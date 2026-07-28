@@ -1,0 +1,9 @@
+node_modules
+dist
+.vercel
+.DS_Store
+.env.local
+.font-venv
+android/.gradle
+android/build
+android/app/build
