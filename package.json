@@ -1,19 +1,12 @@
 {
-  "name": "bible-reader",
+  "name": "bible-flutter-maintenance",
   "private": true,
   "version": "1.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "download:bible": "node scripts/download-bible.mjs"
-  },
-  "dependencies": {
-    "@vitejs/plugin-react": "latest",
-    "lucide-react": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "vite": "latest"
+    "download:bible": "node tool/download_bible.mjs",
+    "verify:bible": "node tool/verify_bible.mjs",
+    "build:web": "flutter build web --release",
+    "test": "flutter test",
+    "analyze": "flutter analyze"
   }
 }
