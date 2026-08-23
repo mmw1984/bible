@@ -1647,7 +1647,7 @@ class _AppearanceSettings extends StatelessWidget {
               style: TextStyle(color: colors.faint, fontSize: 12),
             ),
             Text(
-              '1.6.0',
+              '1.6.1',
               style: TextStyle(color: colors.muted, fontSize: 12),
             ),
           ],
