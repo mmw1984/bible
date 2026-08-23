@@ -1,27 +1,19 @@
+.git
+.DS_Store
+.font-venv
 .dart_tool/
-.env*
-.git/
 .idea/
-.vercel/
-android/
-/assets/
-ios/
-lib/
-linux/
-macos/
-scripts/
-test/
-windows/
+.vercel
+.env*
+releases/
 
-build/.cxx/
-build/app/
-build/app_links/
-build/flutter_secure_storage/
-build/jni/
-build/jni_flutter/
-build/native_assets/
-build/reports/
-build/shared_preferences_android/
-build/test_cache/
-build/unit_test_assets/
-build/url_launcher_android/
+# Local working copies of the same project
+bible flutter/
+bible flutter backup/
+
+# Not required for the Flutter web build on Vercel
+build/
+android/
+test/
+tool/
+.github/

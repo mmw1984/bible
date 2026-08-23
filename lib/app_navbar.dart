@@ -17,6 +17,9 @@ const kAppNavBarBottomGap = 12.0;
 /// Horizontal breathing room around the pill.
 const kAppNavBarHorizontalInset = 16.0;
 
+/// Full-width cap of the pill when all three tabs are shown.
+const kAppNavBarMaxWidth = 260.0;
+
 /// Total height the floating bar occupies, including its bottom gap.
 double appNavBarOccupiedHeight(BuildContext context) =>
     MediaQuery.paddingOf(context).bottom + kAppNavBarBottomGap + kAppNavBarHeight;
@@ -112,13 +115,17 @@ class _AppNavBarState extends State<AppNavBar> {
 
     // Size off local constraints, never MediaQuery: on the very first web
     // frames the viewport reports zero and a negative pill width crashes
-    // the whole bar.
+    // the whole bar. Scale with the tab count so hiding Devotions shrinks
+    // the pill instead of stretching the remaining segments wider.
     return Center(
       child: LayoutBuilder(
         builder: (context, constraints) {
           final pillWidth = math.max(
             120.0,
-            math.min(constraints.maxWidth, 260.0),
+            math.min(
+              constraints.maxWidth,
+              kAppNavBarMaxWidth * widget.items.length / 3,
+            ),
           );
           Widget pill = Container(
             height: kAppNavBarHeight,
