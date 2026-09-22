@@ -15,10 +15,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings => '設定';
 
   @override
-  String get back => '返回';
+  String get back => '返去';
 
   @override
-  String get close => '關閉';
+  String get close => '閂';
 
   @override
   String get save => '儲存';
@@ -36,37 +36,37 @@ class AppLocalizationsZh extends AppLocalizations {
   String get options => '選項';
 
   @override
-  String get retry => '重試';
+  String get retry => '再試';
 
   @override
-  String get search => '搜尋';
+  String get search => '搵';
 
   @override
   String get bibleAi => 'Bible AI';
 
   @override
-  String get bibleAiConversation => 'Bible AI 對話';
+  String get bibleAiConversation => 'Bible AI 傾偈';
 
   @override
-  String get clearConversation => '清除對話';
+  String get clearConversation => '清除傾偈';
 
   @override
-  String get clearConversationQuestion => '清除對話？';
+  String get clearConversationQuestion => '清除傾偈？';
 
   @override
-  String get clearConversationBody => '所有 Bible AI 對話記錄都會從這部裝置移除。';
+  String get clearConversationBody => '所有 Bible AI 傾偈記錄都會喺呢部機度刪走。';
 
   @override
-  String get noConversation => '尚未有對話';
+  String get noConversation => '重未有傾偈';
 
   @override
-  String get answerIncomplete => '回覆已停止或尚未完整';
+  String get answerIncomplete => '回覆停咗或者未完整';
 
   @override
   String get askAi => '問 AI';
 
   @override
-  String get explainScripture => '解釋經文';
+  String get explainScripture => '解經';
 
   @override
   String get copyScripture => '複製經文';
@@ -78,25 +78,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get removeScriptureAttachment => '移除經文附件';
 
   @override
-  String get regenerate => '重新生成';
+  String get regenerate => '再生成';
 
   @override
-  String get goToLatest => '前往最新回覆';
+  String get goToLatest => '跳去最新回覆';
 
   @override
-  String get thinking => '正在思考';
+  String get thinking => '諗緊…';
 
   @override
-  String get thinkingContent => '思考內容';
+  String get thinkingContent => '思考過程';
 
   @override
-  String get expandThinking => '展開思考內容';
+  String get expandThinking => '睇下點諗';
 
   @override
-  String get collapseThinking => '收起思考內容';
+  String get collapseThinking => '收埋諗法';
 
   @override
-  String get questionHint => '輸入你的問題';
+  String get questionHint => '輸入你嘅問題';
 
   @override
   String followUpHint(String reference) {
@@ -107,22 +107,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get send => '送出';
 
   @override
-  String get stop => '停止生成';
+  String get stop => '停';
 
   @override
-  String get aiInitializingFailed => 'Bible AI 初始化失敗，請重試。';
+  String get aiInitializingFailed => 'Bible AI 開唔到，請再試過。';
 
   @override
-  String get answerFailed => '未能完成回覆，內容已保留，請稍後再試。';
+  String get answerFailed => '回覆完成唔到，內容留番喺度，遲啲再試。';
 
   @override
-  String get regenerateFailed => '未能重新生成回覆，請稍後再試。';
+  String get regenerateFailed => '再生成唔到，遲啲再試。';
 
   @override
-  String get openRouterNotConnected => 'OpenRouter 尚未連接';
+  String get openRouterNotConnected => 'OpenRouter 未連線';
 
   @override
-  String get openRouterConnectBody => '登入後即可使用 Bible AI。';
+  String get openRouterConnectBody => '登入咗就可以用 Bible AI。';
 
   @override
   String get login => '登入';
@@ -131,10 +131,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get logout => '登出';
 
   @override
-  String get connectedSecurely => '已安全連接';
+  String get connectedSecurely => '已經安全連線';
 
   @override
-  String get notSignedIn => '尚未登入';
+  String get notSignedIn => '重未登入';
 
   @override
   String get openRouterConnection => 'OpenRouter 連線';
@@ -144,7 +144,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get modelHelper =>
-      '預設使用 Free Models Router，也可輸入其他 OpenRouter model ID。';
+      '預設用 Free Models Router，亦可以入第二個 OpenRouter model ID。';
 
   @override
   String get saveModel => '儲存模型';
@@ -162,26 +162,26 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dark => '深色';
 
   @override
-  String get appLanguage => '應用程式語言';
+  String get appLanguage => 'App 語言';
 
   @override
-  String get chinese => '中文';
+  String get chinese => '廣東話';
 
   @override
   String get english => '英文';
 
   @override
-  String get bilingual => '雙語';
+  String get bilingual => '中英對照';
 
   @override
-  String get selectBook => '選擇書卷';
+  String get selectBook => '揀書卷';
 
   @override
-  String get selectChapter => '選擇章節';
+  String get selectChapter => '揀章';
 
   @override
   String selectChapterCurrent(int chapter) {
-    return '選擇章節，目前第 $chapter 章';
+    return '揀章，而家係第 $chapter 章';
   }
 
   @override
@@ -195,10 +195,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get readingLanguage => '閱讀語言';
+  String get readingLanguage => '閱讀文字';
 
   @override
-  String get currentlyReading => '正在閱讀';
+  String get currentlyReading => '而家睇緊';
 
   @override
   String get previousChapter => '上一章';
@@ -207,78 +207,78 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nextChapter => '下一章';
 
   @override
-  String get scriptureLoadFailed => '經文暫時無法載入';
+  String get scriptureLoadFailed => '經文暫時載入唔到';
 
   @override
-  String get closeSearch => '關閉搜尋';
+  String get closeSearch => '閂搵嘢';
 
   @override
-  String get closeChapterPicker => '關閉章節選單';
+  String get closeChapterPicker => '閂揀章';
 
   @override
-  String get closeLibrary => '關閉書卷';
+  String get closeLibrary => '閂書卷';
 
   @override
-  String get closeScriptureActions => '關閉經文操作';
+  String get closeScriptureActions => '閂經文選項';
 
   @override
   String explainScripturePrompt(String reference) {
-    return '請解釋 $reference，並說明上下文、主旨及今天可以如何理解。';
+    return '請解釋 $reference，並說明上下文、主旨及今日可以點樣理解。請用廣東話（繁體）回答。';
   }
 
   @override
-  String get searchWholeBible => '搜尋全本聖經';
+  String get searchWholeBible => '搵遍全本聖經';
 
   @override
-  String get searchHintBody => '輸入字詞、人物、事件或主題';
+  String get searchHintBody => '打低字詞、人物、事件或者主題';
 
   @override
-  String get traditionalSearch => '傳統搜尋';
+  String get traditionalSearch => '全文直搵';
 
   @override
-  String get aiSearch => 'AI 搜尋';
+  String get aiSearch => 'AI 搵';
 
   @override
-  String get aiOverview => 'AI Overview';
+  String get aiOverview => 'AI 總覽';
 
   @override
-  String get aiScriptureResults => 'AI 經文結果';
+  String get aiScriptureResults => 'AI 搵到嘅經文';
 
   @override
-  String get searchStatus => '搜尋狀態';
+  String get searchStatus => '搵嘢進度';
 
   @override
-  String get searchingOverview => '正在整理概覽';
+  String get searchingOverview => '整理緊總覽';
 
   @override
-  String get searchingScripture => '正在比對經文';
+  String get searchingScripture => '對緊經文';
 
   @override
-  String get noResults => '找不到相符經文';
+  String get noResults => '搵唔到相關經文';
 
   @override
-  String get searchFailed => '搜尋暫時未能完成，請再試一次。';
+  String get searchFailed => '搵唔到嘢，請再試過。';
 
   @override
-  String get overviewFailed => 'AI Overview 暫時未能完成。';
+  String get overviewFailed => 'AI 總覽整唔到。';
 
   @override
-  String get referencesFailed => 'AI 經文搜尋暫時未能完成。';
+  String get referencesFailed => 'AI 搵經文整唔到。';
 
   @override
-  String get verseResultsFailed => '經文結果暫時未能載入。';
+  String get verseResultsFailed => '經文結果載入唔到。';
 
   @override
-  String get loginToSearch => '完成 OpenRouter 登入後會自動繼續 AI 搜尋；傳統全文結果毋須登入。';
+  String get loginToSearch => '登入咗 OpenRouter 就會自動繼續幫你 AI 搵；全文直搵唔使登入。';
 
   @override
   String traditionalResultCount(String count) {
-    return '傳統全文結果 · $count';
+    return '全文結果 · $count';
   }
 
   @override
   String aiResultCount(int count) {
-    return 'AI 經文結果 · $count';
+    return 'AI 結果 · $count';
   }
 
   @override
@@ -288,84 +288,90 @@ class AppLocalizationsZh extends AppLocalizations {
   String get newTestamentCount => '新約 · 27';
 
   @override
-  String get returnToSearchOrigin => '返回搜尋前位置';
+  String get returnToSearchOrigin => '返去啱先嗰版';
 
   @override
   String get aiSettings => '設定';
 
   @override
-  String get openRouterLoginFailed => '未能開啟 OpenRouter 登入。';
+  String get openRouterLoginFailed => '開唔到 OpenRouter 登入。';
 
   @override
-  String get tabBible => '圣经';
+  String get tabBible => '聖經';
 
   @override
-  String get tabAsk => 'Ask';
+  String get tabAsk => '發問';
 
   @override
-  String get tabDevotion => '灵修默想';
+  String get tabDevotion => '靈修默想';
 
   @override
-  String get navbarStyle => '导航栏样式';
+  String get navbarStyle => '導覽列樣式';
 
   @override
   String get navbarStyleLiquidGlass => 'Liquid Glass';
 
   @override
-  String get navbarStyleSolid => '实色';
+  String get navbarStyleSolid => '淨色';
 
   @override
   String get navbarStyleBlur => '模糊';
 
   @override
   String get liquidGlassUnsupportedHint =>
-      '此设备不支持 Liquid Glass（需要 Android 13 或以上），已改用模糊样式。';
+      '呢部機用唔到 Liquid Glass（要 Android 13 或以上），轉咗用模糊樣式。';
 
   @override
   String get glassPerfFallbackNotice =>
-      '为保持流畅，已自动改用模糊样式；你可以在设置重新开启 Liquid Glass。';
+      '為咗順啲，自動轉咗用模糊樣式；可以喺設定重新開返 Liquid Glass。';
 
   @override
-  String get devotionLoading => '正在加载灵修…';
+  String get devotionLoading => '載入緊靈修…';
 
   @override
-  String get devotionLoadFailed => '灵修暂时无法加载';
+  String get devotionLoadFailed => '靈修暫時載入唔到';
 
   @override
-  String get devotionRetry => '重试';
+  String get devotionRetry => '再試';
 
   @override
-  String get devotionRefresh => '重新整理';
+  String get devotionRefresh => '更新';
 
   @override
-  String get devotionOpenInBrowser => '在浏览器打开';
+  String get devotionOpenInBrowser => '喺瀏覽器開啟';
 
   @override
-  String get devotionOpenWebReader => '网页版';
+  String get devotionOpenWebReader => '網頁版';
 
   @override
-  String get devotionWebLoadFailed => '网页无法加载';
+  String get devotionWebLoadFailed => '網頁載入唔到';
 
   @override
-  String get devotionOpenEmbed => '打开嵌入音频';
+  String get devotionOpenEmbed => '開嚟聽';
 
   @override
-  String get devotionWatchVideo => '播放影片';
+  String get devotionWatchVideo => '睇片';
+
+  @override
+  String get devotionCopyArticle => '複製全文';
+
+  @override
+  String get devotionCopied => '已複製';
 
   @override
   String get layoutSection => '版面';
 
   @override
-  String get navbarVisibility => '导航栏';
+  String get navbarVisibility => '導覽列';
 
   @override
-  String get devotionVisibility => '灵修默想';
+  String get devotionVisibility => '靈修默想';
 
   @override
-  String get optionShow => '显示';
+  String get optionShow => '開';
 
   @override
-  String get optionHide => '隐藏';
+  String get optionHide => '閂';
 
   @override
   String get appVersion => '版本';
@@ -382,10 +388,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get settings => '設定';
 
   @override
-  String get back => '返回';
+  String get back => '返去';
 
   @override
-  String get close => '關閉';
+  String get close => '閂';
 
   @override
   String get save => '儲存';
@@ -403,37 +409,37 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get options => '選項';
 
   @override
-  String get retry => '重試';
+  String get retry => '再試';
 
   @override
-  String get search => '搜尋';
+  String get search => '搵';
 
   @override
   String get bibleAi => 'Bible AI';
 
   @override
-  String get bibleAiConversation => 'Bible AI 對話';
+  String get bibleAiConversation => 'Bible AI 傾偈';
 
   @override
-  String get clearConversation => '清除對話';
+  String get clearConversation => '清除傾偈';
 
   @override
-  String get clearConversationQuestion => '清除對話？';
+  String get clearConversationQuestion => '清除傾偈？';
 
   @override
-  String get clearConversationBody => '所有 Bible AI 對話記錄都會從這部裝置移除。';
+  String get clearConversationBody => '所有 Bible AI 傾偈記錄都會喺呢部機度刪走。';
 
   @override
-  String get noConversation => '尚未有對話';
+  String get noConversation => '重未有傾偈';
 
   @override
-  String get answerIncomplete => '回覆已停止或尚未完整';
+  String get answerIncomplete => '回覆停咗或者未完整';
 
   @override
   String get askAi => '問 AI';
 
   @override
-  String get explainScripture => '解釋經文';
+  String get explainScripture => '解經';
 
   @override
   String get copyScripture => '複製經文';
@@ -445,25 +451,25 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get removeScriptureAttachment => '移除經文附件';
 
   @override
-  String get regenerate => '重新生成';
+  String get regenerate => '再生成';
 
   @override
-  String get goToLatest => '前往最新回覆';
+  String get goToLatest => '跳去最新回覆';
 
   @override
-  String get thinking => '正在思考';
+  String get thinking => '諗緊…';
 
   @override
-  String get thinkingContent => '思考內容';
+  String get thinkingContent => '思考過程';
 
   @override
-  String get expandThinking => '展開思考內容';
+  String get expandThinking => '睇下點諗';
 
   @override
-  String get collapseThinking => '收起思考內容';
+  String get collapseThinking => '收埋諗法';
 
   @override
-  String get questionHint => '輸入你的問題';
+  String get questionHint => '輸入你嘅問題';
 
   @override
   String followUpHint(String reference) {
@@ -474,22 +480,22 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get send => '送出';
 
   @override
-  String get stop => '停止生成';
+  String get stop => '停';
 
   @override
-  String get aiInitializingFailed => 'Bible AI 初始化失敗，請重試。';
+  String get aiInitializingFailed => 'Bible AI 開唔到，請再試過。';
 
   @override
-  String get answerFailed => '未能完成回覆，內容已保留，請稍後再試。';
+  String get answerFailed => '回覆完成唔到，內容留番喺度，遲啲再試。';
 
   @override
-  String get regenerateFailed => '未能重新生成回覆，請稍後再試。';
+  String get regenerateFailed => '再生成唔到，遲啲再試。';
 
   @override
-  String get openRouterNotConnected => 'OpenRouter 尚未連接';
+  String get openRouterNotConnected => 'OpenRouter 未連線';
 
   @override
-  String get openRouterConnectBody => '登入後即可使用 Bible AI。';
+  String get openRouterConnectBody => '登入咗就可以用 Bible AI。';
 
   @override
   String get login => '登入';
@@ -498,10 +504,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get logout => '登出';
 
   @override
-  String get connectedSecurely => '已安全連接';
+  String get connectedSecurely => '已經安全連線';
 
   @override
-  String get notSignedIn => '尚未登入';
+  String get notSignedIn => '重未登入';
 
   @override
   String get openRouterConnection => 'OpenRouter 連線';
@@ -511,7 +517,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get modelHelper =>
-      '預設使用 Free Models Router，也可輸入其他 OpenRouter model ID。';
+      '預設用 Free Models Router，亦可以入第二個 OpenRouter model ID。';
 
   @override
   String get saveModel => '儲存模型';
@@ -529,26 +535,26 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get dark => '深色';
 
   @override
-  String get appLanguage => '應用程式語言';
+  String get appLanguage => 'App 語言';
 
   @override
-  String get chinese => '中文';
+  String get chinese => '廣東話';
 
   @override
   String get english => '英文';
 
   @override
-  String get bilingual => '雙語';
+  String get bilingual => '中英對照';
 
   @override
-  String get selectBook => '選擇書卷';
+  String get selectBook => '揀書卷';
 
   @override
-  String get selectChapter => '選擇章節';
+  String get selectChapter => '揀章';
 
   @override
   String selectChapterCurrent(int chapter) {
-    return '選擇章節，目前第 $chapter 章';
+    return '揀章，而家係第 $chapter 章';
   }
 
   @override
@@ -562,10 +568,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   }
 
   @override
-  String get readingLanguage => '閱讀語言';
+  String get readingLanguage => '閱讀文字';
 
   @override
-  String get currentlyReading => '正在閱讀';
+  String get currentlyReading => '而家睇緊';
 
   @override
   String get previousChapter => '上一章';
@@ -574,78 +580,78 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get nextChapter => '下一章';
 
   @override
-  String get scriptureLoadFailed => '經文暫時無法載入';
+  String get scriptureLoadFailed => '經文暫時載入唔到';
 
   @override
-  String get closeSearch => '關閉搜尋';
+  String get closeSearch => '閂搵嘢';
 
   @override
-  String get closeChapterPicker => '關閉章節選單';
+  String get closeChapterPicker => '閂揀章';
 
   @override
-  String get closeLibrary => '關閉書卷';
+  String get closeLibrary => '閂書卷';
 
   @override
-  String get closeScriptureActions => '關閉經文操作';
+  String get closeScriptureActions => '閂經文選項';
 
   @override
   String explainScripturePrompt(String reference) {
-    return '請解釋 $reference，並說明上下文、主旨及今天可以如何理解。';
+    return '請解釋 $reference，並說明上下文、主旨及今日可以點樣理解。請用廣東話（繁體）回答。';
   }
 
   @override
-  String get searchWholeBible => '搜尋全本聖經';
+  String get searchWholeBible => '搵遍全本聖經';
 
   @override
-  String get searchHintBody => '輸入字詞、人物、事件或主題';
+  String get searchHintBody => '打低字詞、人物、事件或者主題';
 
   @override
-  String get traditionalSearch => '傳統搜尋';
+  String get traditionalSearch => '全文直搵';
 
   @override
-  String get aiSearch => 'AI 搜尋';
+  String get aiSearch => 'AI 搵';
 
   @override
-  String get aiOverview => 'AI Overview';
+  String get aiOverview => 'AI 總覽';
 
   @override
-  String get aiScriptureResults => 'AI 經文結果';
+  String get aiScriptureResults => 'AI 搵到嘅經文';
 
   @override
-  String get searchStatus => '搜尋狀態';
+  String get searchStatus => '搵嘢進度';
 
   @override
-  String get searchingOverview => '正在整理概覽';
+  String get searchingOverview => '整理緊總覽';
 
   @override
-  String get searchingScripture => '正在比對經文';
+  String get searchingScripture => '對緊經文';
 
   @override
-  String get noResults => '找不到相符經文';
+  String get noResults => '搵唔到相關經文';
 
   @override
-  String get searchFailed => '搜尋暫時未能完成，請再試一次。';
+  String get searchFailed => '搵唔到嘢，請再試過。';
 
   @override
-  String get overviewFailed => 'AI Overview 暫時未能完成。';
+  String get overviewFailed => 'AI 總覽整唔到。';
 
   @override
-  String get referencesFailed => 'AI 經文搜尋暫時未能完成。';
+  String get referencesFailed => 'AI 搵經文整唔到。';
 
   @override
-  String get verseResultsFailed => '經文結果暫時未能載入。';
+  String get verseResultsFailed => '經文結果載入唔到。';
 
   @override
-  String get loginToSearch => '完成 OpenRouter 登入後會自動繼續 AI 搜尋；傳統全文結果毋須登入。';
+  String get loginToSearch => '登入咗 OpenRouter 就會自動繼續幫你 AI 搵；全文直搵唔使登入。';
 
   @override
   String traditionalResultCount(String count) {
-    return '傳統全文結果 · $count';
+    return '全文結果 · $count';
   }
 
   @override
   String aiResultCount(int count) {
-    return 'AI 經文結果 · $count';
+    return 'AI 結果 · $count';
   }
 
   @override
@@ -655,84 +661,90 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get newTestamentCount => '新約 · 27';
 
   @override
-  String get returnToSearchOrigin => '返回搜尋前位置';
+  String get returnToSearchOrigin => '返去啱先嗰版';
 
   @override
   String get aiSettings => '設定';
 
   @override
-  String get openRouterLoginFailed => '未能開啟 OpenRouter 登入。';
+  String get openRouterLoginFailed => '開唔到 OpenRouter 登入。';
 
   @override
   String get tabBible => '聖經';
 
   @override
-  String get tabAsk => 'Ask';
+  String get tabAsk => '發問';
 
   @override
   String get tabDevotion => '靈修默想';
 
   @override
-  String get navbarStyle => '導航欄樣式';
+  String get navbarStyle => '導覽列樣式';
 
   @override
   String get navbarStyleLiquidGlass => 'Liquid Glass';
 
   @override
-  String get navbarStyleSolid => '實色';
+  String get navbarStyleSolid => '淨色';
 
   @override
   String get navbarStyleBlur => '模糊';
 
   @override
   String get liquidGlassUnsupportedHint =>
-      '此裝置不支援 Liquid Glass（需要 Android 13 或以上），已改用模糊樣式。';
+      '呢部機用唔到 Liquid Glass（要 Android 13 或以上），轉咗用模糊樣式。';
 
   @override
   String get glassPerfFallbackNotice =>
-      '為保持流暢，已自動改用模糊樣式；你可以在設定重新開啟 Liquid Glass。';
+      '為咗順啲，自動轉咗用模糊樣式；可以喺設定重新開返 Liquid Glass。';
 
   @override
-  String get devotionLoading => '正在載入靈修…';
+  String get devotionLoading => '載入緊靈修…';
 
   @override
-  String get devotionLoadFailed => '靈修暫時無法載入';
+  String get devotionLoadFailed => '靈修暫時載入唔到';
 
   @override
-  String get devotionRetry => '重試';
+  String get devotionRetry => '再試';
 
   @override
-  String get devotionRefresh => '重新整理';
+  String get devotionRefresh => '更新';
 
   @override
-  String get devotionOpenInBrowser => '在瀏覽器開啟';
+  String get devotionOpenInBrowser => '喺瀏覽器開啟';
 
   @override
   String get devotionOpenWebReader => '網頁版';
 
   @override
-  String get devotionWebLoadFailed => '網頁無法載入';
+  String get devotionWebLoadFailed => '網頁載入唔到';
 
   @override
-  String get devotionOpenEmbed => '開啟嵌入音訊';
+  String get devotionOpenEmbed => '開嚟聽';
 
   @override
-  String get devotionWatchVideo => '播放影片';
+  String get devotionWatchVideo => '睇片';
+
+  @override
+  String get devotionCopyArticle => '複製全文';
+
+  @override
+  String get devotionCopied => '已複製';
 
   @override
   String get layoutSection => '版面';
 
   @override
-  String get navbarVisibility => '導航欄';
+  String get navbarVisibility => '導覽列';
 
   @override
   String get devotionVisibility => '靈修默想';
 
   @override
-  String get optionShow => '顯示';
+  String get optionShow => '開';
 
   @override
-  String get optionHide => '隱藏';
+  String get optionHide => '閂';
 
   @override
   String get appVersion => '版本';

@@ -31,7 +31,13 @@
   "collapseThinking": "Collapse thinking content",
   "questionHint": "Enter your question",
   "followUpHint": "Ask about {reference}",
-  "@followUpHint": {"placeholders": {"reference": {"type": "String"}}},
+  "@followUpHint": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
   "send": "Send",
   "stop": "Stop generating",
   "aiInitializingFailed": "Bible AI could not initialize. Please retry.",
@@ -58,11 +64,29 @@
   "selectBook": "Select book",
   "selectChapter": "Select chapter",
   "selectChapterCurrent": "Select chapter, currently chapter {chapter}",
-  "@selectChapterCurrent": {"placeholders": {"chapter": {"type": "int"}}},
+  "@selectChapterCurrent": {
+    "placeholders": {
+      "chapter": {
+        "type": "int"
+      }
+    }
+  },
   "chapterNumber": "Chapter {chapter}",
-  "@chapterNumber": {"placeholders": {"chapter": {"type": "int"}}},
+  "@chapterNumber": {
+    "placeholders": {
+      "chapter": {
+        "type": "int"
+      }
+    }
+  },
   "chapterCount": "{count} chapters",
-  "@chapterCount": {"placeholders": {"count": {"type": "int"}}},
+  "@chapterCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "readingLanguage": "Reading language",
   "currentlyReading": "Currently reading",
   "previousChapter": "Previous chapter",
@@ -73,7 +97,13 @@
   "closeLibrary": "Close book library",
   "closeScriptureActions": "Close scripture actions",
   "explainScripturePrompt": "Explain {reference}, including its context, main message, and how it can be understood today.",
-  "@explainScripturePrompt": {"placeholders": {"reference": {"type": "String"}}},
+  "@explainScripturePrompt": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
   "searchWholeBible": "Search the whole Bible",
   "searchHintBody": "Enter words, a person, event, or topic",
   "traditionalSearch": "Text search",
@@ -90,9 +120,21 @@
   "verseResultsFailed": "Scripture results could not be loaded.",
   "loginToSearch": "Sign in to OpenRouter to continue AI search. Text search works without signing in.",
   "traditionalResultCount": "Text results · {count}",
-  "@traditionalResultCount": {"placeholders": {"count": {"type": "String"}}},
+  "@traditionalResultCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "aiResultCount": "AI scripture results · {count}",
-  "@aiResultCount": {"placeholders": {"count": {"type": "int"}}},
+  "@aiResultCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "oldTestamentCount": "Old Testament · 39",
   "newTestamentCount": "New Testament · 27",
   "returnToSearchOrigin": "Return to previous reading position",
@@ -116,6 +158,8 @@
   "devotionWebLoadFailed": "Page failed to load",
   "devotionOpenEmbed": "Open embedded audio",
   "devotionWatchVideo": "Play video",
+  "devotionCopyArticle": "Copy article",
+  "devotionCopied": "Copied to clipboard",
   "layoutSection": "Layout",
   "navbarVisibility": "Navigation bar",
   "devotionVisibility": "Devotions",

@@ -22,7 +22,7 @@ extension AppLocaleValue on AppLocale {
   };
 
   String get aiLanguage => switch (this) {
-    AppLocale.zhHant => 'natural Traditional Chinese',
+    AppLocale.zhHant => 'Cantonese (Traditional Chinese, 香港廣東話書面語)',
     AppLocale.en => 'natural English',
   };
 }

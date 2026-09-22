@@ -358,6 +358,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get devotionWatchVideo => 'Play video';
 
   @override
+  String get devotionCopyArticle => 'Copy article';
+
+  @override
+  String get devotionCopied => 'Copied to clipboard';
+
+  @override
   String get layoutSection => 'Layout';
 
   @override

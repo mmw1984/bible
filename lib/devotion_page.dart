@@ -210,12 +210,17 @@ class _DevotionPageState extends State<DevotionPage>
               onRefresh: () => _load(silent: false),
               color: colors.ink,
               backgroundColor: colors.surface,
-              child: _maybeWrapWithAndroidBlur(
-                CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(
-                  parent: ClampingScrollPhysics(),
-                ),
-                slivers: [
+              // SelectionArea makes every article Text selectable: mouse-drag
+              // on web, long-press for the system copy menu on Android.
+              // Devotion content has no long-press gestures of its own, so
+              // nothing competes with selection here.
+              child: SelectionArea(
+                child: _maybeWrapWithAndroidBlur(
+                  CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: ClampingScrollPhysics(),
+                  ),
+                  slivers: [
                   // Large reader-style masthead: oversized title with the
                   // controls docked to its baseline, mirroring 聖經 page.
                   SliverPadding(
@@ -264,6 +269,14 @@ class _DevotionPageState extends State<DevotionPage>
                                 onTap: loading
                                     ? null
                                     : () => _load(silent: false),
+                              ),
+                              const SizedBox(width: 9),
+                              AppGlyphButton(
+                                glyph: AppGlyph.copy,
+                                label: context.l10n.devotionCopyArticle,
+                                onTap: post == null
+                                    ? null
+                                    : () => _copyArticle(context, post),
                               ),
                               const SizedBox(width: 9),
                               AppGlyphButton(
@@ -457,6 +470,7 @@ class _DevotionPageState extends State<DevotionPage>
               ),
             ),
             ),
+            ),
           ],
         ),
       ),
@@ -464,6 +478,22 @@ class _DevotionPageState extends State<DevotionPage>
   }
 
   Widget _maybeWrapWithAndroidBlur(Widget child) => child;
+
+  Future<void> _copyArticle(BuildContext context, DevotionPost post) async {
+    final locale =
+        AppSettingsScope.maybeOf(context)?.state.locale ?? AppLocale.zhHant;
+    final text = devotionPostToPlainText(post, locale);
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.devotionCopied),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+  }
 
   /// Refresh control — now icon-only to match the webview button.
   Widget _buildRefreshButton(

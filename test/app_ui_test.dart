@@ -140,7 +140,7 @@ void main() {
               child: AppTextInput(
                 key: const ValueKey('centered-input'),
                 controller: TextEditingController(),
-                hint: '搜尋全本聖經',
+                hint: '搵遍全本聖經',
               ),
             ),
           ),
@@ -154,7 +154,7 @@ void main() {
       matching: find.byType(AnimatedContainer),
     );
     expect(
-      tester.getCenter(find.text('搜尋全本聖經')).dy,
+      tester.getCenter(find.text('搵遍全本聖經')).dy,
       closeTo(tester.getCenter(surface.first).dy, 1),
     );
   });
@@ -189,7 +189,7 @@ void main() {
               const SizedBox(height: 12),
               AppSegmented<bool>(
                 choices: const [
-                  AppChoice(value: true, label: '中文'),
+                  AppChoice(value: true, label: '廣東話'),
                   AppChoice(value: false, label: 'English'),
                 ],
                 selected: true,

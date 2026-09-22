@@ -1,3 +1,4 @@
+import 'package:bible/app_settings.dart';
 import 'package:bible/devotion_page.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -221,5 +222,49 @@ void main() {
         'src="https://example.com/eager.jpg" /></p>';
     final url = parseDevotionBlocks(html).whereType<DevotionImage>().single.url;
     expect(url, 'https://example.com/eager.jpg');
+  });
+
+  test('<br> keeps an in-paragraph newline instead of a space', () {
+    const html = '<p>第一行。\n   <br />\n   第二行。</p>';
+    final paragraphs = parseDevotionBlocks(html).whereType<DevotionParagraph>();
+    expect(paragraphs, hasLength(1), reason: 'must stay one block');
+    expect(paragraphs.single.text, '第一行。\n第二行。');
+  });
+
+  test('devotionPostToPlainText exports title, sections, video URL', () {
+    final post = DevotionPost(
+      id: 1,
+      date: DateTime(2026, 9, 22),
+      devotionDate: DateTime(2026, 9, 22),
+      title: '今日靈修',
+      link: 'https://example.com/post',
+      blocks: const [
+        DevotionParagraph('開場白。'),
+        DevotionSection(
+          title: '分享',
+          blocks: [
+            DevotionHeading('小標'),
+            DevotionParagraph('分享內容。'),
+            DevotionQuote('經文金句。'),
+          ],
+        ),
+        DevotionVideo('abc123'),
+        DevotionImage('https://example.com/pic.jpg'),
+        DevotionEmbed('https://w.soundcloud.com/player/?url=x'),
+      ],
+    );
+    final text = devotionPostToPlainText(post, AppLocale.zhHant);
+    expect(text, startsWith('今日靈修\n'));
+    expect(text, contains('2026年9月22日'));
+    expect(text, contains('開場白。'));
+    expect(text, contains('【分享】'));
+    expect(text, contains('小標'));
+    expect(text, contains('分享內容。'));
+    expect(text, contains('經文金句。'));
+    expect(text, contains('https://www.youtube.com/watch?v=abc123'));
+    expect(text, isNot(contains('https://example.com/pic.jpg')),
+        reason: 'images have no text form');
+    expect(text, isNot(contains('w.soundcloud.com')),
+        reason: 'embeds are skipped, only videos keep a URL');
   });
 }

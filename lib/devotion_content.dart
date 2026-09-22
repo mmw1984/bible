@@ -351,8 +351,19 @@ HtmlElement parseHtmlDocument(String html) {
   return document;
 }
 
-String _collapseWhitespace(String input) =>
-    input.replaceAll(RegExp(r'\s+'), ' ').trim();
+String _collapseWhitespace(String input) {
+  // <br> writes a NUL sentinel (see _convertRichContent) so source newlines
+  // from HTML indentation still collapse to spaces while explicit breaks
+  // survive as \n inside one paragraph block.
+  return input
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim()
+      .replaceAll('\u0000', '\n')
+      .replaceAll(RegExp(r' *\n *'), '\n')
+      // A block of only <br> markers must collapse to empty so flush()
+      // skips it instead of emitting a stray blank paragraph before media.
+      .trim();
+}
 
 /// Serialises a parsed subtree back to HTML. Fallback-fetched posts store
 /// their content container this way so [decodeDevotionPostsCache] can
@@ -500,7 +511,7 @@ void _convertRichContent(
     if (node is! HtmlElement) return;
     switch (node.tag) {
       case 'br':
-        buffer.write(' ');
+        buffer.write('\u0000');
       case 'img':
         flush();
         _addImage(node, blocks);
@@ -1115,4 +1126,42 @@ String formatDevotionDateShort(DateTime date, AppLocale locale) {
     return '${_englishMonths[date.month - 1]} ${date.day}';
   }
   return '${date.month}月${date.day}日';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Plain-text export (one-tap copy)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Flattens a post into shareable plain text: title, devotion date, then one
+/// line per text block with `【section】` markers. Media has no text form —
+/// videos keep their watch URL, images/embeds are skipped.
+String devotionPostToPlainText(DevotionPost post, AppLocale locale) {
+  final lines = <String>[
+    post.title,
+    formatDevotionDate(post.devotionDate, locale),
+    '',
+  ];
+  void writeBlocks(List<DevotionBlock> blocks) {
+    for (final block in blocks) {
+      switch (block) {
+        case DevotionParagraph():
+          lines.add(block.text);
+        case DevotionHeading():
+          lines.add(block.text);
+        case DevotionQuote():
+          lines.add(block.text);
+        case DevotionSection():
+          lines.add('【${block.title}】');
+          writeBlocks(block.blocks);
+        case DevotionVideo():
+          lines.add(block.watchUrl);
+        case DevotionImage():
+        case DevotionEmbed():
+          break;
+      }
+    }
+  }
+
+  writeBlocks(post.blocks);
+  return lines.join('\n').trimRight();
 }

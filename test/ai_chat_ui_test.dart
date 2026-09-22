@@ -119,7 +119,7 @@ void main() {
     try {
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(find.text('正在思考'), findsOneWidget);
+      expect(find.text('諗緊…'), findsOneWidget);
       expect(find.text('先看上下文。', findRichText: true), findsOneWidget);
       expect(
         find.textContaining('User Safety', findRichText: true),
@@ -139,10 +139,10 @@ void main() {
       await sending;
     }
     await tester.pump(const Duration(milliseconds: 250));
-    expect(find.text('思考內容'), findsOneWidget);
+    expect(find.text('思考過程'), findsOneWidget);
     expect(find.text('先看上下文。', findRichText: true), findsOneWidget);
 
-    await tester.tap(find.bySemanticsLabel('收起思考內容'));
+    await tester.tap(find.bySemanticsLabel('收埋諗法'));
     await tester.pump(const Duration(milliseconds: 250));
     expect(find.text('先看上下文。', findRichText: true), findsNothing);
   });
@@ -169,7 +169,7 @@ void main() {
 
       expect(find.text('初步回答。', findRichText: true), findsOneWidget);
       expect(find.text('補充推理。', findRichText: true), findsOneWidget);
-      expect(find.text('正在思考'), findsOneWidget);
+      expect(find.text('諗緊…'), findsOneWidget);
       expect(
         tester.getRect(find.text('補充推理。', findRichText: true)).height,
         greaterThan(0),
@@ -203,13 +203,13 @@ void main() {
 
     list.controller!.jumpTo(list.controller!.position.maxScrollExtent);
     await tester.pump();
-    expect(find.bySemanticsLabel('前往最新回覆'), findsOneWidget);
+    expect(find.bySemanticsLabel('跳去最新回覆'), findsOneWidget);
 
-    await tester.tap(find.bySemanticsLabel('前往最新回覆'));
+    await tester.tap(find.bySemanticsLabel('跳去最新回覆'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 320));
     expect(list.controller!.offset, closeTo(0, 1));
-    expect(find.bySemanticsLabel('前往最新回覆'), findsNothing);
+    expect(find.bySemanticsLabel('跳去最新回覆'), findsNothing);
   });
 
   testWidgets('OpenRouter connection status is a compact settings row', (
@@ -222,7 +222,7 @@ void main() {
     await tester.pumpWidget(_testApp(AiSettingsPage(aiController: controller)));
     await _pumpPage(tester);
 
-    expect(find.text('已安全連接'), findsOneWidget);
+    expect(find.text('已經安全連線'), findsOneWidget);
     expect(
       tester
           .getSize(find.byKey(const ValueKey('openrouter-connection-status')))
@@ -280,7 +280,7 @@ void main() {
     await _pumpPage(tester);
     // The layout section added above the danger zone pushes it off-screen;
     // drag the settings list until the tile clears the bottom edge.
-    final tile = find.widgetWithText(ListTile, '清除對話');
+    final tile = find.widgetWithText(ListTile, '清除傾偈');
     final settingsList = find
         .descendant(
           of: find.byType(AiSettingsPage),
@@ -294,7 +294,7 @@ void main() {
     expect(tester.getRect(tile).bottom, lessThanOrEqualTo(844));
     await tester.tap(tile);
     await _pumpPage(tester);
-    expect(find.text('清除對話？'), findsOneWidget);
+    expect(find.text('清除傾偈？'), findsOneWidget);
 
     await tester.tap(find.text('清除'));
     await _pumpPage(tester);
@@ -358,7 +358,7 @@ void main() {
 
     await tester.tap(find.bySemanticsLabel('設定'));
     await _pumpPage(tester);
-    expect(find.text('中文'), findsOneWidget);
+    expect(find.text('廣東話'), findsOneWidget);
     expect(find.text('English'), findsOneWidget);
     expect(find.text('Liquid Glass'), findsNothing);
     expect(find.byType(Switch), findsNothing);

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -28,6 +29,8 @@ class DevotionSoundCloudPlayer extends StatefulWidget {
 }
 
 class _DevotionSoundCloudPlayerState extends State<DevotionSoundCloudPlayer> {
+  // Assigned only on IO platforms; webview_flutter has no web implementation
+  // and constructing the controller on web throws.
   late final WebViewController _controller;
   bool _hasError = false;
   bool _isLoading = true;
@@ -35,6 +38,7 @@ class _DevotionSoundCloudPlayerState extends State<DevotionSoundCloudPlayer> {
   @override
   void initState() {
     super.initState();
+    if (kIsWeb) return;
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.transparent)
@@ -72,6 +76,16 @@ class _DevotionSoundCloudPlayerState extends State<DevotionSoundCloudPlayer> {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final radii = AppRadii.of(context);
+
+    if (kIsWeb) {
+      // No WebView on web: hand the SoundCloud URL straight to the browser
+      // so the page never constructs an unsupported controller.
+      return _ExternalFallback(
+        colors: colors,
+        radii: radii,
+        url: widget.embedUrl,
+      );
+    }
 
     if (_hasError) {
       return _ExternalFallback(
