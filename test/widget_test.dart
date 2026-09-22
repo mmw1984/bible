@@ -28,11 +28,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 600));
 
     expect(find.text('創世記'), findsOneWidget);
-    expect(find.text('廣東話'), findsOneWidget);
+    expect(find.text('中文'), findsOneWidget);
     expect(find.text('英文'), findsOneWidget);
-    expect(find.text('中英對照'), findsOneWidget);
-    expect(find.bySemanticsLabel('揀書卷'), findsOneWidget);
-    expect(find.bySemanticsLabel('搵遍全本聖經'), findsOneWidget);
+    expect(find.text('雙語'), findsOneWidget);
+    expect(find.bySemanticsLabel('選擇書卷'), findsOneWidget);
+    expect(find.bySemanticsLabel('搜尋全本聖經'), findsOneWidget);
   });
 
   testWidgets('reader controls sit above frosted top and bottom edges', (
@@ -139,7 +139,7 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('chapter-anchor')));
     await tester.pumpAndSettle();
-    expect(find.text('揀章'), findsOneWidget);
+    expect(find.text('選擇章節'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('chapter-picker-2')));
     await tester.pumpAndSettle();
@@ -150,7 +150,7 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.text('揀章'), findsNothing);
+    expect(find.text('選擇章節'), findsNothing);
   });
 
   testWidgets('library switches testament and opens the selected book', (
@@ -163,7 +163,7 @@ void main() {
 
     await tester.pumpWidget(_readerApp(aiController: controller));
     await _pumpReader(tester);
-    await tester.tap(find.bySemanticsLabel('揀書卷'));
+    await tester.tap(find.bySemanticsLabel('選擇書卷'));
     await tester.pumpAndSettle();
 
     expect(find.text('舊約 · 39'), findsOneWidget);
@@ -188,7 +188,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('JHN-chinese')), findsOneWidget);
-    await tester.tap(find.bySemanticsLabel('揀書卷'));
+    await tester.tap(find.bySemanticsLabel('選擇書卷'));
     await tester.pumpAndSettle();
     expect(_visibleLibraryBookCount(tester), 27);
     expect(
@@ -211,10 +211,10 @@ void main() {
 
     await tester.pumpWidget(_readerApp(aiController: controller));
     await _pumpReader(tester);
-    await tester.tap(find.bySemanticsLabel('搵遍全本聖經'));
+    await tester.tap(find.bySemanticsLabel('搜尋全本聖經'));
     await tester.pumpAndSettle();
 
-    final empty = find.text('打低字詞、人物、事件或者主題');
+    final empty = find.text('輸入字詞、人物、事件或主題');
     final text = tester.widget<Text>(empty);
     expect(text.style?.fontSize, 14);
     expect(text.style?.fontWeight, FontWeight.w500);
@@ -237,7 +237,7 @@ void main() {
 
     await tester.pumpWidget(_readerApp(aiController: controller));
     await _pumpReader(tester);
-    await tester.tap(find.bySemanticsLabel('搵遍全本聖經'));
+    await tester.tap(find.bySemanticsLabel('搜尋全本聖經'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
@@ -250,7 +250,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('全文結果 · 1'), findsOneWidget);
+    expect(find.text('傳統全文結果 · 1'), findsOneWidget);
     expect(model.prompts, isEmpty);
     await tester.tap(find.text('神愛世人').last);
     await tester.pumpAndSettle(const Duration(milliseconds: 50));
@@ -260,7 +260,7 @@ void main() {
     final targetRect = tester.getRect(target);
     expect(targetRect.top, greaterThanOrEqualTo(0));
     expect(targetRect.bottom, lessThanOrEqualTo(844));
-    expect(find.bySemanticsLabel('返去啱先嗰版'), findsOneWidget);
+    expect(find.bySemanticsLabel('返回搜尋前位置'), findsOneWidget);
   });
 
   testWidgets('search result can restore the exact reader origin', (
@@ -281,10 +281,10 @@ void main() {
 
     await _openTraditionalResult(tester);
     expect(find.byKey(const ValueKey('JHN-3')), findsOneWidget);
-    expect(find.text('返去啱先嗰版'), findsOneWidget);
-    expect(find.bySemanticsLabel('返去啱先嗰版'), findsOneWidget);
+    expect(find.text('返回搜尋前位置'), findsOneWidget);
+    expect(find.bySemanticsLabel('返回搜尋前位置'), findsOneWidget);
 
-    await tester.tap(find.bySemanticsLabel('返去啱先嗰版'));
+    await tester.tap(find.bySemanticsLabel('返回搜尋前位置'));
     await _pumpReader(tester);
     await tester.pump(const Duration(milliseconds: 500));
     expect(_chapterScroll('GEN-1'), findsOneWidget);
@@ -292,7 +292,7 @@ void main() {
       find.byType(CustomScrollView),
     );
     expect(restored.controller!.offset, closeTo(412, .01));
-    expect(find.bySemanticsLabel('返去啱先嗰版'), findsNothing);
+    expect(find.bySemanticsLabel('返回搜尋前位置'), findsNothing);
   });
 
   testWidgets('system back restores search origin', (tester) async {
@@ -332,7 +332,7 @@ void main() {
     await tester.pumpWidget(_readerApp(aiController: controller));
     await _pumpReader(tester);
     await _openTraditionalResult(tester);
-    expect(find.bySemanticsLabel('返去啱先嗰版'), findsOneWidget);
+    expect(find.bySemanticsLabel('返回搜尋前位置'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.bySemanticsLabel('下一章'),
@@ -343,7 +343,7 @@ void main() {
     await _pumpReader(tester);
 
     expect(_chapterScroll('JHN-4'), findsOneWidget);
-    expect(find.bySemanticsLabel('返去啱先嗰版'), findsNothing);
+    expect(find.bySemanticsLabel('返回搜尋前位置'), findsNothing);
   });
 
   testWidgets('reopening keeps search destination without temporary origin', (
@@ -370,7 +370,7 @@ void main() {
 
     final reopened = tester.widget<CustomScrollView>(_chapterScroll('JHN-3'));
     expect(reopened.controller!.offset, closeTo(destinationOffset, .01));
-    expect(find.bySemanticsLabel('返去啱先嗰版'), findsNothing);
+    expect(find.bySemanticsLabel('返回搜尋前位置'), findsNothing);
   });
 
   testWidgets('AI overview and scripture results use separate requests', (
@@ -384,14 +384,14 @@ void main() {
 
     await tester.pumpWidget(_readerApp(aiController: controller));
     await _pumpReader(tester);
-    await tester.tap(find.bySemanticsLabel('搵遍全本聖經'));
+    await tester.tap(find.bySemanticsLabel('搜尋全本聖經'));
     await tester.pumpAndSettle();
     expect(
       tester.getTopLeft(find.byKey(const ValueKey('search-dialog-surface'))).dy,
       greaterThanOrEqualTo(10),
     );
 
-    await tester.tap(find.bySemanticsLabel('AI 搵'));
+    await tester.tap(find.bySemanticsLabel('AI 搜尋'));
     await tester.enterText(find.byType(EditableText), '神的愛');
     await tester.tap(
       find.byWidgetPredicate(
@@ -404,7 +404,7 @@ void main() {
     expect(model.prompts.first, contains('BIBLE_SEARCH_OVERVIEW'));
     expect(model.prompts.last, contains('BIBLE_SEARCH_REFERENCES_JSON'));
     expect(find.text('神的愛貫穿救恩。', findRichText: true), findsOneWidget);
-    expect(find.text('AI 結果 · 1'), findsOneWidget);
+    expect(find.text('AI 經文結果 · 1'), findsOneWidget);
   });
 
   testWidgets('verse actions dispatch ask and explanation payloads', (
@@ -422,7 +422,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('複製經文'), findsOneWidget);
     expect(find.text('問 AI'), findsOneWidget);
-    expect(find.text('解經'), findsOneWidget);
+    expect(find.text('解釋經文'), findsOneWidget);
 
     await tester.tap(find.text('問 AI'));
     await tester.pumpAndSettle();
@@ -433,11 +433,11 @@ void main() {
     expect(find.text('創世記 1:1'), findsWidgets);
     expect(tester.testTextInput.isVisible, isTrue);
 
-    await tester.tap(find.bySemanticsLabel('返去'));
+    await tester.tap(find.bySemanticsLabel('返回'));
     await tester.pumpAndSettle();
     await tester.longPress(find.text('Verse 1'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('解經'));
+    await tester.tap(find.text('解釋經文'));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('創世記 1:1'), findsWidgets);

@@ -1608,7 +1608,7 @@ class _AppearanceSettings extends StatelessWidget {
         const SizedBox(height: 8),
         AppSegmented<AppLocale>(
           choices: [
-            AppChoice(value: AppLocale.zhHant, label: '廣東話'),
+            AppChoice(value: AppLocale.zhHant, label: '中文'),
             AppChoice(value: AppLocale.en, label: 'English'),
           ],
           selected: state.locale,

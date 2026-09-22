@@ -114,13 +114,13 @@ abstract class AppLocalizations {
   /// No description provided for @back.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'返去'**
+  /// **'返回'**
   String get back;
 
   /// No description provided for @close.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'閂'**
+  /// **'關閉'**
   String get close;
 
   /// No description provided for @save.
@@ -156,13 +156,13 @@ abstract class AppLocalizations {
   /// No description provided for @retry.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'再試'**
+  /// **'重試'**
   String get retry;
 
   /// No description provided for @search.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'搵'**
+  /// **'搜尋'**
   String get search;
 
   /// No description provided for @bibleAi.
@@ -174,37 +174,37 @@ abstract class AppLocalizations {
   /// No description provided for @bibleAiConversation.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'Bible AI 傾偈'**
+  /// **'Bible AI 對話'**
   String get bibleAiConversation;
 
   /// No description provided for @clearConversation.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'清除傾偈'**
+  /// **'清除對話'**
   String get clearConversation;
 
   /// No description provided for @clearConversationQuestion.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'清除傾偈？'**
+  /// **'清除對話？'**
   String get clearConversationQuestion;
 
   /// No description provided for @clearConversationBody.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'所有 Bible AI 傾偈記錄都會喺呢部機度刪走。'**
+  /// **'所有 Bible AI 對話記錄都會從這部裝置移除。'**
   String get clearConversationBody;
 
   /// No description provided for @noConversation.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'重未有傾偈'**
+  /// **'尚未有對話'**
   String get noConversation;
 
   /// No description provided for @answerIncomplete.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'回覆停咗或者未完整'**
+  /// **'回覆已停止或尚未完整'**
   String get answerIncomplete;
 
   /// No description provided for @askAi.
@@ -216,7 +216,7 @@ abstract class AppLocalizations {
   /// No description provided for @explainScripture.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'解經'**
+  /// **'解釋經文'**
   String get explainScripture;
 
   /// No description provided for @copyScripture.
@@ -240,43 +240,43 @@ abstract class AppLocalizations {
   /// No description provided for @regenerate.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'再生成'**
+  /// **'重新生成'**
   String get regenerate;
 
   /// No description provided for @goToLatest.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'跳去最新回覆'**
+  /// **'前往最新回覆'**
   String get goToLatest;
 
   /// No description provided for @thinking.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'諗緊…'**
+  /// **'正在思考'**
   String get thinking;
 
   /// No description provided for @thinkingContent.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'思考過程'**
+  /// **'思考內容'**
   String get thinkingContent;
 
   /// No description provided for @expandThinking.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'睇下點諗'**
+  /// **'展開思考內容'**
   String get expandThinking;
 
   /// No description provided for @collapseThinking.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'收埋諗法'**
+  /// **'收起思考內容'**
   String get collapseThinking;
 
   /// No description provided for @questionHint.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'輸入你嘅問題'**
+  /// **'輸入你的問題'**
   String get questionHint;
 
   /// No description provided for @followUpHint.
@@ -294,37 +294,37 @@ abstract class AppLocalizations {
   /// No description provided for @stop.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'停'**
+  /// **'停止生成'**
   String get stop;
 
   /// No description provided for @aiInitializingFailed.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'Bible AI 開唔到，請再試過。'**
+  /// **'Bible AI 初始化失敗，請重試。'**
   String get aiInitializingFailed;
 
   /// No description provided for @answerFailed.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'回覆完成唔到，內容留番喺度，遲啲再試。'**
+  /// **'未能完成回覆，內容已保留，請稍後再試。'**
   String get answerFailed;
 
   /// No description provided for @regenerateFailed.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'再生成唔到，遲啲再試。'**
+  /// **'未能重新生成回覆，請稍後再試。'**
   String get regenerateFailed;
 
   /// No description provided for @openRouterNotConnected.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'OpenRouter 未連線'**
+  /// **'OpenRouter 尚未連接'**
   String get openRouterNotConnected;
 
   /// No description provided for @openRouterConnectBody.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'登入咗就可以用 Bible AI。'**
+  /// **'登入後即可使用 Bible AI。'**
   String get openRouterConnectBody;
 
   /// No description provided for @login.
@@ -342,13 +342,13 @@ abstract class AppLocalizations {
   /// No description provided for @connectedSecurely.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'已經安全連線'**
+  /// **'已安全連接'**
   String get connectedSecurely;
 
   /// No description provided for @notSignedIn.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'重未登入'**
+  /// **'尚未登入'**
   String get notSignedIn;
 
   /// No description provided for @openRouterConnection.
@@ -366,7 +366,7 @@ abstract class AppLocalizations {
   /// No description provided for @modelHelper.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'預設用 Free Models Router，亦可以入第二個 OpenRouter model ID。'**
+  /// **'預設使用 Free Models Router，也可輸入其他 OpenRouter model ID。'**
   String get modelHelper;
 
   /// No description provided for @saveModel.
@@ -402,13 +402,13 @@ abstract class AppLocalizations {
   /// No description provided for @appLanguage.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'App 語言'**
+  /// **'應用程式語言'**
   String get appLanguage;
 
   /// No description provided for @chinese.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'廣東話'**
+  /// **'中文'**
   String get chinese;
 
   /// No description provided for @english.
@@ -420,25 +420,25 @@ abstract class AppLocalizations {
   /// No description provided for @bilingual.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'中英對照'**
+  /// **'雙語'**
   String get bilingual;
 
   /// No description provided for @selectBook.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'揀書卷'**
+  /// **'選擇書卷'**
   String get selectBook;
 
   /// No description provided for @selectChapter.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'揀章'**
+  /// **'選擇章節'**
   String get selectChapter;
 
   /// No description provided for @selectChapterCurrent.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'揀章，而家係第 {chapter} 章'**
+  /// **'選擇章節，目前第 {chapter} 章'**
   String selectChapterCurrent(int chapter);
 
   /// No description provided for @chapterNumber.
@@ -456,13 +456,13 @@ abstract class AppLocalizations {
   /// No description provided for @readingLanguage.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'閱讀文字'**
+  /// **'閱讀語言'**
   String get readingLanguage;
 
   /// No description provided for @currentlyReading.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'而家睇緊'**
+  /// **'正在閱讀'**
   String get currentlyReading;
 
   /// No description provided for @previousChapter.
@@ -480,139 +480,139 @@ abstract class AppLocalizations {
   /// No description provided for @scriptureLoadFailed.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'經文暫時載入唔到'**
+  /// **'經文暫時無法載入'**
   String get scriptureLoadFailed;
 
   /// No description provided for @closeSearch.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'閂搵嘢'**
+  /// **'關閉搜尋'**
   String get closeSearch;
 
   /// No description provided for @closeChapterPicker.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'閂揀章'**
+  /// **'關閉章節選單'**
   String get closeChapterPicker;
 
   /// No description provided for @closeLibrary.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'閂書卷'**
+  /// **'關閉書卷'**
   String get closeLibrary;
 
   /// No description provided for @closeScriptureActions.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'閂經文選項'**
+  /// **'關閉經文操作'**
   String get closeScriptureActions;
 
   /// No description provided for @explainScripturePrompt.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'請解釋 {reference}，並說明上下文、主旨及今日可以點樣理解。請用廣東話（繁體）回答。'**
+  /// **'請解釋 {reference}，並說明上下文、主旨及今天可以如何理解。'**
   String explainScripturePrompt(String reference);
 
   /// No description provided for @searchWholeBible.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'搵遍全本聖經'**
+  /// **'搜尋全本聖經'**
   String get searchWholeBible;
 
   /// No description provided for @searchHintBody.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'打低字詞、人物、事件或者主題'**
+  /// **'輸入字詞、人物、事件或主題'**
   String get searchHintBody;
 
   /// No description provided for @traditionalSearch.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'全文直搵'**
+  /// **'傳統搜尋'**
   String get traditionalSearch;
 
   /// No description provided for @aiSearch.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'AI 搵'**
+  /// **'AI 搜尋'**
   String get aiSearch;
 
   /// No description provided for @aiOverview.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'AI 總覽'**
+  /// **'AI Overview'**
   String get aiOverview;
 
   /// No description provided for @aiScriptureResults.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'AI 搵到嘅經文'**
+  /// **'AI 經文結果'**
   String get aiScriptureResults;
 
   /// No description provided for @searchStatus.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'搵嘢進度'**
+  /// **'搜尋狀態'**
   String get searchStatus;
 
   /// No description provided for @searchingOverview.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'整理緊總覽'**
+  /// **'正在整理概覽'**
   String get searchingOverview;
 
   /// No description provided for @searchingScripture.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'對緊經文'**
+  /// **'正在比對經文'**
   String get searchingScripture;
 
   /// No description provided for @noResults.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'搵唔到相關經文'**
+  /// **'找不到相符經文'**
   String get noResults;
 
   /// No description provided for @searchFailed.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'搵唔到嘢，請再試過。'**
+  /// **'搜尋暫時未能完成，請再試一次。'**
   String get searchFailed;
 
   /// No description provided for @overviewFailed.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'AI 總覽整唔到。'**
+  /// **'AI Overview 暫時未能完成。'**
   String get overviewFailed;
 
   /// No description provided for @referencesFailed.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'AI 搵經文整唔到。'**
+  /// **'AI 經文搜尋暫時未能完成。'**
   String get referencesFailed;
 
   /// No description provided for @verseResultsFailed.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'經文結果載入唔到。'**
+  /// **'經文結果暫時未能載入。'**
   String get verseResultsFailed;
 
   /// No description provided for @loginToSearch.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'登入咗 OpenRouter 就會自動繼續幫你 AI 搵；全文直搵唔使登入。'**
+  /// **'完成 OpenRouter 登入後會自動繼續 AI 搜尋；傳統全文結果毋須登入。'**
   String get loginToSearch;
 
   /// No description provided for @traditionalResultCount.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'全文結果 · {count}'**
+  /// **'傳統全文結果 · {count}'**
   String traditionalResultCount(String count);
 
   /// No description provided for @aiResultCount.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'AI 結果 · {count}'**
+  /// **'AI 經文結果 · {count}'**
   String aiResultCount(int count);
 
   /// No description provided for @oldTestamentCount.
@@ -630,7 +630,7 @@ abstract class AppLocalizations {
   /// No description provided for @returnToSearchOrigin.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'返去啱先嗰版'**
+  /// **'返回搜尋前位置'**
   String get returnToSearchOrigin;
 
   /// No description provided for @aiSettings.
@@ -642,7 +642,7 @@ abstract class AppLocalizations {
   /// No description provided for @openRouterLoginFailed.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'開唔到 OpenRouter 登入。'**
+  /// **'未能開啟 OpenRouter 登入。'**
   String get openRouterLoginFailed;
 
   /// No description provided for @tabBible.
@@ -654,7 +654,7 @@ abstract class AppLocalizations {
   /// No description provided for @tabAsk.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'發問'**
+  /// **'Ask'**
   String get tabAsk;
 
   /// No description provided for @tabDevotion.
@@ -666,7 +666,7 @@ abstract class AppLocalizations {
   /// No description provided for @navbarStyle.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'導覽列樣式'**
+  /// **'導航欄樣式'**
   String get navbarStyle;
 
   /// No description provided for @navbarStyleLiquidGlass.
@@ -678,7 +678,7 @@ abstract class AppLocalizations {
   /// No description provided for @navbarStyleSolid.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'淨色'**
+  /// **'實色'**
   String get navbarStyleSolid;
 
   /// No description provided for @navbarStyleBlur.
@@ -690,43 +690,43 @@ abstract class AppLocalizations {
   /// No description provided for @liquidGlassUnsupportedHint.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'呢部機用唔到 Liquid Glass（要 Android 13 或以上），轉咗用模糊樣式。'**
+  /// **'此裝置不支援 Liquid Glass（需要 Android 13 或以上），已改用模糊樣式。'**
   String get liquidGlassUnsupportedHint;
 
   /// No description provided for @glassPerfFallbackNotice.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'為咗順啲，自動轉咗用模糊樣式；可以喺設定重新開返 Liquid Glass。'**
+  /// **'為保持流暢，已自動改用模糊樣式；你可以在設定重新開啟 Liquid Glass。'**
   String get glassPerfFallbackNotice;
 
   /// No description provided for @devotionLoading.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'載入緊靈修…'**
+  /// **'正在載入靈修…'**
   String get devotionLoading;
 
   /// No description provided for @devotionLoadFailed.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'靈修暫時載入唔到'**
+  /// **'靈修暫時無法載入'**
   String get devotionLoadFailed;
 
   /// No description provided for @devotionRetry.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'再試'**
+  /// **'重試'**
   String get devotionRetry;
 
   /// No description provided for @devotionRefresh.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'更新'**
+  /// **'重新整理'**
   String get devotionRefresh;
 
   /// No description provided for @devotionOpenInBrowser.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'喺瀏覽器開啟'**
+  /// **'在瀏覽器開啟'**
   String get devotionOpenInBrowser;
 
   /// No description provided for @devotionOpenWebReader.
@@ -738,19 +738,19 @@ abstract class AppLocalizations {
   /// No description provided for @devotionWebLoadFailed.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'網頁載入唔到'**
+  /// **'網頁無法載入'**
   String get devotionWebLoadFailed;
 
   /// No description provided for @devotionOpenEmbed.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'開嚟聽'**
+  /// **'開啟嵌入音訊'**
   String get devotionOpenEmbed;
 
   /// No description provided for @devotionWatchVideo.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'睇片'**
+  /// **'播放影片'**
   String get devotionWatchVideo;
 
   /// No description provided for @devotionCopyArticle.
@@ -774,7 +774,7 @@ abstract class AppLocalizations {
   /// No description provided for @navbarVisibility.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'導覽列'**
+  /// **'導航欄'**
   String get navbarVisibility;
 
   /// No description provided for @devotionVisibility.
@@ -786,13 +786,13 @@ abstract class AppLocalizations {
   /// No description provided for @optionShow.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'開'**
+  /// **'顯示'**
   String get optionShow;
 
   /// No description provided for @optionHide.
   ///
   /// In zh_Hant, this message translates to:
-  /// **'閂'**
+  /// **'隱藏'**
   String get optionHide;
 
   /// No description provided for @appVersion.
