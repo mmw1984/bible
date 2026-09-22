@@ -47,7 +47,8 @@ jobs:
 
       - name: Checksum APK
         run: |
-          sha256sum bible-*-release.apk | tee bible-*-release.apk.sha256
+          version=$(grep '^version:' pubspec.yaml | cut -d' ' -f2 | cut -d+ -f1)
+          sha256sum "bible-${version}-release.apk" | tee "bible-${version}-release.apk.sha256"
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
