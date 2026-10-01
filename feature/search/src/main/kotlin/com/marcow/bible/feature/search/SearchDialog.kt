@@ -30,8 +30,9 @@ import com.marcow.bible.core.model.ScriptureHit
  * transition are here rather than repeated by every host.
  *
  * [onOpenVerse] is a callback rather than a route because the reader is another feature and
- * `core:navigation` has no route for a verse yet. The host closes this window first, exactly as
- * Flutter's `onVerse` popped its dialog, and then navigates; the sheet can do neither half alone.
+ * `core:navigation` has no route for a verse yet. The window closes itself and *then* hands the verse
+ * over, which is the order Flutter's `onVerse` used at `legacy/flutter/lib/main.dart:847`; the
+ * navigation itself is the host's, because the reader's location is the host's to keep.
  *
  * @see SearchSheet for the parameters, which are the same ones.
  */
@@ -99,11 +100,27 @@ fun SearchDialog(
                 onModeChange = onModeChange,
                 onSignIn = onSignIn,
                 onDismiss = onDismiss,
-                onOpenVerse = onOpenVerse,
+                onOpenVerse = jumpToVerse(onDismiss, onOpenVerse),
                 authError = authError,
             )
         }
     }
+}
+
+/**
+ * Flutter's `onVerse`, and nothing else: the window goes first, then the jump.
+ *
+ * `legacy/flutter/lib/main.dart:847` popped the dialog and only then looked the book up and moved the
+ * reader. The other order is the one a host reaches for by accident — navigate while this window is
+ * still up, and the navigation's own back stack entry is what gets popped, leaving the sheet sitting
+ * over the verse it was just asked to open.
+ *
+ * It is a function rather than a lambda in the composable because the order is the whole of it, and
+ * that is the one thing about a tap in a window that a plain JVM test can see.
+ */
+internal fun jumpToVerse(dismiss: () -> Unit, openVerse: (ScriptureHit) -> Unit): (ScriptureHit) -> Unit = { hit ->
+    dismiss()
+    openVerse(hit)
 }
 
 /**
