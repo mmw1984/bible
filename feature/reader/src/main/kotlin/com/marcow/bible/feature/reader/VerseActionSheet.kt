@@ -173,28 +173,22 @@ internal fun VerseActionSheetContent(
                     .background(appColors.faint),
             )
             Spacer(Modifier.height(GrabberBelow))
-            ActionTile(
-                glyph = AppGlyph.COPY,
-                label = stringResource(R.string.copy_scripture),
-                onClick = {
-                    clipboard.setText(AnnotatedString(request.text))
-                    onDismiss()
-                },
-            )
-            if (onAction != null) {
+            verseActionRows(askSupported = onAction != null).forEach { row ->
                 ActionTile(
-                    glyph = AppGlyph.CHAT,
-                    label = stringResource(R.string.ask_ai),
+                    glyph = verseActionGlyph(row),
+                    label = stringResource(verseActionLabel(row)),
                     onClick = {
-                        onAction(VerseAction.ASK_AI, request)
-                        onDismiss()
-                    },
-                )
-                ActionTile(
-                    glyph = AppGlyph.BOOK,
-                    label = stringResource(R.string.explain_scripture),
-                    onClick = {
-                        onAction(VerseAction.EXPLAIN, request.copy(question = explainQuestion))
+                        when (row) {
+                            VerseActionRow.COPY -> clipboard.setText(AnnotatedString(request.text))
+                            // A safe call because the row is only drawn when there is one: the list
+                            // above was built from that same `onAction`. Flutter wrote two
+                            // `if (ai.isSupported)`s that agreed, and this is the one flag.
+                            VerseActionRow.ASK_AI -> onAction?.invoke(VerseAction.ASK_AI, request)
+                            VerseActionRow.EXPLAIN -> onAction?.invoke(
+                                VerseAction.EXPLAIN,
+                                request.copy(question = explainQuestion),
+                            )
+                        }
                         onDismiss()
                     },
                 )
@@ -228,6 +222,66 @@ private fun ActionTile(glyph: AppGlyph, label: String, onClick: () -> Unit, modi
             Text(text = label, color = colors.ink, style = MaterialTheme.typography.bodyMedium)
         }
     }
+}
+
+/**
+ * One row in the sheet, which is one more than there are [VerseAction]s.
+ *
+ * Copy is a row and not an action because it asks nobody for anything: it hands the verse to the
+ * clipboard and the reader is finished. That is why it is the row that survives when there is no host
+ * to send the other two to, and why [VerseAction] stays a two-value enum describing the two
+ * `_openAiChat` calls Flutter made (`legacy/flutter/lib/main.dart:923`) rather than a third it did not.
+ */
+enum class VerseActionRow {
+    COPY,
+    ASK_AI,
+    EXPLAIN,
+}
+
+/**
+ * The rows, in the order Flutter listed its three `_ActionTile`s: `:910`, `:919`, `:932`.
+ *
+ * One row or three, and one is what the app ships today. Flutter gated the two question rows on
+ * `ai.isSupported`, and Phase 2 has no Ask feature to be supported, so a long press opens a sheet with
+ * a single row in it — the same shape the feature had before `ai` could be anything else, and the
+ * reason [VerseActionSheet]'s own note calls a sheet with two dead rows in it worse than a sheet with
+ * one.
+ *
+ * Copy is first either way and is never the row that goes. A sheet whose only row were the one that
+ * needed nothing would be a sheet with nothing in it, which is what [askSupported] is for.
+ */
+fun verseActionRows(askSupported: Boolean): List<VerseActionRow> = if (askSupported) {
+    listOf(VerseActionRow.COPY, VerseActionRow.ASK_AI, VerseActionRow.EXPLAIN)
+} else {
+    listOf(VerseActionRow.COPY)
+}
+
+/**
+ * The string each row is named by, and the only sentence in the sheet.
+ *
+ * `context.l10n.copyScripture`, `askAi` and `explainScripture` at
+ * `legacy/flutter/lib/main.dart:912`, `:921` and `:934` — Flutter's, and one per row, because
+ * Flutter's `_ActionTile` drew the label twice: once as the `AppTap`'s `label` and once as the `Text`
+ * inside it, so a row announced itself and then repeated itself. [ActionTile] here is one `AppTap`
+ * whose `contentDescription` is the label it also draws, which is the same one announcement.
+ */
+fun verseActionLabel(row: VerseActionRow): Int = when (row) {
+    VerseActionRow.COPY -> R.string.copy_scripture
+    VerseActionRow.ASK_AI -> R.string.ask_ai
+    VerseActionRow.EXPLAIN -> R.string.explain_scripture
+}
+
+/**
+ * The glyph on each row — Flutter's own three, unchanged.
+ *
+ * `AppGlyph.copy`, `.chat` and `.book` at `:911`, `:920` and `:933`, so unlike the reader's Ask and
+ * Devotions buttons there is nothing to decide here: a copy glyph on the row that copies is not the
+ * place to introduce a second icon language.
+ */
+fun verseActionGlyph(row: VerseActionRow): AppGlyph = when (row) {
+    VerseActionRow.COPY -> AppGlyph.COPY
+    VerseActionRow.ASK_AI -> AppGlyph.CHAT
+    VerseActionRow.EXPLAIN -> AppGlyph.BOOK
 }
 
 /** 200 ms on `springCurve`, the transition of Flutter's `showGeneralDialog`. */
