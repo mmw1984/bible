@@ -84,7 +84,7 @@ fun DrawScope.drawAppGlyph(glyph: AppGlyph, color: Color) {
         style = paint,
     )
     fun circle(x: Float, y: Float, r: Float) = drawCircle(color, radius = w * r, center = point(x, y), style = paint)
-    fun path(vararg points: Offset) {
+    fun path(points: List<Offset>) {
         val value = Path().apply {
             moveTo(points.first().x, points.first().y)
             points.drop(1).forEach { lineTo(it.x, it.y) }
@@ -107,7 +107,7 @@ fun DrawScope.drawAppGlyph(glyph: AppGlyph, color: Color) {
                 cornerRadius = CornerRadius(w * 0.12f),
                 style = paint,
             )
-            path(point(0.34f, 0.74f), point(0.29f, 0.9f), point(0.48f, 0.74f))
+            path(listOf(point(0.34f, 0.74f), point(0.29f, 0.9f), point(0.48f, 0.74f)))
         }
 
         AppGlyph.SEARCH -> {
@@ -155,18 +155,22 @@ fun DrawScope.drawAppGlyph(glyph: AppGlyph, color: Color) {
 
         AppGlyph.BOOK -> {
             path(
-                point(0.12f, 0.2f),
-                point(0.47f, 0.13f),
-                point(0.47f, 0.83f),
-                point(0.12f, 0.9f),
-                point(0.12f, 0.2f),
+                listOf(
+                    point(0.12f, 0.2f),
+                    point(0.47f, 0.13f),
+                    point(0.47f, 0.83f),
+                    point(0.12f, 0.9f),
+                    point(0.12f, 0.2f),
+                ),
             )
             path(
-                point(0.88f, 0.2f),
-                point(0.53f, 0.13f),
-                point(0.53f, 0.83f),
-                point(0.88f, 0.9f),
-                point(0.88f, 0.2f),
+                listOf(
+                    point(0.88f, 0.2f),
+                    point(0.53f, 0.13f),
+                    point(0.53f, 0.83f),
+                    point(0.88f, 0.9f),
+                    point(0.88f, 0.2f),
+                ),
             )
         }
 
@@ -175,18 +179,18 @@ fun DrawScope.drawAppGlyph(glyph: AppGlyph, color: Color) {
             line(0.76f, 0.24f, 0.24f, 0.76f)
         }
 
-        AppGlyph.CHEVRON_DOWN -> path(point(0.2f, 0.36f), point(0.5f, 0.66f), point(0.8f, 0.36f))
+        AppGlyph.CHEVRON_DOWN -> path(listOf(point(0.2f, 0.36f), point(0.5f, 0.66f), point(0.8f, 0.36f)))
 
-        AppGlyph.CHEVRON_RIGHT -> path(point(0.36f, 0.2f), point(0.66f, 0.5f), point(0.36f, 0.8f))
+        AppGlyph.CHEVRON_RIGHT -> path(listOf(point(0.36f, 0.2f), point(0.66f, 0.5f), point(0.36f, 0.8f)))
 
         AppGlyph.BACK -> {
             line(0.84f, 0.5f, 0.17f, 0.5f)
-            path(point(0.42f, 0.2f), point(0.17f, 0.5f), point(0.42f, 0.8f))
+            path(listOf(point(0.42f, 0.2f), point(0.17f, 0.5f), point(0.42f, 0.8f)))
         }
 
         AppGlyph.FORWARD -> {
             line(0.16f, 0.5f, 0.83f, 0.5f)
-            path(point(0.58f, 0.2f), point(0.83f, 0.5f), point(0.58f, 0.8f))
+            path(listOf(point(0.58f, 0.2f), point(0.83f, 0.5f), point(0.58f, 0.8f)))
         }
 
         AppGlyph.SETTINGS -> {
@@ -207,21 +211,7 @@ fun DrawScope.drawAppGlyph(glyph: AppGlyph, color: Color) {
         }
 
         AppGlyph.CLOUD -> path(
-            point(0.18f, 0.7f),
-            point(0.18f, 0.57f),
-            point(0.29f, 0.47f),
-            point(0.42f, 0.47f),
-            point(0.5f, 0.31f),
-            point(0.67f, 0.31f),
-            point(0.78f, 0.45f),
-            point(0.84f, 0.46f),
-            point(0.9f, 0.57f),
-            point(0.9f, 0.7f),
-            point(0.18f, 0.7f),
-        )
-
-        AppGlyph.CLOUD_OFF -> {
-            path(
+            listOf(
                 point(0.18f, 0.7f),
                 point(0.18f, 0.57f),
                 point(0.29f, 0.47f),
@@ -233,6 +223,24 @@ fun DrawScope.drawAppGlyph(glyph: AppGlyph, color: Color) {
                 point(0.9f, 0.57f),
                 point(0.9f, 0.7f),
                 point(0.18f, 0.7f),
+            ),
+        )
+
+        AppGlyph.CLOUD_OFF -> {
+            path(
+                listOf(
+                    point(0.18f, 0.7f),
+                    point(0.18f, 0.57f),
+                    point(0.29f, 0.47f),
+                    point(0.42f, 0.47f),
+                    point(0.5f, 0.31f),
+                    point(0.67f, 0.31f),
+                    point(0.78f, 0.45f),
+                    point(0.84f, 0.46f),
+                    point(0.9f, 0.57f),
+                    point(0.9f, 0.7f),
+                    point(0.18f, 0.7f),
+                ),
             )
             line(0.14f, 0.14f, 0.86f, 0.86f)
         }
@@ -248,12 +256,12 @@ fun DrawScope.drawAppGlyph(glyph: AppGlyph, color: Color) {
             }
         }
 
-        AppGlyph.CHECK -> path(point(0.18f, 0.52f), point(0.41f, 0.75f), point(0.84f, 0.24f))
+        AppGlyph.CHECK -> path(listOf(point(0.18f, 0.52f), point(0.41f, 0.75f), point(0.84f, 0.24f)))
 
         AppGlyph.LOGIN -> {
             rect(0.14f, 0.15f, 0.42f, 0.7f)
             line(0.43f, 0.5f, 0.88f, 0.5f)
-            path(point(0.66f, 0.28f), point(0.88f, 0.5f), point(0.66f, 0.72f))
+            path(listOf(point(0.66f, 0.28f), point(0.88f, 0.5f), point(0.66f, 0.72f)))
         }
 
         AppGlyph.REFRESH -> {
@@ -266,11 +274,19 @@ fun DrawScope.drawAppGlyph(glyph: AppGlyph, color: Color) {
                 size = Size(w * 0.64f, h * 0.64f),
                 style = paint,
             )
-            path(point(0.79f, 0.18f), point(0.84f, 0.44f), point(0.59f, 0.35f))
+            path(listOf(point(0.79f, 0.18f), point(0.84f, 0.44f), point(0.59f, 0.35f)))
         }
 
         AppGlyph.SEND -> {
-            path(point(0.15f, 0.16f), point(0.87f, 0.5f), point(0.15f, 0.84f), point(0.3f, 0.5f), point(0.15f, 0.16f))
+            path(
+                listOf(
+                    point(0.15f, 0.16f),
+                    point(0.87f, 0.5f),
+                    point(0.15f, 0.84f),
+                    point(0.3f, 0.5f),
+                    point(0.15f, 0.16f),
+                ),
+            )
             line(0.3f, 0.5f, 0.64f, 0.5f)
         }
 
@@ -278,7 +294,7 @@ fun DrawScope.drawAppGlyph(glyph: AppGlyph, color: Color) {
 
         AppGlyph.VERIFIED -> {
             circle(0.5f, 0.5f, 0.34f)
-            path(point(0.31f, 0.52f), point(0.45f, 0.66f), point(0.7f, 0.38f))
+            path(listOf(point(0.31f, 0.52f), point(0.45f, 0.66f), point(0.7f, 0.38f)))
         }
     }
 }
