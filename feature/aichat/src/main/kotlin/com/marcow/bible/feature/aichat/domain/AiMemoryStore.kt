@@ -58,8 +58,12 @@ interface AiMemoryStore {
  * `feature/aichat` would put a second copy of persistence in the wrong module: §4.6 wants these two
  * files to become Room tables, and a file store would have to be deleted rather than migrated. The
  * port is what the chat is written against, so the swap is one Hilt binding.
+ *
+ * Public rather than internal because `AiChatModule` names it in an `@Binds` signature, which a
+ * public module cannot do with an internal type — the same reason `feature/search`'s `BlankAiSearchMemory`
+ * is public.
  */
-internal class BlankAiMemoryStore : AiMemoryStore {
+class BlankAiMemoryStore : AiMemoryStore {
     override suspend fun promptMemory(maxCharacters: Int): String = ""
 
     override suspend fun transcript(limit: Int): List<AiMessage> = emptyList()

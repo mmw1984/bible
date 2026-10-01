@@ -66,6 +66,9 @@ dependencies {
     api(project(":core:model"))
     api(project(":core:common"))
     implementation(project(":core:network"))
+    // The chat answers in the language the user reads in, which is a setting, so the screen that
+    // owns the reply resolves its language through the repository rather than being told once.
+    implementation(project(":core:datastore"))
     implementation(project(":core:database"))
     implementation(project(":core:legacy-migration"))
     implementation(libs.kotlinx.coroutines.android)
@@ -77,4 +80,9 @@ dependencies {
     // `ScriptureToolRunner` reads through `BibleRepository`, which wraps Room `@Dao` interfaces too
     // wide to hand-roll a fake of, so the app's `mockk` is the same shortcut here.
     testImplementation(libs.mockk)
+    // The same in-memory DataStore `core/datastore` tests with, so a chat can be asked in the
+    // language the user reads in without a file.
+    testImplementation(testFixtures(project(":core:datastore")))
+    // `InMemorySettingsDataStore` takes the generated message, so the test builds one.
+    testImplementation(project(":core:datastore-proto"))
 }

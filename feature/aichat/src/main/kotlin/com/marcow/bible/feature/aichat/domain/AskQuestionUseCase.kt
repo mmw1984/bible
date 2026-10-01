@@ -32,9 +32,14 @@ import kotlin.time.TimeSource
  *
  * The provider is a parameter and not a field because `AiProvider` has no binding to inject: the
  * `ai_provider` setting is what chooses it, and whoever holds the setting is the one that can.
+ *
+ * Public rather than internal because `AiChatModule` names it in an `@Binds` signature, which a public
+ * module cannot do with an internal type. The [scriptureToolRunner] it is built from stays internal,
+ * because a private constructor property is not part of what the class exposes.
  */
 @Singleton
-internal class AskQuestionUseCase @Inject constructor(private val scriptureToolRunner: ScriptureToolRunner) {
+class AskQuestionUseCase @Inject constructor(private val scriptureToolRunner: ScriptureToolRunner) :
+    AskAiQuestion {
 
     /**
      * [question] asked of [provider], with the text as it arrives handed to [onProgress].
@@ -44,7 +49,7 @@ internal class AskQuestionUseCase @Inject constructor(private val scriptureToolR
      * the answer that has already arrived be returned whole rather than abandoned, which is what
      * `_stopRequested` did for a subscription it could also cancel.
      */
-    suspend fun ask(
+    override suspend fun ask(
         provider: AiProvider,
         question: AskQuestion,
         onProgress: (AnswerProgress) -> Unit = {},
@@ -341,7 +346,7 @@ internal class AskQuestionUseCase @Inject constructor(private val scriptureToolR
  * [aiLanguage] is `AppLocale.aiLanguage` (`natural Traditional Chinese` / `natural English`), stated
  * rather than defaulted: an answer in the wrong language is not a thing to discover afterwards.
  */
-internal data class AskQuestion(
+data class AskQuestion(
     val question: String,
     val aiLanguage: String,
     val scriptureContext: String? = null,
@@ -356,7 +361,7 @@ internal data class AskQuestion(
  * Published at most every 50ms and never with both halves empty, so a caller can tell a still-empty
  * answer from the one exception — a first attempt that failed and is about to be asked again.
  */
-internal data class AnswerProgress(val text: String, val reasoning: String)
+data class AnswerProgress(val text: String, val reasoning: String)
 
 /**
  * The answer a question produced, and the two flags the `AiMessage` it becomes carries.
@@ -365,7 +370,7 @@ internal data class AnswerProgress(val text: String, val reasoning: String)
  * reader of the flags to work out: an answer that was cut, stopped or left half-continued is
  * incomplete, and one that came back as a tool request is not, whatever the provider said.
  */
-internal data class ChatAnswer(val text: String, val reasoning: String, val incomplete: Boolean, val stopped: Boolean)
+data class ChatAnswer(val text: String, val reasoning: String, val incomplete: Boolean, val stopped: Boolean)
 
 /** What one `_streamModelAnswer` call produced, the record Dart returned. */
 private data class Round(val answer: String, val complete: Boolean, val stopped: Boolean)
@@ -383,4 +388,4 @@ private data class Continuation(val round: Round, val failed: Boolean)
  * A failure *after* text has arrived is not this: the round ends on the text that came, which is the
  * answer the reader keeps, and the failure is the caller's to report.
  */
-internal class AiAnswerException(message: String) : Exception(message)
+class AiAnswerException(message: String) : Exception(message)
