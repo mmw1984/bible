@@ -77,7 +77,7 @@ private fun DevotionBlockRow(
     indent: Dp,
     onOpenUrl: (String) -> Unit,
 ) {
-    val colors = appColors()
+    val colors = appColors
     val inset = Modifier.padding(horizontal = indent)
     when (block) {
         is DevotionBlock.Paragraph -> Text(
@@ -175,8 +175,8 @@ private fun DevotionBlockRow(
  */
 @Composable
 private fun DevotionQuote(text: String, modifier: Modifier = Modifier) {
-    val colors = appColors()
-    val shape = RoundedCornerShape(appRadii().compact)
+    val colors = appColors
+    val shape = RoundedCornerShape(appRadii.compact)
     Box(modifier = modifier) {
         Box(
             Modifier
@@ -243,7 +243,7 @@ private fun DevotionImage(url: String, modifier: Modifier = Modifier) {
         model = url,
         contentDescription = null,
         contentScale = ContentScale.Crop,
-        modifier = modifier.clip(RoundedCornerShape(appRadii().surface)),
+        modifier = modifier.clip(RoundedCornerShape(appRadii.surface)),
         loading = { DevotionImagePlaceholder(loading = true) },
         error = { DevotionImagePlaceholder(loading = false) },
     )
@@ -261,16 +261,16 @@ private fun DevotionImagePlaceholder(loading: Boolean) {
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(DevotionChrome.IMAGE_ASPECT_RATIO)
-            .background(appColors().surfaceRaised.copy(alpha = DevotionChrome.IMAGE_PANEL_ALPHA)),
+            .background(appColors.surfaceRaised.copy(alpha = DevotionChrome.IMAGE_PANEL_ALPHA)),
         contentAlignment = Alignment.Center,
     ) {
         if (loading) {
-            DevotionSpinner(color = appColors().muted)
+            DevotionSpinner(color = appColors.muted)
         } else {
             DevotionGlyphView(
                 glyph = DevotionGlyph.IMAGE_OFF,
                 size = DevotionChrome.IMAGE_GLYPH_SIZE,
-                color = appColors().faint,
+                color = appColors.faint,
             )
         }
     }
@@ -305,7 +305,7 @@ private fun DevotionVideoCard(
     onOpen: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val colors = appColors()
+    val colors = appColors
     val label = stringResource(R.string.devotion_watch_video)
     val openLabel = stringResource(R.string.devotion_open_in_browser)
     val picture = Modifier.fillMaxWidth().aspectRatio(DevotionChrome.VIDEO_ASPECT_RATIO)
@@ -314,7 +314,7 @@ private fun DevotionVideoCard(
             onClick = onOpen,
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(appRadii().surface))
+                .clip(RoundedCornerShape(appRadii.surface))
                 // The picture is the whole target and says nothing, so it is named for a screen
                 // reader here rather than left as an unlabelled tap.
                 .semantics { contentDescription = label },
@@ -403,7 +403,7 @@ private fun DevotionVideoBackdrop() {
         Modifier
             .fillMaxWidth()
             .aspectRatio(DevotionChrome.VIDEO_ASPECT_RATIO)
-            .background(appColors().surfaceRaised.copy(alpha = DevotionChrome.RAISED_FILL_ALPHA)),
+            .background(appColors.surfaceRaised.copy(alpha = DevotionChrome.RAISED_FILL_ALPHA)),
     )
 }
 
@@ -421,8 +421,8 @@ private fun DevotionEmbedCard(
     onOpen: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val colors = appColors()
-    val radii = appRadii()
+    val colors = appColors
+    val radii = appRadii
     val shape = RoundedCornerShape(radii.surface)
     val label = stringResource(R.string.devotion_open_embed)
     Row(
