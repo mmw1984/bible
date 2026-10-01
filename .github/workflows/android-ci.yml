@@ -52,11 +52,22 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: ktlint
         run: ./gradlew ktlintCheck --stacktrace
 
       - name: detekt
         run: ./gradlew detekt --stacktrace
+
+      # Regenerates bible.db from legacy/flutter/assets/bible and fails if the
+      # committed copy is stale. Node 22+ has the built-in node:sqlite module,
+      # so this needs no npm install.
+      - name: Verify bible.db is in sync with the bundled JSON
+        run: node tool/build_bible_db.mjs --check
 
       - name: Unit tests
         run: ./gradlew test --stacktrace

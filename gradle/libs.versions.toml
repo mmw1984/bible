@@ -11,10 +11,15 @@ hilt = "2.59"
 androidxHilt = "1.2.0"
 
 # AndroidX
-composeBom = "2026.09.00"
+# Every version below is the newest release whose AAR metadata still allows
+# compileSdk 36. Compose 1.12, lifecycle 2.11, navigation 2.10 and coil 3.6 all
+# declare minCompileSdk 37 / minAgpVersion 9.1.0, which would mean migrating the
+# whole project to AGP 9 in the middle of the port. Bump these only together
+# with compileSdk.
+composeBom = "2026.06.01" # compose 1.11.4
 activityCompose = "1.13.0"
-lifecycle = "2.11.0"
-navigationCompose = "2.10.2"
+lifecycle = "2.10.0"
+navigationCompose = "2.9.8"
 room = "2.8.5"
 datastore = "1.2.1"
 securityCrypto = "1.1.0"
@@ -31,13 +36,14 @@ javaxInject = "1"
 # Network / parsing
 okhttp = "5.5.0"
 retrofit = "3.0.0"
-coil = "3.6.3"
+coil = "3.5.0"
 jsoup = "1.23.2"
 
 # Test
 junit = "5.14.4"
 mockk = "1.14.11"
 turbine = "1.2.1"
+sqliteJdbc = "3.53.4.0"
 
 # Static analysis
 detekt = "1.23.8"
@@ -58,6 +64,7 @@ androidx-compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
 androidx-compose-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+androidx-core-ktx = { module = "androidx.core:core-ktx" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 
@@ -96,6 +103,9 @@ junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+# Reads the generated bible.db straight from src/main/assets on the JVM, so the
+# schema and the bundled data are verified without an emulator.
+sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqliteJdbc" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

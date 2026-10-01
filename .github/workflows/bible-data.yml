@@ -1,0 +1,40 @@
+name: Bible data
+
+# The prepackaged bible.db is committed (see tool/build_bible_db.mjs), so this
+# workflow guards against it drifting from legacy/flutter/assets/bible.
+on:
+  push:
+    branches:
+      - android-2.0
+    paths:
+      - 'legacy/flutter/assets/bible/**'
+      - 'tool/build_bible_db.mjs'
+      - 'app/src/main/assets/databases/**'
+      - '.github/workflows/bible-data.yml'
+  pull_request:
+    branches:
+      - android-2.0
+    paths:
+      - 'legacy/flutter/assets/bible/**'
+      - 'tool/build_bible_db.mjs'
+      - 'app/src/main/assets/databases/**'
+      - '.github/workflows/bible-data.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: bible.db matches the bundled json
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify the committed database
+        run: node tool/build_bible_db.mjs --check

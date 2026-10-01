@@ -54,14 +54,18 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(project(":core:model"))
-    implementation(project(":core:common"))
+    api(project(":core:common"))
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.core.ktx)
 
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.kotlinx.coroutines.test)
+    // The prepackaged bible.db is verified straight from src/main/assets, so the
+    // schema and the bundled data are checked without an emulator.
+    testImplementation(libs.sqlite.jdbc)
 }
