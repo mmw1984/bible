@@ -19,7 +19,9 @@ fun envSigningAvailable(): Boolean = !keystoreEnv["ANDROID_KEYSTORE_BASE64"].isN
 
 android {
     namespace = "com.marcow.bible"
-    compileSdk = 37
+    compileSdk {
+        version = release(37, 0)
+    }
 
     defaultConfig {
         applicationId = "com.marcow.bible"
