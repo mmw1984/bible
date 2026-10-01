@@ -39,14 +39,8 @@ interface OpenRouterTokenExchange {
  * an unreadable exception message.
  */
 @Singleton
-class HttpOpenRouterTokenExchange @Inject constructor(
-    private val httpClient: OkHttpClient,
-) : OpenRouterTokenExchange {
-    override suspend fun exchange(
-        code: String,
-        codeVerifier: String,
-        codeChallengeMethod: String,
-    ): String {
+class HttpOpenRouterTokenExchange @Inject constructor(private val httpClient: OkHttpClient) : OpenRouterTokenExchange {
+    override suspend fun exchange(code: String, codeVerifier: String, codeChallengeMethod: String): String {
         val payload = buildJsonObject {
             put("code", code)
             put("code_verifier", codeVerifier)

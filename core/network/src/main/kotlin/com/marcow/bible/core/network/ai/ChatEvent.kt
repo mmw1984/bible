@@ -43,10 +43,7 @@ sealed interface ChatEvent {
  * Every other reason is a complete answer, including [ContentFilter], which Flutter did not treat
  * as a failure either: it produced a finished message with whatever text came back.
  */
-enum class FinishReason(
-    val wireValue: String,
-    val incomplete: Boolean,
-) {
+enum class FinishReason(val wireValue: String, val incomplete: Boolean) {
     /** `stop`, the ordinary end of an answer. */
     STOP("stop", false),
 
@@ -65,8 +62,7 @@ enum class FinishReason(
 
     companion object {
         /** Reads a provider's `finish_reason`, unknown values becoming [UNKNOWN] rather than failing. */
-        fun of(wireValue: String?): FinishReason =
-            entries.firstOrNull { it.wireValue == wireValue } ?: UNKNOWN
+        fun of(wireValue: String?): FinishReason = entries.firstOrNull { it.wireValue == wireValue } ?: UNKNOWN
     }
 }
 
@@ -77,11 +73,7 @@ enum class FinishReason(
  * it an optional enhancement, so nothing in the chat has to draw it and [ChatEvent.Finished] leaves
  * it null when the provider did not send one.
  */
-data class AiUsage(
-    val promptTokens: Int = 0,
-    val completionTokens: Int = 0,
-    val totalTokens: Int = 0,
-)
+data class AiUsage(val promptTokens: Int = 0, val completionTokens: Int = 0, val totalTokens: Int = 0)
 
 /**
  * A whole answer, which is what a provider gives back when the caller did not ask for a stream.
@@ -158,8 +150,7 @@ enum class AiProviderId(val storageValue: String) {
 
     companion object {
         /** Reads `ai_provider`, falling back to [OpenRouter] exactly as §4 Phase 4 requires. */
-        fun fromStorage(value: String?): AiProviderId =
-            entries.firstOrNull { it.storageValue == value } ?: OpenRouter
+        fun fromStorage(value: String?): AiProviderId = entries.firstOrNull { it.storageValue == value } ?: OpenRouter
     }
 }
 

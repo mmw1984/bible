@@ -58,9 +58,8 @@ const val OPENROUTER_PENDING_CODE = "openrouter_pending_code"
  * `EncryptedSharedPreferences` fails to open such a file rather than reading what it can.
  */
 @Singleton
-class EncryptedOpenRouterSecureStore @Inject constructor(
-    @ApplicationContext context: Context,
-) : OpenRouterSecureStore {
+class EncryptedOpenRouterSecureStore @Inject constructor(@ApplicationContext context: Context) :
+    OpenRouterSecureStore {
     private val preferences: SharedPreferences = EncryptedSharedPreferences.create(
         context,
         PREFERENCES_FILE,

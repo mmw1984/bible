@@ -51,13 +51,11 @@ fun openRouterPkceVerifier(random: SecureRandom = SecureRandom()): String {
  * The parameters keep the order Dart's map had, so this reads against `openrouter_service.dart:96`
  * the way the Flutter source did.
  */
-fun openRouterAuthorizeUri(
-    challenge: String,
-    callbackUrl: String = OPENROUTER_CALLBACK_URI,
-): String = "$OPENROUTER_AUTHORIZE_ORIGIN/auth" +
-    "?callback_url=${percentEncode(callbackUrl)}" +
-    "&code_challenge=${percentEncode(challenge)}" +
-    "&code_challenge_method=$OPENROUTER_PKCE_METHOD"
+fun openRouterAuthorizeUri(challenge: String, callbackUrl: String = OPENROUTER_CALLBACK_URI): String =
+    "$OPENROUTER_AUTHORIZE_ORIGIN/auth" +
+        "?callback_url=${percentEncode(callbackUrl)}" +
+        "&code_challenge=${percentEncode(challenge)}" +
+        "&code_challenge_method=$OPENROUTER_PKCE_METHOD"
 
 /**
  * `isOpenRouterCallback(uri, isWeb: false, …)`: is this the callback OpenRouter redirects to?
@@ -182,7 +180,12 @@ private fun percentDecode(value: String): String {
 }
 
 private fun isUnreserved(code: Int): Boolean =
-    code in 'a'.code..'z'.code || code in 'A'.code..'Z'.code || code in '0'.code..'9'.code ||
-        code == '-'.code || code == '.'.code || code == '_'.code || code == '~'.code
+    code in 'a'.code..'z'.code ||
+        code in 'A'.code..'Z'.code ||
+        code in '0'.code..'9'.code ||
+        code == '-'.code ||
+        code == '.'.code ||
+        code == '_'.code ||
+        code == '~'.code
 
 private const val HEX = "0123456789ABCDEF"

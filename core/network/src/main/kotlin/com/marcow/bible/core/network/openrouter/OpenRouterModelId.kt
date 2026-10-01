@@ -24,9 +24,7 @@ interface OpenRouterModelId {
  * ?? 'openrouter/free'` the read, so a fresh install asks the free router exactly as it did.
  */
 @Singleton
-class StoredOpenRouterModelId @Inject constructor(
-    private val store: OpenRouterSecureStore,
-) : OpenRouterModelId {
+class StoredOpenRouterModelId @Inject constructor(private val store: OpenRouterSecureStore) : OpenRouterModelId {
     override suspend fun modelId(): String =
         store.read(OPENROUTER_MODEL)?.takeIf { it.isNotBlank() } ?: FREE_ROUTER_MODEL_ID
 }
