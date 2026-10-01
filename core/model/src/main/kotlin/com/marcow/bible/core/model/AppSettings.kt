@@ -8,8 +8,7 @@ enum class ThemeMode(val storageValue: String) {
     ;
 
     companion object {
-        fun fromStorage(value: String?): ThemeMode =
-            entries.firstOrNull { it.storageValue == value } ?: LIGHT
+        fun fromStorage(value: String?): ThemeMode = entries.firstOrNull { it.storageValue == value } ?: LIGHT
     }
 }
 
@@ -21,8 +20,7 @@ enum class NavBarStyle(val storageValue: String) {
 
     companion object {
         /** Flutter's default when the key is missing. */
-        fun fromStorage(value: String?): NavBarStyle =
-            entries.firstOrNull { it.storageValue == value } ?: MATERIAL_BLUR
+        fun fromStorage(value: String?): NavBarStyle = entries.firstOrNull { it.storageValue == value } ?: MATERIAL_BLUR
     }
 }
 
@@ -40,8 +38,7 @@ enum class AppLocale(val storageValue: String) {
         get() = if (this == ZH_HANT) "zh-Hant-TW" else storageValue
 
     companion object {
-        fun fromStorage(value: String?): AppLocale =
-            entries.firstOrNull { it.storageValue == value } ?: ZH_HANT
+        fun fromStorage(value: String?): AppLocale = entries.firstOrNull { it.storageValue == value } ?: ZH_HANT
     }
 }
 

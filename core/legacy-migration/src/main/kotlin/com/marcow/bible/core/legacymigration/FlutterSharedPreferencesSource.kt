@@ -16,9 +16,8 @@ import javax.inject.Singleton
  * *string* carrying a base64 marker (see [parseLegacyDouble]).
  */
 @Singleton
-class FlutterSharedPreferencesSource @Inject constructor(
-    @ApplicationContext context: Context,
-) : LegacyPreferenceSource {
+class FlutterSharedPreferencesSource @Inject constructor(@ApplicationContext context: Context) :
+    LegacyPreferenceSource {
     private val preferences: SharedPreferences =
         context.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
 
