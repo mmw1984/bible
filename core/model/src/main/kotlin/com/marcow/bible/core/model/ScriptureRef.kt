@@ -7,11 +7,6 @@ package com.marcow.bible.core.model
  * The field names are the prompt contract: the model is asked to emit
  * `bookId`, `chapter`, `verseStart` and `verseEnd`.
  */
-data class ScriptureRef(
-    val bookId: String,
-    val chapter: Int,
-    val verseStart: Int,
-    val verseEnd: Int = verseStart,
-) {
+data class ScriptureRef(val bookId: String, val chapter: Int, val verseStart: Int, val verseEnd: Int = verseStart) {
     val isSingleVerse: Boolean get() = verseStart == verseEnd
 }

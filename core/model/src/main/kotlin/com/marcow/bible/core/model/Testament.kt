@@ -12,7 +12,6 @@ enum class Testament(val storageValue: Int) {
     ;
 
     companion object {
-        fun fromStorageValue(value: Int): Testament =
-            entries.firstOrNull { it.storageValue == value } ?: OLD
+        fun fromStorageValue(value: Int): Testament = entries.firstOrNull { it.storageValue == value } ?: OLD
     }
 }

@@ -16,7 +16,6 @@ enum class ReadingMode(val storageKey: String) {
         /** Chinese-only is the Flutter default (`legacy/flutter/lib/main.dart:228`). */
         val DEFAULT = CHINESE
 
-        fun fromStorageKey(key: String?): ReadingMode =
-            entries.firstOrNull { it.storageKey == key } ?: DEFAULT
+        fun fromStorageKey(key: String?): ReadingMode = entries.firstOrNull { it.storageKey == key } ?: DEFAULT
     }
 }
