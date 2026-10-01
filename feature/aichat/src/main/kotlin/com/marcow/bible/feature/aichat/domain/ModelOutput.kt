@@ -149,7 +149,12 @@ private fun stripWebCitations(source: String): String {
  *
  * The check on the last line is for a preamble that was cut off mid-word by a token ceiling, which
  * still has to go — otherwise the answer opens with `safety: sa`.
+ *
+ * The loop keeps both of its jumps on purpose: the blank line only a removed preamble leaves behind,
+ * and the first line that is none. They are two endings of one forward scan, so folding them away
+ * would mean deriving the same stopping point twice.
  */
+@Suppress("LoopWithTooManyJumpStatements")
 private fun stripLeadingInternalMetadata(source: String): String {
     val lines = source.split("\n")
     var firstVisible = 0
