@@ -64,6 +64,7 @@ private fun Map<String, JsonElement>.stringOrEmpty(key: String): String = when (
  * `toInt()` truncates toward zero in Dart and in Kotlin alike, so a model answering `3.7` yields
  * the same chapter `3` on both sides.
  */
+@Suppress("ThrowsCount")
 private fun Map<String, JsonElement>.numberOrDefault(key: String, fallback: Int): Int {
     val raw = this[key]
     if (raw == null || raw is JsonNull) return fallback
