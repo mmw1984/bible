@@ -30,6 +30,15 @@ object OpenRouterModule {
     @Singleton
     fun provideOpenRouterChatClient(client: HttpOpenRouterChatClient): OpenRouterChatClient = client
 
+    /**
+     * The forced web search, provided behind its own port because `research()` is a capability rather
+     * than a completion: a server-side search with a budget and a citation list, which an on-device
+     * provider cannot answer and so cannot be asked for through `AiProvider`.
+     */
+    @Provides
+    @Singleton
+    fun provideOpenRouterResearch(research: HttpOpenRouterResearch): OpenRouterResearch = research
+
     @Provides
     @Singleton
     fun provideOpenRouterTokenExchange(exchange: HttpOpenRouterTokenExchange): OpenRouterTokenExchange = exchange
