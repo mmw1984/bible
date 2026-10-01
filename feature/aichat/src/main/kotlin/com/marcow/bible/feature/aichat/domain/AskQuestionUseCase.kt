@@ -38,8 +38,7 @@ import kotlin.time.TimeSource
  * because a private constructor property is not part of what the class exposes.
  */
 @Singleton
-class AskQuestionUseCase @Inject constructor(private val scriptureToolRunner: ScriptureToolRunner) :
-    AskAiQuestion {
+class AskQuestionUseCase @Inject constructor(private val scriptureToolRunner: ScriptureToolRunner) : AskAiQuestion {
 
     /**
      * [question] asked of [provider], with the text as it arrives handed to [onProgress].
