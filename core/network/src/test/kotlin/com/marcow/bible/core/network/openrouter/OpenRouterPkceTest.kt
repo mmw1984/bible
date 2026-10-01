@@ -125,7 +125,7 @@ class OpenRouterPkceTest {
     }
 
     @Test
-    fun `an empty query value is no value, which is what `_handleLink` rejected`() {
+    fun `an empty query value is no value, which is what _handleLink rejected`() {
         // `code == null || code.isEmpty` and `callbackError.isNotEmpty` are both Dart guards, so an
         // empty `code=` must read as absent rather than as the empty string being a valid code.
         val emptyCode = OpenRouterCallbackUri.parse("bible://openrouter/callback?code=")
