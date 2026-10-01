@@ -95,7 +95,7 @@ fun AppColors.toColorScheme(): ColorScheme {
     )
 }
 
-private fun AppColors.isDark(): Boolean = this == Dark
+private fun AppColors.isDark(): Boolean = this == AppColors.Dark
 
 /**
  * Fallback for a composable rendered outside [AppTheme] (a unit-test root, a preview). Mirrors
