@@ -18,10 +18,7 @@ import kotlinx.serialization.json.JsonPrimitive
  * Public because it is [SearchReferencesUseCase]'s return type, and that use case is a constructor
  * parameter of the public `AiSearchUseCase` — see [AiScriptureReference] for why the chain is public.
  */
-data class AiSearchReferences(
-    val scriptures: List<AiScriptureReference>,
-    val suggestedQuestions: List<String>,
-)
+data class AiSearchReferences(val scriptures: List<AiScriptureReference>, val suggestedQuestions: List<String>)
 
 /**
  * The parse half of `_searchReferences`: the model's text in, validated references out.
