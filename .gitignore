@@ -1,0 +1,69 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+/releases/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/legacy/flutter/android/app/debug
+/legacy/flutter/android/app/profile
+/legacy/flutter/android/app/release
+
+# Native Android build (repo root is the Gradle root)
+.gradle/
+**/build/
+.kotlin/
+local.properties
+*.apk
+*.aab
+*.jks
+*.keystore
+.cxx/
+
+# Local tool workspaces (font subsetting, one-off asset generation)
+.tool-venv/
+/tool/out/
+/artifacts/
+
+.vercel
+.env*
+
+# Local working copies kept out of the repo
+/bible flutter/
+/bible flutter backup/

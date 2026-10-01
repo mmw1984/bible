@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Window theme applied to MainActivity once the process is up. Compose draws the UI. -->
+    <style name="Theme.Bible" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/splash_background</item>
+    </style>
+
+    <!-- Splash theme, migrated from the Flutter LaunchTheme (NATIVE_PLAN.md §3.5). -->
+    <style name="Theme.Bible.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="windowSplashScreenAnimationDuration">420</item>
+        <item name="postSplashScreenTheme">@style/Theme.Bible</item>
+    </style>
+</resources>

@@ -1,0 +1,19 @@
+.git
+.DS_Store
+.font-venv
+.dart_tool/
+.idea/
+.vercel
+.env*
+releases/
+
+# Local working copies of the same project
+bible flutter/
+bible flutter backup/
+
+# Not required for the Flutter web build on Vercel
+build/
+android/
+test/
+tool/
+.github/
