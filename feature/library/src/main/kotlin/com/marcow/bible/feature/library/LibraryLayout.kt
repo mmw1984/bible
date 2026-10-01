@@ -190,9 +190,19 @@ object PanelChrome {
     val closeSize: Dp = 40.dp
     val closeGlyphSize: Dp = 19.dp
 
-    /** The list arriving: 430 in on the spring curve, 240 out on the way to the other testament. */
+    /**
+     * The list arriving: 430 on the spring curve, sliding down by 2.5% of its own height.
+     *
+     * Flutter's `AnimatedSwitcher` on the testament list did declare an exit — `reverseDuration: 240`
+     * and `switchOutCurve: easeInCubic` at `legacy/flutter/lib/main.dart:2009` — so there is a number
+     * there to copy. Its `layoutBuilder` returned `currentChild` on its own
+     * (`legacy/flutter/lib/main.dart:2022`), and `currentChild` is the list coming *in*: the outgoing
+     * list was dropped from the layout on the first frame of the swap and neither of those two values
+     * ever reached the screen. `togetherWith ExitTransition.None` says the same thing, which is why
+     * the panel's `AnimatedContent` has a half-empty `transitionSpec` and why there is no exit
+     * duration kept here.
+     */
     const val listEnterMillis = 430
-    const val listExitMillis = 240
 
     /** The fraction of its own height the list slides down as it arrives, `Offset(0, .025)`. */
     const val ListSlideFraction = 0.025f
