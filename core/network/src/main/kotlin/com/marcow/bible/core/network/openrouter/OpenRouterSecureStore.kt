@@ -49,9 +49,9 @@ const val OPENROUTER_PENDING_CODE = "openrouter_pending_code"
 
 /**
  * The store on `EncryptedSharedPreferences`, which is what `flutter_secure_storage` used on Android
- * too — `NATIVE_PLAN.md` §6 R1 accepts that its entries cannot be carried over (the Flutter file is
- * encrypted with that package's own Tink keyset), so this reads its own file instead and every
- * existing user signs in once more.
+ * too, so the Flutter file is readable with the same configuration — see
+ * [EncryptedFlutterSecureStorageReader] for the attempt and [MigratingOpenRouterSecureStore] for the
+ * carry-over. R1 accepts the attempt failing, and then the user signs in once more.
  *
  * The file is named after this app rather than after the Flutter package: sharing a name would put
  * entries written by a different encryptor configuration in the same preference file, and

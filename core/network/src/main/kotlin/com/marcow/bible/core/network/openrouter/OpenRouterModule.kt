@@ -43,9 +43,26 @@ object OpenRouterModule {
     @Singleton
     fun provideOpenRouterTokenExchange(exchange: HttpOpenRouterTokenExchange): OpenRouterTokenExchange = exchange
 
+    /**
+     * [MigratingOpenRouterSecureStore] wrapping the encrypted store, so the API key the Flutter build
+     * left in `FlutterSecureStorage.xml` is carried over on the first read. R1 accepts the attempt
+     * failing, and the fallback is the sign-in prompt the app already shows.
+     *
+     * The decorator is built here rather than injected, since asking for it as a dependency would mean
+     * asking for the [OpenRouterSecureStore] it is being bound as.
+     */
     @Provides
     @Singleton
-    fun provideOpenRouterSecureStore(store: EncryptedOpenRouterSecureStore): OpenRouterSecureStore = store
+    fun provideOpenRouterSecureStore(
+        store: EncryptedOpenRouterSecureStore,
+        legacy: FlutterSecureStorageReader,
+    ): OpenRouterSecureStore = MigratingOpenRouterSecureStore(store, legacy)
+
+    @Provides
+    @Singleton
+    fun provideFlutterSecureStorageReader(
+        reader: EncryptedFlutterSecureStorageReader,
+    ): FlutterSecureStorageReader = reader
 
     @Provides
     @Singleton
