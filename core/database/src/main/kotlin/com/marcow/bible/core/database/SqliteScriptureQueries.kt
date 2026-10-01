@@ -16,9 +16,7 @@ import javax.inject.Singleton
  * Every method blocks; callers run on `Dispatchers.IO`.
  */
 @Singleton
-class SqliteScriptureQueries @Inject constructor(
-    private val connection: ScriptureConnection,
-) : ScriptureQueries {
+class SqliteScriptureQueries @Inject constructor(private val connection: ScriptureConnection) : ScriptureQueries {
 
     override fun books(): List<BibleBook> = connection.read { db ->
         db.rawQuery(ALL_BOOKS_SQL, null).use { cursor -> readBooks(cursor) }
