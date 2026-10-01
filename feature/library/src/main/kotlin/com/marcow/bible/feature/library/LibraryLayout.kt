@@ -26,9 +26,24 @@ fun libraryPanelWidth(windowWidth: Dp): Dp = minOf(windowWidth * PanelWidthFract
 /** `SizedBox(width: 270)` in `_BibleHomeState` — the column the reader sits beside on a wide window. */
 val SidebarWidth: Dp = 270.dp
 
-/** The books in [testament], in canon order — `bibleBooks.indexed.where((entry) => entry.$2.old == old)`. */
+/** The books in [testament], in canon order — `bibleBooks.indexed.where((entry) -> entry.$2.old == old)`. */
 fun booksInTestament(books: List<BibleBook>, testament: Testament): List<BibleBook> =
     books.filter { it.testament == testament }
+
+/**
+ * Which half of the canon the sheet opens on, from the book the reader is on.
+ *
+ * Flutter's `_LibraryPanel` opened on the testament of the book being read rather than always on the
+ * Old Testament — `late bool old = bibleBooks[widget.selected].old`, with `widget.selected` an index
+ * into the same constant list the panel drew. So a reader in John who opens the sheet arrives at 新約
+ * with 27 books behind the segment, not at 舊約 with 39.
+ *
+ * A book id the panel does not have, or none at all, falls back to [Testament.OLD]. That is what
+ * Flutter's own `late` initializer did before `initState` ran on a fresh install with no stored
+ * position, and it is the half of the canon a reader who has read nothing belongs at.
+ */
+fun openingTestament(books: List<BibleBook>, selectedBookId: String?): Testament =
+    books.firstOrNull { it.id == selectedBookId }?.testament ?: Testament.OLD
 
 /**
  * The two-digit canon number a book is listed under, `'${index + 1}'.padLeft(2, '0')`.

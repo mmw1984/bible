@@ -90,7 +90,10 @@ fun LibraryPanel(
 ) {
     val colors = appColors
     val selected = state.books.firstOrNull { it.id == selectedBookId }
-    var testament by remember(selected?.id) { mutableStateOf(selected?.testament ?: Testament.OLD) }
+    // Keyed on the book rather than the testament, so choosing a book in the other half and dismissing
+    // the sheet leaves the reader where they asked to be — which is the same rule Flutter's `late bool
+    // old = bibleBooks[widget.selected].old` ran on every time the panel was built.
+    var testament by remember(selected?.id) { mutableStateOf(openingTestament(state.books, selectedBookId)) }
 
     Box(
         modifier = modifier

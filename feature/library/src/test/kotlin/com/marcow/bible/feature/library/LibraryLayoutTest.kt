@@ -65,6 +65,28 @@ class LibraryLayoutTest {
     }
 
     @Test
+    fun `the sheet opens on the testament of the book being read`() {
+        // `_LibraryPanel`'s `late bool old = bibleBooks[widget.selected].old`, so a reader in John who
+        // opens the sheet arrives at 新約 with 27 books behind the segment rather than at 舊約 with 39.
+        assertEquals(Testament.NEW, openingTestament(canon, "JHN"))
+        assertEquals(Testament.OLD, openingTestament(canon, "GEN"))
+    }
+
+    /**
+     * No book, or a book the panel does not have, opens on the Old Testament.
+     *
+     * The fallback is Flutter's own: its `late` initializer ran on a fresh install with nothing stored,
+     * and it happened to be 創世記. An id that is not in the list is the same case — the panel cannot
+     * look up a book it was not given, so it starts where the canon does.
+     */
+    @Test
+    fun `no book to read opens on the Old Testament`() {
+        assertEquals(Testament.OLD, openingTestament(canon, selectedBookId = null))
+        assertEquals(Testament.OLD, openingTestament(canon, "NOPE"))
+        assertEquals(Testament.OLD, openingTestament(emptyList(), "JHN"))
+    }
+
+    @Test
     fun `a book is named after the reading mode, not the list it is in`() {
         val state = LibraryUiState(books = canon)
         val john = canon.first { it.id == "JHN" }
