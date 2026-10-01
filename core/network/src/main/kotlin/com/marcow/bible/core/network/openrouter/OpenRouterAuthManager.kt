@@ -153,7 +153,15 @@ class OpenRouterAuthManager @Inject constructor(
         retryPendingExchange()
     }
 
-    /** `_performPendingExchange()`. */
+    /**
+     * `_performPendingExchange()`.
+     *
+     * The catch is deliberately broad: Dart's `catch (error)` wrapped the POST *and* the four storage
+     * writes, so its text reached `_lastError` whatever went wrong. [OpenRouterTokenExchange] and
+     * [OpenRouterSecureStore] are ports, so the set of exceptions is not this file's to enumerate,
+     * and narrowing it would let a failure reach the user with no message at all.
+     */
+    @Suppress("TooGenericExceptionCaught")
     private suspend fun performPendingExchange() {
         val code = store.read(OPENROUTER_PENDING_CODE) ?: return
         val verifier = store.read(OPENROUTER_PKCE_VERIFIER)

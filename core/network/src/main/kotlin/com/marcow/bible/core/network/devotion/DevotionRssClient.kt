@@ -95,19 +95,19 @@ private fun Element.tagText(name: String): String {
  * posts, and an unreadable date falls back to now exactly as it did in Dart.
  */
 internal fun parseRfc822Date(raw: String): LocalDateTime {
-    val match = RFC_822.find(raw.trim()) ?: return LocalDateTime.now()
-    val (day, monthName, yearText, hour, minute, second) = match.destructured
-    val month = MONTHS[monthName.lowercase()] ?: 1
-    val parsedYear = yearText.toIntOrNull() ?: LocalDateTime.now().year
+    // Read one group at a time: an RFC-822 stamp has six, which is more than may be destructured.
+    val parts = RFC_822.find(raw.trim())?.groupValues ?: return LocalDateTime.now()
+    val month = MONTHS[parts[MONTH_NAME_GROUP].lowercase()] ?: 1
+    val parsedYear = parts[YEAR_GROUP].toIntOrNull() ?: LocalDateTime.now().year
     return try {
         LocalDateTime.of(
             // A two-digit year is this century, as Dart's `if (year < 100) year += 2000` did.
             if (parsedYear < 100) parsedYear + 2000 else parsedYear,
             month,
-            day.toIntOrNull() ?: 1,
-            hour.toIntOrNull() ?: 0,
-            minute.toIntOrNull() ?: 0,
-            second.toIntOrNull() ?: 0,
+            parts[DAY_GROUP].toIntOrNull() ?: 1,
+            parts[HOUR_GROUP].toIntOrNull() ?: 0,
+            parts[MINUTE_GROUP].toIntOrNull() ?: 0,
+            parts[SECOND_GROUP].toIntOrNull() ?: 0,
         )
     } catch (_: DateTimeException) {
         // `DateTime(2026, 2, 31)` rolled over to 3 March in Dart; a local date-time refuses instead,
@@ -124,3 +124,11 @@ private val MONTHS = mapOf(
 
 /** The pattern of `parseRfc822Date`, with the two optional groups left empty when absent. */
 private val RFC_822 = Regex("""(\d{1,2})\s+([A-Za-z]{3})[a-z]*\s+(\d{2,4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?""")
+
+/** The group numbers of [RFC_822], in the order `parseRfc822Date` needs them. */
+private const val DAY_GROUP = 1
+private const val MONTH_NAME_GROUP = 2
+private const val YEAR_GROUP = 3
+private const val HOUR_GROUP = 4
+private const val MINUTE_GROUP = 5
+private const val SECOND_GROUP = 6
