@@ -400,8 +400,7 @@ class WebResearchTest {
         buildJsonArray { parts.forEach { (type, text) -> add(contentPart(type, text)) } }
 
     /** `{"web_search_requests": <count>}`, the one key read out of `usage`. */
-    private fun webSearch(count: JsonPrimitive): JsonObject =
-        buildJsonObject { put("web_search_requests", count) }
+    private fun webSearch(count: JsonPrimitive): JsonObject = buildJsonObject { put("web_search_requests", count) }
 
     /** Sources given as `(url, title, excerpt)`, the shape a test thinks in. */
     private fun sourcesOf(vararg entries: Triple<String, String, String>): List<JsonObject> =
