@@ -82,22 +82,22 @@ object ReaderChrome {
     val chapterControlHorizontal: Dp = 12.dp
     val chapterControlVertical: Dp = 8.dp
     val chapterNumberSize: TextUnit = 23.sp
-    val chapterNumberLineHeight: Float = 1f
+    const val chapterNumberLineHeight: Float = 1f
 
     /** Inside a verse: the number, then the text. */
     val verseVerticalPadding: Dp = 18.dp
     val verseNumberSize: TextUnit = 10.sp
     val verseNumberGap: Dp = 6.dp
     val verseGap: Dp = 4.dp
-    val verseLineHeight: Float = 1.9f
+    const val verseLineHeight: Float = 1.9f
     val verseEnglishGap: Dp = 8.dp
     val verseEnglishSize: TextUnit = 14.sp
-    val verseEnglishLineHeight: Float = 1.7f
+    const val verseEnglishLineHeight: Float = 1.7f
     val verseOnlyEnglishSize: TextUnit = 17.sp
-    val verseOnlyEnglishLineHeight: Float = 1.78f
+    const val verseOnlyEnglishLineHeight: Float = 1.78f
 
     /** The title's own line box, which bounds the two lines Flutter allowed it. */
-    val titleLineHeight: Float = 1.04f
+    const val titleLineHeight: Float = 1.04f
 
     /** The failing chapter's message, which Flutter centred in the space a chapter would take. */
     val failureVerticalPadding: Dp = 70.dp
@@ -106,6 +106,6 @@ object ReaderChrome {
     val skeletonBarHeight: Dp = 54.dp
     val skeletonBarGap: Dp = 14.dp
     val skeletonBottomPadding: Dp = 24.dp
-    val skeletonBars: Int = 6
-    val skeletonPulseMillis: Int = 1_100
+    const val skeletonBars: Int = 6
+    const val skeletonPulseMillis: Int = 1_100
 }
