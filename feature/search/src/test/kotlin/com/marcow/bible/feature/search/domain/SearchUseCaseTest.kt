@@ -239,8 +239,7 @@ private fun ChatCompletionRequest.prompt(): String {
 private fun JsonObject.reasoning(): JsonObject = this["reasoning"] as? JsonObject ?: error("the reasoning block")
 
 /** `response_format.json_schema.name`, which is what the provider is told to validate against. */
-private fun JsonObject.schemaName(): String? =
-    (this["response_format"] as? JsonObject)
+private fun JsonObject.schemaName(): String? = (this["response_format"] as? JsonObject)
         ?.let { it["json_schema"] as? JsonObject }
         ?.let { it["name"] as? JsonPrimitive }
         ?.content
@@ -265,8 +264,7 @@ private class FakeBibleDao : BibleDao {
 
     override suspend fun versesByTestament(testament: Int): List<VerseEntity> = emptyList()
 
-    override suspend fun booksByTestament(testament: Int): List<BookEntity> =
-        canon.filter { it.testament == testament }
+    override suspend fun booksByTestament(testament: Int): List<BookEntity> = canon.filter { it.testament == testament }
 
     override suspend fun searchContains(pattern: String, limit: Int): List<ScriptureSearchRow> = emptyList()
 }
