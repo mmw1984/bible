@@ -66,6 +66,7 @@ fun LibrarySidebar(
 ) {
     val colors = appColors
     val name = book.displayName(readingMode, usesEnglishUi)
+    val openLibraryLabel = stringResource(R.string.select_book)
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -96,7 +97,17 @@ fun LibrarySidebar(
                     end = SidebarChrome.bookRowEnd,
                     bottom = SidebarChrome.bookRowBottom,
                 )
-                .semantics { contentDescription = name },
+                // What the row is named, not what it is showing. Flutter's `AppTap` at
+                // `legacy/flutter/lib/main.dart:1765` was `AppTap(label: context.l10n.selectBook)` —
+                // the same label the menu button over the reader carries — so this row is announced as
+                // the control that opens the library rather than as the book currently open beside it.
+                // Naming the book instead was a plausible reading and the wrong one: a reader who taps
+                // this row gets the sheet, and the name is already the column's own heading above it.
+                //
+                // Flutter also excluded the row's inner text, so its node was the label alone. Here the
+                // name is still read after it, which is the one difference left and the useful one: the
+                // control says what it does and then which book it would change.
+                .semantics { contentDescription = openLibraryLabel },
         ) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(
