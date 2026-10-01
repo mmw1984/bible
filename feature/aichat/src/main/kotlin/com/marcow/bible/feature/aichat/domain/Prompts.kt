@@ -80,6 +80,41 @@ internal fun limitText(value: String, maxCharacters: Int): String =
     if (value.length <= maxCharacters) value else value.take(maxCharacters) + "\n$TRUNCATION_MARKER"
 
 /**
+ * The continuation prompt, moved across word for word from the `'''…'''` inside the continuation
+ * loop of `_answerExistingMessage` at `legacy/flutter/lib/ai_service.dart:516`–`527`.
+ *
+ * It is asked when a round ended without `[[END]]` and without a `stop`: the answer reached the
+ * ceiling, so the tail of what has been written goes back with the instruction to carry on *after*
+ * it. Verbatim for the same reason [chatPrompt] is — the phrase "Continue directly after the final
+ * characters above", the two `[[END]]` / `[[MORE]]` markers and the four-line sentence about not
+ * repeating the title are all tuned — and the leading newline is Dart's as well.
+ *
+ * [prompt] is the same conversation prompt the first round used, not a new one, so the model is
+ * still answering the original question rather than the tail of its own answer.
+ */
+internal fun continuationPrompt(prompt: String, answer: String): String = """
+$prompt
+
+Response already written:
+${answerTail(answer, CONTINUATION_TAIL_LIMIT)}
+
+Continue directly after the final characters above. Return only the new
+continuation: do not repeat the title, introduction, outline, or any existing
+paragraph. End with [[END]] when the answer is complete. If another segment is
+still needed, end this segment with [[MORE]].
+"""
+
+/**
+ * `_tail` in `legacy/flutter/lib/ai_service.dart:857`: the *end* of the answer, not the beginning.
+ *
+ * The last [CONTINUATION_TAIL_LIMIT] characters rather than the first, because the model continues
+ * from the end of what it wrote: handing it the opening of the answer would ask it to continue from
+ * the wrong place and produce a second copy of the title.
+ */
+internal fun answerTail(value: String, maxCharacters: Int): String =
+    if (value.length <= maxCharacters) value else value.takeLast(maxCharacters)
+
+/**
  * `'(none supplied)'`, what the authoritative block says when the chat was opened without a chapter.
  *
  * Stated rather than left blank so the model is told the block is empty instead of inferring an
@@ -98,3 +133,9 @@ internal const val MESSAGE_LIMIT = 4000
 
 /** `12`: `historyLimit`, how many messages the recent block carries at most. */
 internal const val HISTORY_LIMIT = 12
+
+/** `2`: the `continuation < 2` bound on how many times an answer may be asked to carry on. */
+internal const val MAX_CONTINUATIONS = 2
+
+/** `3200`: the `_tail(answer, 3200)` ceiling on the answer quoted back to the model. */
+internal const val CONTINUATION_TAIL_LIMIT = 3200

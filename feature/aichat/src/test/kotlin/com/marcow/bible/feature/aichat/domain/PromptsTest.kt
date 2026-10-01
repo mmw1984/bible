@@ -79,12 +79,48 @@ class PromptsTest {
         assertFalse(prompt.contains("[[END]]\n"))
     }
 
+    @Test
+    fun `the continuation prompt is the Flutter one word for word`() {
+        // The `'''…'''` at `legacy/flutter/lib/ai_service.dart:516`, including the newline Dart's
+        // `'''` put at the front: a reworded instruction here is a different answer to the same
+        // question, so the whole text is compared rather than a few phrases of it.
+        assertEquals("\n$CONTINUATION", continuationPrompt(PROMPT, ANSWER))
+    }
+
+    @Test
+    fun `the continuation quotes the end of the answer, not the beginning`() {
+        val written = "a".repeat(CONTINUATION_TAIL_LIMIT + 100) + "TAIL"
+
+        val prompt = continuationPrompt(PROMPT, written)
+
+        assertTrue(prompt.contains("\nResponse already written:\n"))
+        assertTrue(prompt.endsWith("end this segment with [[MORE]].\n"))
+        assertEquals(
+            CONTINUATION_TAIL_LIMIT,
+            prompt.substringAfter("Response already written:\n").substringBefore("\n\nContinue").length,
+        )
+        assertTrue(prompt.contains("a".repeat(50) + "TAIL\n\nContinue directly"))
+    }
+
+    @Test
+    fun `an answer inside the tail limit is quoted whole`() {
+        assertEquals(ANSWER, answerTail(ANSWER, CONTINUATION_TAIL_LIMIT))
+        assertEquals(ANSWER, answerTail(ANSWER, ANSWER.length))
+    }
+
+    @Test
+    fun `the loop is bounded at two continuations`() {
+        assertEquals(2, MAX_CONTINUATIONS)
+    }
+
     private companion object {
         const val QUESTION = "Who is this?"
         const val MEMORY = "(no memory yet)"
         const val RECENT = "user: earlier"
         const val SCRIPTURE = "JHN 3:16 text"
         const val LANGUAGE = "natural Traditional Chinese"
+        const val PROMPT = "THE CONVERSATION PROMPT"
+        const val ANSWER = "An answer that is already partly written."
 
         const val TOOL_REQUEST =
             "{\"tool\":\"get_scripture\",\"bookId\":\"JHN\",\"chapter\":3," +
@@ -133,6 +169,18 @@ OUTPUT CONTROL
 End a complete user-facing answer with [[END]]. Use [[MORE]] only when genuinely
 cut off by the output limit. Never show these markers inside prose or a JSON tool
 request.
+""".trimIndent()
+
+        val CONTINUATION = """
+$PROMPT
+
+Response already written:
+$ANSWER
+
+Continue directly after the final characters above. Return only the new
+continuation: do not repeat the title, introduction, outline, or any existing
+paragraph. End with [[END]] when the answer is complete. If another segment is
+still needed, end this segment with [[MORE]].
 """.trimIndent()
     }
 }
