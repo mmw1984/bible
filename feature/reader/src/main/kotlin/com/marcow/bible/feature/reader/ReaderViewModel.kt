@@ -38,12 +38,16 @@ import javax.inject.Inject
  * [stepTo] writes the chapter being left before the one being opened. Flutter kept those in two
  * places — `reader_scroll_<BOOK>-<CHAPTER>` and `reader_book` — where this is one row per book, which
  * is why the chapter order and its offset travel together.
+ *
+ * It declares [ReaderNavigator] and [ReaderScrollSink] rather than being adapted to them: the seven
+ * methods the screen calls already exist with these exact names and meanings, so the screen is wired
+ * by handing it the view model, and a test can hand it something smaller instead.
  */
 @HiltViewModel
 class ReaderViewModel @Inject constructor(
     private val bibleRepository: BibleRepository,
     private val settingsRepository: SettingsRepository,
-) : ViewModel() {
+) : ViewModel(), ReaderNavigator, ReaderScrollSink {
     /** Canon order, loaded once: the reader navigates by index and every direction depends on it. */
     private val books = mutableListOf<BibleBook>()
     private val writes = Channel<ReaderPosition>(Channel.UNLIMITED)
@@ -89,16 +93,16 @@ class ReaderViewModel @Inject constructor(
      * picker itself, which cannot offer one — from leaving the reader on the chapter they are already
      * on.
      */
-    fun selectChapter(chapter: Int) {
+    override fun selectChapter(chapter: Int) {
         val book = books.getOrNull(position.bookIndex) ?: return
         val clamped = clampChapter(book.chapters, chapter)
         if (clamped == position.chapter) return
         stepTo(position.movedTo(position.bookIndex, clamped))
     }
 
-    fun selectNextChapter() = stepTo(nextPosition(books, position))
+    override fun selectNextChapter() = stepTo(nextPosition(books, position))
 
-    fun selectPreviousChapter() = stepTo(previousPosition(books, position))
+    override fun selectPreviousChapter() = stepTo(previousPosition(books, position))
 
     /**
      * Switches between Chinese, English and bilingual without reloading the chapter.
@@ -106,7 +110,7 @@ class ReaderViewModel @Inject constructor(
      * Both translations come out of the same row, so the Flutter reader only re-rendered — but it
      * did persist the position, since the mode is part of where the reader was.
      */
-    fun selectMode(mode: ReadingMode) {
+    override fun selectMode(mode: ReadingMode) {
         if (mode == position.mode) return
         // Flutter wrote twice here: the outgoing pixel offset, then `reader_mode`. Both are the same
         // row now, so one write carries the mode and the offset together.
@@ -121,7 +125,7 @@ class ReaderViewModel @Inject constructor(
      * Called on every scroll frame and does nothing else: the ratio is remembered in [scrollRatio]
      * so a navigation that arrives mid-gesture still writes the position actually being left.
      */
-    fun onScrolled(ratio: Float) {
+    override fun onScrolled(ratio: Float) {
         scrollRatio = ratio.coerceIn(0f, 1f)
         scrollSave?.cancel()
         scrollSave = viewModelScope.launch {
@@ -131,7 +135,7 @@ class ReaderViewModel @Inject constructor(
     }
 
     /** Consumes the one-shot scroll instruction once the screen has jumped to it. */
-    fun onScrollRestored() {
+    override fun onScrollRestored() {
         _state.update { it.copy(scrollToRatio = null) }
     }
 
@@ -159,7 +163,7 @@ class ReaderViewModel @Inject constructor(
      * it has been turned into a ratio, which is what `LegacyPrefsImporter` relies on to apply it
      * exactly once.
      */
-    fun onChapterMeasured(maxScrollPx: Float) {
+    override fun onChapterMeasured(maxScrollPx: Float) {
         if (legacyScrollApplied || maxScrollPx <= 0f) return
         legacyScrollApplied = true
         viewModelScope.launch {
