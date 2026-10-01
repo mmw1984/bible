@@ -68,6 +68,9 @@ dependencies {
     implementation(project(":core:network"))
     implementation(project(":core:database"))
     implementation(libs.kotlinx.coroutines.android)
+    // The cache stores raw WordPress post JSON, the same shape the Flutter cache stored in
+    // SharedPreferences; reading it back is the tree API, not a serializer per projection.
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.jsoup)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)

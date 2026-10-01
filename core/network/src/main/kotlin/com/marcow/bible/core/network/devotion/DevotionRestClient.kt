@@ -83,8 +83,14 @@ internal fun decodeDevotionPosts(body: String): List<DevotionPost> {
 private fun JsonObject.publishDate(): LocalDateTime =
     parseIsoDateTime(string("date_gmt").ifEmpty { string("date") }) ?: LocalDateTime.now()
 
-/** `DateTime.tryParse(raw)?.toLocal() ?? DateTime.now()`: a local date-time with no zone attached. */
-internal fun parseIsoDateTime(raw: String): LocalDateTime? = try {
+/**
+ * `DateTime.tryParse(raw)?.toLocal() ?? DateTime.now()`: a local date-time with no zone attached.
+ *
+ * Public because the devotion cache writes the same WordPress date back out and reads it in again
+ * (`DevotionCache` in `feature/devotion`), and a date is a date in both layers: parsing it twice with
+ * two implementations is how a cache starts disagreeing with the feed that wrote it.
+ */
+fun parseIsoDateTime(raw: String): LocalDateTime? = try {
     LocalDateTime.parse(raw)
 } catch (_: DateTimeParseException) {
     null
