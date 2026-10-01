@@ -8,6 +8,19 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
+ * The port the sheet searches through.
+ *
+ * The use case below is the only implementation, but the sheet takes the port rather than the class
+ * so its state machine can be exercised against a stub — there is no OpenRouter and no SQLite in a
+ * JVM test, and the states worth testing here (the two independent progress flags, the four failure
+ * panels) are exactly the ones a live search makes impossible to reach.
+ */
+interface TraditionalSearch {
+    /** The hits for [query], at most [SEARCH_RESULT_LIMIT] of them, in canon order. */
+    suspend operator fun invoke(query: String): List<ScriptureHit>
+}
+
+/**
  * The text half of the search sheet, mirroring `BibleRepository.search` in
  * `legacy/flutter/lib/bible_data.dart`.
  *
@@ -21,11 +34,11 @@ import javax.inject.Singleton
  * on an empty box), so the distinction only matters to the tests.
  */
 @Singleton
-internal class TraditionalSearchUseCase @Inject constructor(
+class TraditionalSearchUseCase @Inject constructor(
     private val bibleDao: BibleDao,
-) {
+) : TraditionalSearch {
     /** At most [SEARCH_RESULT_LIMIT] hits in canon order. */
-    suspend operator fun invoke(query: String): List<ScriptureHit> {
+    override suspend operator fun invoke(query: String): List<ScriptureHit> {
         val pattern = searchPattern(query) ?: return emptyList()
         return bibleDao.searchContains(pattern, SEARCH_RESULT_LIMIT).map { it.toDomain() }
     }

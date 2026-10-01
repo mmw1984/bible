@@ -9,7 +9,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /** One step of an AI search reaching the sheet, mirroring the four callbacks of `BibleAiController.search`. */
-internal sealed interface AiSearchUpdate {
+sealed interface AiSearchUpdate {
     /** `onOverview`: the overview prose is ready to show. */
     data class OverviewReady(val overview: String) : AiSearchUpdate
 
@@ -26,6 +26,25 @@ internal sealed interface AiSearchUpdate {
 
     /** `onReferencesError`, or the `.catchError` after resolution — told apart by [failure]. */
     data class ReferencesFailed(val failure: ReferenceFailure) : AiSearchUpdate
+}
+
+/**
+ * The port the sheet runs an AI search through.
+ *
+ * The use case below is the only implementation, but the sheet takes the port rather than the class
+ * so its state machine can be exercised against a stub. Two requests landing in a chosen order — the
+ * overview failing while the references arrive, the references failing at the chapter lookup — is
+ * what the sheet's four panels are for, and none of it can be provoked reliably against a live model.
+ */
+interface AiSearch {
+    /**
+     * The four updates of one search, in whatever order they actually land.
+     *
+     * A [Flow] rather than a single response because the sheet draws each half as it arrives; the
+     * Flutter build's `AiSearchResponse` was the value `search()` returned and nothing read it,
+     * because `_searchAi` had already been given every piece through its callbacks.
+     */
+    fun search(query: String, memory: String, aiLanguage: String): Flow<AiSearchUpdate>
 }
 
 /**
@@ -57,19 +76,12 @@ internal sealed interface AiSearchUpdate {
  * 10) — so nothing is recorded here rather than recorded somewhere Phase 4 will have to move.
  */
 @Singleton
-internal class AiSearchUseCase @Inject constructor(
+class AiSearchUseCase @Inject constructor(
     private val searchOverview: SearchOverviewUseCase,
     private val searchReferences: SearchReferencesUseCase,
     private val resolveReferences: ResolveReferencesUseCase,
-) {
-    /**
-     * The four updates of one search, in whatever order they actually land.
-     *
-     * A [Flow] rather than a single `AiSearchResponse` because the sheet draws each half as it
-     * arrives; the Flutter build's `AiSearchResponse` was the value `search()` returned and nothing
-     * read it, because `_searchAi` had already been given every piece through its callbacks.
-     */
-    fun search(query: String, memory: String, aiLanguage: String): Flow<AiSearchUpdate> = channelFlow {
+) : AiSearch {
+    override fun search(query: String, memory: String, aiLanguage: String): Flow<AiSearchUpdate> = channelFlow {
         coroutineScope {
             async {
                 try {
@@ -111,12 +123,12 @@ internal class AiSearchUseCase @Inject constructor(
  * trusted (it is the one legacy file that carries what the user told the AI), so until then the block
  * is empty — which is the same state the Flutter build was in on a fresh install with no memory yet.
  */
-internal interface AiSearchMemory {
+interface AiSearchMemory {
     /** The block for the prompt's `Persistent user memory:` line, or `''` when there is none. */
     suspend fun promptMemory(): String
 }
 
 @Singleton
-internal class BlankAiSearchMemory @Inject constructor() : AiSearchMemory {
+class BlankAiSearchMemory @Inject constructor() : AiSearchMemory {
     override suspend fun promptMemory(): String = ""
 }

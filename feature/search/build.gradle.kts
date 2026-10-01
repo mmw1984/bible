@@ -67,6 +67,8 @@ dependencies {
     api(project(":core:common"))
     implementation(project(":core:database"))
     implementation(project(":core:network"))
+    // The sheet's prompts are asked in the language the user reads in, which is a setting.
+    implementation(project(":core:datastore"))
     implementation(libs.kotlinx.coroutines.android)
     // `jsonObjectOrNull` decodes the references answer directly, rather than through a serializer
     // that would have to survive the model's prose around the JSON.
@@ -76,4 +78,9 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.kotlinx.coroutines.test)
+    // The same in-memory DataStore `core/datastore` tests with, so a search can be asked for the
+    // language the user reads in without a file.
+    testImplementation(testFixtures(project(":core:datastore")))
+    // `InMemorySettingsDataStore` takes the generated message, so the test builds one.
+    testImplementation(project(":core:datastore-proto"))
 }
