@@ -254,6 +254,42 @@ class SearchViewModelTest {
     }
 
     @Test
+    fun `a query waiting for a sign-in runs what the box says then, not what it said`() = runTest(dispatcher) {
+        // `_aiChanged` called `_searchAi()` with no argument, so Dart re-read the box rather than
+        // replaying the submitted query. A user who edits the query while the sign-in is in flight
+        // is asking for the edited one, and this is the only test that can see the difference.
+        val aiSearch = FakeAiSearch(MutableSharedFlow())
+        val session = FakeOpenRouterSession(initial = false)
+        val viewModel = searchViewModel(aiSearch = aiSearch, session = session)
+
+        searchAi(viewModel, query = "love")
+        viewModel.beginSignIn()
+        viewModel.onQueryChanged("hope")
+        session.signIn()
+        advanceUntilIdle()
+
+        assertEquals("hope", aiSearch.lastQuery)
+    }
+
+    @Test
+    fun `a box emptied while the sign-in was in flight runs nothing`() = runTest(dispatcher) {
+        val aiSearch = FakeAiSearch(MutableSharedFlow())
+        val session = FakeOpenRouterSession(initial = false)
+        val viewModel = searchViewModel(aiSearch = aiSearch, session = session)
+
+        searchAi(viewModel, query = "love")
+        viewModel.beginSignIn()
+        viewModel.onQueryChanged("")
+        session.signIn()
+        advanceUntilIdle()
+
+        // Replaying `query` here would have searched "love" after the user deleted it, which is the
+        // half of the same divergence `runAiSearch`'s own blank guard exists to refuse.
+        assertNull(aiSearch.lastQuery)
+        assertFalse(viewModel.state.value.searching)
+    }
+
+    @Test
     fun `the prompt is asked in the language the user reads in`() = runTest(dispatcher) {
         val updates = MutableSharedFlow<AiSearchUpdate>(extraBufferCapacity = 8)
         val aiSearch = FakeAiSearch(updates)

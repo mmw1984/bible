@@ -66,9 +66,17 @@ class SearchViewModel @Inject constructor(
                 _state.update { it.copy(signedIn = signedIn) }
                 // `_aiChanged`: the sign-in finished and nothing is running, so the query the user
                 // typed before signing in is worth one more try.
+                //
+                // The *box*, not the last submitted query. `_aiChanged` at
+                // `legacy/flutter/lib/main.dart:2161` calls `_searchAi()` with no argument, and
+                // `_searchAi([String? supplied])` opens with `(supplied ?? input.text).trim()` — so
+                // Dart re-read the box, and a query edited while the sign-in was in flight is the
+                // one that runs. `query` would have replayed the text that was in the box when the
+                // user pressed search, which is a different query whenever the two differ, and an
+                // emptied box would have replayed it instead of running nothing.
                 if (pendingCloudSearch && signedIn && !_state.value.searching) {
                     pendingCloudSearch = false
-                    runAiSearch(_state.value.query)
+                    runAiSearch(_state.value.input.trim())
                 }
             }
         }
