@@ -95,12 +95,7 @@ fun AppControlSurface(
 }
 
 /** `_solidTint` in `app_ui.dart`. */
-private fun solidTint(
-    colors: AppColors,
-    requested: Color?,
-    selected: Boolean,
-    emphasized: Boolean,
-): Color = when {
+private fun solidTint(colors: AppColors, requested: Color?, selected: Boolean, emphasized: Boolean): Color = when {
     requested != null && requested != Color.Transparent -> requested
     selected -> colors.ink
     emphasized -> colors.surfaceRaised
@@ -148,7 +143,13 @@ fun Modifier.appTapFeedback(
         label = "appTapScale",
     )
     val opacity by animateFloatAsState(
-        targetValue = if (!enabled) DISABLED_ALPHA else if (pressed) PRESSED_ALPHA else 1f,
+        targetValue = if (!enabled) {
+            DISABLED_ALPHA
+        } else if (pressed) {
+            PRESSED_ALPHA
+        } else {
+            1f
+        },
         animationSpec = tapAnimationSpec(),
         label = "appTapAlpha",
     )

@@ -46,6 +46,7 @@ object AppTheme {
         val base = appTypography()
         // `theme.textTheme.apply(bodyColor: …, displayColor: …)`: every style in the scale takes the
         // ink colour and nothing else is re-tinted.
+
         fun TextStyle.inked() = copy(color = ink)
         Typography(
             displayLarge = base.displayLarge.inked(),
