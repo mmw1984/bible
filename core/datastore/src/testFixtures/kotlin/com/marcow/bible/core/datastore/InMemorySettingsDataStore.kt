@@ -18,6 +18,9 @@ import java.io.OutputStream
  * exists in a JVM unit test. This stands in for it so [SettingsRepository] can be tested
  * directly; [roundTrip] goes through the same [Serializer] the file-backed store uses, so a test
  * can still prove the message survives real serialization.
+ *
+ * It is a `testFixtures` dependency rather than test-only code because the feature modules own the
+ * screens that write settings, and their tests need a store to write them into.
  */
 class InMemorySettingsDataStore(initial: Settings = Settings.getDefaultInstance()) : DataStore<Settings> {
     private val state = MutableStateFlow(initial)

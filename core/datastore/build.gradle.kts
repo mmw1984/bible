@@ -25,6 +25,12 @@ android {
         abortOnError = true
     }
 
+    // `InMemorySettingsDataStore` lives here rather than in `src/test` so the feature modules that
+    // write settings can build the same DataStore the file-backed one parses.
+    testFixtures {
+        enable = true
+    }
+
     testOptions {
         unitTests.all { test ->
             test.useJUnitPlatform()
