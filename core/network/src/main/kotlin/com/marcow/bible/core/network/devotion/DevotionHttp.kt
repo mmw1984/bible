@@ -25,24 +25,24 @@ import java.io.IOException
  * type: a DNS failure, a refused connection and a 503 are all "this tier did not deliver".
  */
 internal suspend fun OkHttpClient.devotionGetText(url: String): String = withTimeoutOrNull(DEVOTION_TIMEOUT_MS) {
-        withContext(Dispatchers.IO) {
-            try {
-                newCall(
-                    Request.Builder()
-                        .url(url)
-                        .headers(DEVOTION_HEADERS.toHeaders())
-                        .build(),
-                ).execute().use { response ->
-                    if (!response.isSuccessful) {
-                        throw DevotionFetchException("devotion request $url failed (${response.code})")
-                    }
-                    response.body?.bytes()?.toString(Charsets.UTF_8).orEmpty()
+    withContext(Dispatchers.IO) {
+        try {
+            newCall(
+                Request.Builder()
+                    .url(url)
+                    .headers(DEVOTION_HEADERS.toHeaders())
+                    .build(),
+            ).execute().use { response ->
+                if (!response.isSuccessful) {
+                    throw DevotionFetchException("devotion request $url failed (${response.code})")
                 }
-            } catch (unreachable: IOException) {
-                throw DevotionFetchException("devotion request $url failed: ${unreachable.message}", unreachable)
+                response.body?.bytes()?.toString(Charsets.UTF_8).orEmpty()
             }
+        } catch (unreachable: IOException) {
+            throw DevotionFetchException("devotion request $url failed: ${unreachable.message}", unreachable)
         }
-    } ?: throw DevotionFetchException("devotion request $url timed out")
+    }
+} ?: throw DevotionFetchException("devotion request $url timed out")
 
 /** `.timeout(const Duration(seconds: 20))` on every `_kDevotionHeaders` request. */
 private const val DEVOTION_TIMEOUT_MS = 20_000L
