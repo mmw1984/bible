@@ -53,11 +53,9 @@ protobuf {
         all().forEach { task ->
             // javalite is enough: the settings message has no `Any`, no extensions and no maps,
             // and it keeps the generated `Settings` class small.
-            task.builtins {
-                named("java") {
-                    option("lite")
-                }
-            }
+            // `maybeCreate` rather than `named`: the plugin adds the `java` builtin itself while
+            // the task is being configured, and `all()` can run before that happens.
+            task.builtins.maybeCreate("java").option("lite")
         }
     }
 }

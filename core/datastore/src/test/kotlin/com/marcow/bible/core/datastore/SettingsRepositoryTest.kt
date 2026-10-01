@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -108,5 +109,25 @@ class SettingsRepositoryTest {
         assertEquals(ThemeMode.LIGHT, settings.themeMode)
         assertEquals(NavBarStyle.MATERIAL_BLUR, settings.navbarStyle)
         assertEquals(AppLocale.ZH_HANT, settings.locale)
+    }
+
+    @Test
+    fun `the legacy pixel offset is pending until the reader converts it`() = runTest {
+        assertNull(repo.pendingLegacyScrollPx())
+
+        repo.rememberLegacyScrollPx(1420.5)
+        assertEquals(1420.5, repo.pendingLegacyScrollPx())
+
+        // Clearing it must not resurrect it, and must leave the rest of the message alone.
+        repo.setThemeMode(ThemeMode.DARK)
+        repo.clearPendingLegacyScroll()
+        assertNull(repo.pendingLegacyScrollPx())
+        assertEquals(ThemeMode.DARK, repo.settings.first().themeMode)
+    }
+
+    @Test
+    fun `a pending pixel offset of zero is still distinguishable from none`() = runTest {
+        repo.rememberLegacyScrollPx(0.0)
+        assertEquals(0.0, repo.pendingLegacyScrollPx())
     }
 }
