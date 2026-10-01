@@ -42,6 +42,13 @@ kotlin {
     }
 }
 
+hilt {
+    // Hilt's AGP aggregating task relies on ScopedArtifact.POST_COMPILATION_CLASSES, which no
+    // longer exists in current AGP, and it is incompatible with KSP anyway: KSP already does the
+    // aggregating work for us.
+    enableAggregatingTask = false
+}
+
 dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
