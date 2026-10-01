@@ -2,8 +2,15 @@ package com.marcow.bible.feature.devotion.data
 
 import com.marcow.bible.core.database.DevotionCacheEntity
 import com.marcow.bible.feature.devotion.domain.DevotionHeading
+import com.marcow.bible.feature.devotion.domain.DevotionImage
 import com.marcow.bible.feature.devotion.domain.DevotionParagraph
 import com.marcow.bible.feature.devotion.domain.DevotionPost
+import com.marcow.bible.feature.devotion.domain.DevotionVideo
+import com.marcow.bible.feature.devotion.domain.fixture
+import com.marcow.bible.feature.devotion.domain.parseArticlePage
+import com.marcow.bible.feature.devotion.domain.parseDevotionBlocks
+import com.marcow.bible.feature.devotion.domain.sectionTitles
+import com.marcow.bible.feature.devotion.domain.sectionsOf
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -134,6 +141,43 @@ class DevotionCacheTest {
         assertEquals(post.publishedAt.toLocalDate(), post.devotionDate)
     }
 
+    @Test
+    fun `a real post survives the round-trip with its block tree intact`() = runTest {
+        val cache = DevotionCache(dao)
+        val original = post(id = 25436, title = "[觀畫靈修] 亞伯蘭與撒萊在埃及 －2026年8月21日", html = fixture("devotion_guanhua.html"))
+
+        cache.write(listOf(original))
+        val restored = cache.read().single()
+
+        // The row holds the post rather than the blocks, so this is the parser running a second time
+        // over byte-identical HTML — which is the only reason an old cache re-parses instead of
+        // serving what the parser of its day made of it. Nothing else in the suite round-trips real
+        // markup: every other case here is a single inline `<p>`, which cannot catch the row
+        // mangling the quotes, entities and CJK a real post is full of.
+        assertEquals(original.contentHtml, restored.contentHtml)
+        assertEquals(original.devotionDate, restored.devotionDate)
+        assertEquals(original.blocks, restored.blocks)
+        assertTrue(restored.blocks.any { it is DevotionVideo }, "the video must survive")
+        assertTrue(sectionsOf(restored.blocks).any { it.blocks.any { block -> block is DevotionImage } })
+    }
+
+    @Test
+    fun `a scraped article survives the round-trip`() = runTest {
+        val cache = DevotionCache(dao)
+        val scraped = checkNotNull(
+            parseArticlePage("https://devotion.wkphc.org/25436", fixture("devotion_site_article.html")),
+        )
+
+        cache.write(listOf(scraped))
+        val restored = cache.read().single()
+
+        assertEquals(scraped.title, restored.title)
+        // The day is re-read out of the title on every load, so the title surviving is the day
+        // surviving — this tier stores a publish time of "now", which carries no day of its own.
+        assertEquals(scraped.devotionDate, restored.devotionDate)
+        assertEquals(sectionTitles(scraped.blocks), sectionTitles(restored.blocks))
+    }
+
     private fun post(
         id: Long,
         title: String,
@@ -146,6 +190,6 @@ class DevotionCacheTest {
         title = title,
         link = "https://devotion.wkphc.org/$id",
         contentHtml = html,
-        blocks = emptyList(),
+        blocks = parseDevotionBlocks(html),
     )
 }
