@@ -30,7 +30,6 @@ import com.marcow.bible.core.designsystem.components.AppTap
 import com.marcow.bible.core.designsystem.theme.appColors
 import com.marcow.bible.core.designsystem.theme.appRadii
 import java.net.URI
-
 import android.graphics.Color as AndroidColor
 
 /**
@@ -114,10 +113,7 @@ internal fun DevotionEmbedPlayer(url: String, onOpenUrl: (String) -> Unit, modif
                             if (request?.isForMainFrame == true) failed = true
                         }
 
-                        override fun shouldOverrideUrlLoading(
-                            view: WebView?,
-                            request: WebResourceRequest?,
-                        ): Boolean {
+                        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                             val target = request?.url?.toString() ?: return false
                             // `false` means the frame follows the URL; `true` means it declines.
                             //
