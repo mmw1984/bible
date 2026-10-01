@@ -127,12 +127,7 @@ fun AppFloatingNavBar(
  * never has to wait for the host to echo the new index back before the pill starts moving.
  */
 @Composable
-private fun NavBarContent(
-    items: List<AppNavBarItem>,
-    pillWidth: Dp,
-    selectedIndex: Int,
-    onSelected: (Int) -> Unit,
-) {
+private fun NavBarContent(items: List<AppNavBarItem>, pillWidth: Dp, selectedIndex: Int, onSelected: (Int) -> Unit) {
     val density = LocalDensity.current
     // Hiding Devotions shortens the list without renaming a tab, so the host's index is coerced.
     val effectiveIndex = selectedIndex.coerceIn(0, items.lastIndex)
