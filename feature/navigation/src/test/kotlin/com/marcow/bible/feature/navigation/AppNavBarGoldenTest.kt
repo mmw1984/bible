@@ -38,9 +38,14 @@ import org.junit.jupiter.api.TestInfo
  * lands open rather than photographing itself at `alpha = 0` — and so these goldens are the same
  * kind of picture an `@Preview` of the bar would be.
  *
- * The goldens are recorded by CI and compared with `maxPercentDifference = 0.0`. A golden that
- * tolerates a one percent drift is one whose diff nobody reads, and the only failures worth having
- * here are a change someone meant and a change they did not.
+ * `maxPercentDifference = 0.0`. A golden that tolerates a one percent drift is one whose diff nobody
+ * reads, and the only failures worth having here are a change someone meant and a change they did not.
+ *
+ * The images are not in the repository yet, which is worth saying here rather than leaving to be
+ * found: `./gradlew :feature:navigation:recordPaparazziDebug` is the task that draws them, they land
+ * in `src/test/snapshots/images` for the commit that changes them to carry, and
+ * `./gradlew :feature:navigation:verifyPaparazziDebug` is what compares them. `./gradlew test` on its
+ * own writes an HTML report and compares nothing.
  */
 class AppNavBarGoldenTest {
     private lateinit var paparazzi: Paparazzi

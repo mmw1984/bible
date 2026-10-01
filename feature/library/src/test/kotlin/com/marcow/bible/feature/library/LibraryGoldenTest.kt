@@ -37,10 +37,15 @@ import org.junit.jupiter.api.TestInfo
  * below sets it the way its README recommends for anything that would otherwise short-circuit for a
  * `@Preview`.
  *
- * The goldens are recorded by CI and compared with `maxPercentDifference = 0.0` — a golden that
- * tolerates a one percent drift is a golden whose diff is never read. The two failures this is here
- * to catch are a change someone meant and a change they did not, and only the second is visible in
- * the second.
+ * `maxPercentDifference = 0.0` — a golden that tolerates a one percent drift is a golden whose diff
+ * is never read. The two failures worth having here are a change someone meant and a change they did
+ * not, and only the second is visible in the second.
+ *
+ * The images are not in the repository yet, which is worth saying here rather than leaving to be
+ * found: `./gradlew :feature:library:recordPaparazziDebug` is the task that draws them, they land in
+ * `src/test/snapshots/images` for the commit that changes them to carry, and
+ * `./gradlew :feature:library:verifyPaparazziDebug` is what compares them. `./gradlew test` on its
+ * own writes an HTML report and compares nothing.
  */
 class LibraryGoldenTest {
     private lateinit var paparazzi: Paparazzi

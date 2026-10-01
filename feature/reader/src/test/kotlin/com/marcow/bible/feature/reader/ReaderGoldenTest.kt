@@ -41,10 +41,15 @@ import org.junit.jupiter.api.TestInfo
  * harness below sets it the same way its README recommends for anything that would otherwise
  * short-circuit for a `@Preview`.
  *
- * The goldens are recorded by CI, not from a workstation, and compared with
- * `maxPercentDifference = 0.0` — a golden that tolerates a one percent drift is a golden nobody reads
- * the diff of. The two failures this is here to catch are a change someone meant and a change they
- * did not, and they are only distinguishable in the second case.
+ * `maxPercentDifference = 0.0` — a golden that tolerates a one percent drift is a golden nobody
+ * reads the diff of. The two failures this is here to catch are a change someone meant and a change
+ * they did not, and only the second shows up in a diff.
+ *
+ * The images are not in the repository yet, which is worth saying here rather than leaving to be
+ * found: `./gradlew :feature:reader:recordPaparazziDebug` is the task that draws them, they land in
+ * `src/test/snapshots/images` for the commit that changes them to carry, and
+ * `./gradlew :feature:reader:verifyPaparazziDebug` is what compares them. `./gradlew test` on its
+ * own writes an HTML report and compares nothing, so a run of it says the composables still draw.
  */
 class ReaderGoldenTest {
     private lateinit var paparazzi: Paparazzi

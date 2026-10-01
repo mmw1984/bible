@@ -36,6 +36,9 @@ import org.junit.jupiter.api.TestInfo
  * harness sets it: nothing in this bar animates, and the flag is here for the same reason it is in the
  * reader's and the library's goldens — so that a future control in this module does not photograph
  * itself at the invisible start of its own entrance.
+ *
+ * No image under `src/test/snapshots/images` has been recorded for any of it yet;
+ * [AppNavBarGoldenTest] is where that is written down along with the tasks that record and compare.
  */
 class ReaderTopBarGoldenTest {
     private lateinit var paparazzi: Paparazzi
