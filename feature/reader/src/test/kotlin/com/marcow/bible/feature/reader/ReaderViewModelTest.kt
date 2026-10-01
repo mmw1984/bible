@@ -283,6 +283,75 @@ class ReaderViewModelTest {
         )
     }
 
+    /**
+     * Flutter's `dispose`, which flushed the queue before the 180 ms debounce had fired.
+     *
+     * [ReaderRoute] calls [ReaderViewModel.savePosition] on `ON_PAUSE`, so this is the same flush
+     * Flutter's `tester.pumpWidget(const SizedBox.shrink())` triggered: the reader is leaving while
+     * an offset is still waiting to be written, and the offset it left at is the one that has to
+     * reach the row.
+     */
+    @Test
+    fun `leaving while the debounce is still pending writes the offset now`() = runTest(dispatcher) {
+        val viewModel = reader()
+        advanceUntilIdle()
+        viewModel.onScrolled(0.62f)
+        advanceTimeBy(179)
+        assertEquals(0, progressDao.writes.size)
+
+        viewModel.savePosition()
+        advanceUntilIdle()
+
+        assertEquals(0.62f, progressDao.rows["GEN"]?.scrollRatio)
+        assertEquals(1, progressDao.writes.size)
+
+        // The debounce was cancelled rather than left to run, so it cannot follow the flush with a
+        // second write of a row that is already correct.
+        advanceTimeBy(180)
+        assertEquals(1, progressDao.writes.size)
+    }
+
+    /** And the row that flush wrote is where the next launch opens, rather than the top of the chapter. */
+    @Test
+    fun `an offset flushed on the way out is where the app reopens`() = runTest(dispatcher) {
+        val leaving = reader()
+        advanceUntilIdle()
+        leaving.onScrolled(0.62f)
+        advanceTimeBy(179)
+        leaving.savePosition()
+        advanceUntilIdle()
+
+        val reopened = reader()
+        advanceUntilIdle()
+
+        assertEquals("GEN", reopened.state.value.book?.id)
+        assertEquals(0.62f, reopened.state.value.scrollToRatio)
+    }
+
+    /**
+     * A write the repository refused is kept for the next flush rather than dropped.
+     *
+     * Flutter's queue reported the failure and carried the write into the next one, because the
+     * alternative is a reader who closes the app on a full disk and comes back to the top of a
+     * chapter they had scrolled halfway through.
+     */
+    @Test
+    fun `a write the database refused is retried by the next flush`() = runTest(dispatcher) {
+        val viewModel = reader()
+        advanceUntilIdle()
+        progressDao.refuse = true
+
+        viewModel.onScrolled(0.4f)
+        advanceUntilIdle()
+        assertTrue(progressDao.rows.isEmpty())
+
+        progressDao.refuse = false
+        viewModel.savePosition()
+        advanceUntilIdle()
+
+        assertEquals(0.4f, progressDao.rows["GEN"]?.scrollRatio)
+    }
+
     @Test
     fun `an imported Flutter pixel offset becomes a ratio and is not applied twice`() = runTest(dispatcher) {
         settingsRepository.rememberLegacyScrollPx(400.0)
@@ -438,12 +507,16 @@ class ReaderViewModelTest {
         /** Every upsert in order, which is the only way to see that a flush kept its ordering. */
         val writes = mutableListOf<ReadingProgressEntity>()
 
+        /** Whether to refuse an upsert, standing in for a database that has failed a write. */
+        var refuse = false
+
         override suspend fun progress(book: String): ReadingProgressEntity? = rows[book]
 
         override suspend fun allProgress(): List<ReadingProgressEntity> =
             rows.values.sortedByDescending { it.updatedAt }
 
         override suspend fun upsert(progress: ReadingProgressEntity) {
+            check(!refuse) { "the database refused the write" }
             rows[progress.bookId] = progress
             writes += progress
         }
