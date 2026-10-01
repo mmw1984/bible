@@ -66,11 +66,7 @@ data class WebResearchResponse(
  * what dedupes — two citations of the same article through two tracking URLs are one source, not two
  * — and it is also what is shown, since the tracking parameters are of no use to a reader.
  */
-data class WebResearchSource(
-    val url: String,
-    val title: String,
-    val excerpt: String,
-)
+data class WebResearchSource(val url: String, val title: String, val excerpt: String)
 
 /**
  * `research()`'s three refusals, kept apart as types rather than as the strings a caller would have to
