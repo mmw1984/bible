@@ -65,7 +65,18 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.kotlinx.coroutines.test)
-    // The prepackaged bible.db is verified straight from src/main/assets, so the
-    // schema and the bundled data are checked without an emulator.
+    // The prepackaged bible.db is verified straight from the app module's assets,
+    // so the schema and the bundled data are checked without an emulator.
     testImplementation(libs.sqlite.jdbc)
+}
+
+// The generated bible.db is committed under :app, but this module owns the schema
+// and the code that reads it. Gradle unit tests run with the module directory as
+// the working directory, so hand the test an absolute path instead of making it
+// guess the relative one.
+val bibleDatabaseAsset = layout.projectDirectory
+    .file("../../app/src/main/assets/databases/bible.db")
+
+tasks.withType<Test>().configureEach {
+    systemProperty("bible.db.path", bibleDatabaseAsset.asFile.absolutePath)
 }

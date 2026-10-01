@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.sql.Connection
 import java.sql.DriverManager
 
@@ -184,14 +185,15 @@ class BibleDatabaseTest {
         return rows.firstOrNull()?.get("text") as String?
     }
 
-    private fun connection(): Connection =
-        DriverManager.getConnection("jdbc:sqlite:${readOnlyAsset().absolutePath}")
+    private fun connection(): Connection = DriverManager.getConnection(assetUrl())
+
+    private fun assetUrl(): String = "jdbc:sqlite:${readOnlyAsset().absolutePath}"
 
     /** A writable copy, for the tests that insert rows. */
     private fun scratchConnection(): Connection {
         val copy = Files.createTempFile("bible-test", ".db")
         copy.toFile().deleteOnExit()
-        Files.copy(readOnlyAsset().toPath(), copy, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        Files.copy(readOnlyAsset().toPath(), copy, StandardCopyOption.REPLACE_EXISTING)
         return DriverManager.getConnection("jdbc:sqlite:${copy.toAbsolutePath()}")
     }
 
@@ -201,38 +203,39 @@ class BibleDatabaseTest {
         return checkNotNull(file)
     }
 
-    private fun query(sql: String, vararg args: String): List<Map<String, Any?>> =
-        connection().use { db ->
-            db.prepareStatement(sql).use { statement ->
-                args.forEachIndexed { index, value -> statement.setString(index + 1, value) }
-                statement.executeQuery().use { rows ->
-                    val columns = (1..rows.metaData.columnCount).map { rows.metaData.getColumnLabel(it) }
-                    buildList {
-                        while (rows.next()) {
-                            add(columns.associateWith { rows.getObject(it) })
-                        }
+    private fun query(sql: String, vararg args: String): List<Map<String, Any?>> = connection().use { db ->
+        db.prepareStatement(sql).use { statement ->
+            args.forEachIndexed { index, value -> statement.setString(index + 1, value) }
+            statement.executeQuery().use { rows ->
+                val labels = (1..rows.metaData.columnCount).map { rows.metaData.getColumnLabel(it) }
+                buildList {
+                    while (rows.next()) {
+                        add(labels.associateWith { rows.getObject(it) })
                     }
                 }
             }
         }
+    }
 
-    private fun queryInt(sql: String, vararg args: String): Int =
-        connection().use { db ->
-            db.prepareStatement(sql).use { statement ->
-                args.forEachIndexed { index, value -> statement.setString(index + 1, value) }
-                statement.executeQuery().use { rows ->
-                    check(rows.next()) { "query returned no rows: $sql" }
-                    rows.getInt(1)
-                }
+    private fun queryInt(sql: String, vararg args: String): Int = connection().use { db ->
+        db.prepareStatement(sql).use { statement ->
+            args.forEachIndexed { index, value -> statement.setString(index + 1, value) }
+            statement.executeQuery().use { rows ->
+                check(rows.next()) { "query returned no rows: $sql" }
+                rows.getInt(1)
             }
         }
+    }
 
     private fun Map<String, Any?>.int(key: String): Int = (this[key] as Number).toInt()
 
+    /** The database lives in the app module; core/database only reads a copy. */
+    /**
+     * Supplied by core/database/build.gradle.kts, so the test does not depend on
+     * its working directory.
+     */
     private fun databaseFile(): File? =
-        sequenceOf("src/main/assets", "../../app/src/main/assets")
-            .map { File(it, "databases/bible.db") }
-            .firstOrNull { it.isFile }
+        System.getProperty("bible.db.path")?.let(::File)?.takeIf { it.isFile }
 
     private companion object {
         const val EXPECTED_BOOKS = 66
