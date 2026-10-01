@@ -36,6 +36,7 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -133,26 +134,64 @@ fun LibraryPanel(
                 accessibilityLabel = stringResource(R.string.select_book),
             )
             Spacer(Modifier.height(PanelChrome.belowSegmented))
-            AnimatedContent(
-                targetState = testament,
-                modifier = Modifier.weight(1f),
-                transitionSpec = {
-                    fadeIn(tween(PanelChrome.listEnterMillis, easing = SpringCurve)) +
-                        slideIn(tween(PanelChrome.listEnterMillis, easing = SpringCurve)) { height ->
-                            IntOffset(0, (height * PanelChrome.ListSlideFraction).toInt())
-                        } togetherWith ExitTransition.None
-                },
-                label = "libraryTestament",
-            ) { shown ->
-                BookList(
-                    books = state.booksIn(shown),
-                    state = state,
-                    readingMode = readingMode,
-                    selectedBookId = selectedBookId,
-                    onBookSelected = onBookSelected,
-                )
-            }
+            TestamentList(
+                testament = testament,
+                state = state,
+                readingMode = readingMode,
+                selectedBookId = selectedBookId,
+                onBookSelected = onBookSelected,
+            )
         }
+    }
+}
+
+/**
+ * The half of the canon the segmented control has chosen, swapping as it is chosen.
+ *
+ * The switcher is skipped where [LocalInspectionMode] is true, for the reason the reader's title
+ * skips its own: `AnimatedContent` holds the incoming list at `alpha = 0` until its first frame
+ * advances, so the panel would be captured as its title and its segmented control over nothing. The
+ * gate below it has the same problem and the same answer, and the two have to agree — a panel whose
+ * switcher is settled but whose gate is not would show a list at `alpha = 0` just as blankly.
+ */
+@Composable
+private fun TestamentList(
+    testament: Testament,
+    state: LibraryUiState,
+    readingMode: ReadingMode,
+    selectedBookId: String?,
+    onBookSelected: (BibleBook) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (LocalInspectionMode.current) {
+        BookList(
+            books = state.booksIn(testament),
+            state = state,
+            readingMode = readingMode,
+            selectedBookId = selectedBookId,
+            onBookSelected = onBookSelected,
+            modifier = modifier,
+        )
+        return
+    }
+    AnimatedContent(
+        targetState = testament,
+        modifier = modifier,
+        transitionSpec = {
+            fadeIn(tween(PanelChrome.listEnterMillis, easing = SpringCurve)) +
+                slideIn(tween(PanelChrome.listEnterMillis, easing = SpringCurve)) { height ->
+                    IntOffset(0, (height * PanelChrome.ListSlideFraction).toInt())
+                } togetherWith ExitTransition.None
+        },
+        label = "libraryTestament",
+    ) { shown ->
+        BookList(
+            books = state.booksIn(shown),
+            state = state,
+            readingMode = readingMode,
+            selectedBookId = selectedBookId,
+            onBookSelected = onBookSelected,
+        )
     }
 }
 
@@ -169,12 +208,17 @@ private fun BookList(
     readingMode: ReadingMode,
     selectedBookId: String?,
     onBookSelected: (BibleBook) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()
-    val gate = remember { RowGate() }
+    // A gate that starts closed is what a preview and a golden want: nothing is playing a stagger
+    // there, and `Animatable` anchors to the first frame it is given, so an open gate would draw
+    // every row of the panel at `alpha = 0` — the title, the segmented control and an empty list.
+    val inspection = LocalInspectionMode.current
+    val gate = remember { RowGate(open = !inspection) }
     CloseRowGate(gate)
 
-    LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+    LazyColumn(state = listState, modifier = modifier.fillMaxSize()) {
         items(count = books.size, key = { index -> books[index].id }) { index ->
             val book = books[index]
             RowEntrance(staggerIndex = index, gate = gate) {

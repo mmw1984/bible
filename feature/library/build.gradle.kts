@@ -5,6 +5,10 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    // Goldens. The panel and the sidebar are Phase 2 pixels: the segmented control, the
+    // canon numbers down the side and the sheet the reader dismisses are all things that
+    // compile, pass every arithmetic test in this module, and still read wrong.
+    alias(libs.plugins.paparazzi)
 }
 
 android {

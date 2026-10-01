@@ -37,11 +37,18 @@ fun rowEntranceDelayMillis(staggerIndex: Int): Int {
 }
 
 /** Whether the rows being composed right now belong to the panel's first pass. */
-class RowGate {
-    /** Not snapshot state, deliberately: a row must not be recomposed when the gate closes. */
-    @Volatile
-    var open: Boolean = true
-}
+class RowGate(
+    /**
+     * Whether the gate still admits a stagger. Closed once the panel's first frame has been laid
+     * out, or from the start when the panel is being previewed rather than played — see
+     * `LibraryPanel`. Written from a coroutine and read during composition, so it is deliberately
+     * not snapshot state.
+     *
+     * A constructor parameter rather than a second field, so the panel's one decision stays one
+     * line and the reader's `EntranceGate` stays the same shape.
+     */
+    @Volatile var open: Boolean = true,
+)
 
 /** Fades and raises [content] into place, [staggerIndex] rows after the first one. */
 @Composable
