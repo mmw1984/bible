@@ -82,6 +82,60 @@ fun readerTopBarSlots(showNavBar: Boolean, showDevotion: Boolean): List<ReaderTo
 }
 
 /**
+ * The glyph on each control, in App's own set rather than the Lucide icons Flutter drew.
+ *
+ * Ask and Devotions are here standing in for two tabs of [AppNavBar], which carry [AppGlyph.CHAT]
+ * and [AppGlyph.SUN]; a shortcut that stood in for a tab with a different glyph on it would be the
+ * one control on the bar that looked like something else. All four are interchangeable to the eye at
+ * 19 dp — a chat bubble and a rising sun are both a shape on a square — so a swap between them is
+ * held only by a golden, which is the one place two 19 dp glyphs tell each other apart at all.
+ *
+ * Search and Settings keep the two glyphs Flutter used unchanged: the app's own book, search and gear
+ * rather than a second icon language for four controls.
+ */
+fun readerTopBarGlyph(control: ReaderTopBarControl): AppGlyph = when (control) {
+    ReaderTopBarControl.ASK -> AppGlyph.CHAT
+    ReaderTopBarControl.DEVOTION -> AppGlyph.SUN
+    ReaderTopBarControl.SEARCH -> AppGlyph.SEARCH
+    ReaderTopBarControl.SETTINGS -> AppGlyph.SETTINGS
+}
+
+/**
+ * The string each control is named by, which is the whole of what a control says.
+ *
+ * There is no word on any of them — four identical frosted squares with a glyph each — so this is the
+ * only place the destination is written down at all, and each is the string Flutter's `Row` over the
+ * reader used for the same control: `tabAsk` at `legacy/flutter/lib/main.dart:657`, `tabDevotion` at
+ * `:664`, `searchWholeBible` at `:672` and `settings` at `:680`.
+ *
+ * The last two are worth spelling out. The search button says *Search the whole Bible* and not
+ * *Search*, because that is the string the field it opens is then given as its hint (`:2356`) — the
+ * button names the thing the reader is about to type into. And Ask and Devotions say exactly what
+ * [AppNavBar]'s tabs of the same destination say, since they are the same destinations, reached from
+ * the top of the reader because the bar that normally holds them is switched off.
+ *
+ * Four names for four controls, none of them shared: a label that named two of them at once would
+ * leave a reader with two controls that announce themselves identically and do different things.
+ */
+fun readerTopBarLabel(control: ReaderTopBarControl): Int = when (control) {
+    ReaderTopBarControl.ASK -> R.string.tab_ask
+    ReaderTopBarControl.DEVOTION -> R.string.tab_devotion
+    ReaderTopBarControl.SEARCH -> R.string.search_whole_bible
+    ReaderTopBarControl.SETTINGS -> R.string.settings
+}
+
+/**
+ * The book button's name, which is the library's rather than the control's.
+ *
+ * It is on the leading side, outside the [Spacer] that pushes the rest to the right edge, so it is not
+ * one of the [ReaderTopBarControl]s — the wide layout drops it entirely, and it is the sidebar's book
+ * row that carries the name then. `selectBook` is the same string Flutter gave the sidebar's row at
+ * `:1765` and this button at `:650`, which is the whole point: two controls, one destination, one
+ * name, and on a window too wide for this one the other is there to say it.
+ */
+val ReaderLibraryButtonLabel: Int = R.string.select_book
+
+/**
  * The row of controls the Flutter shell drew *over* the reader, replacing the `readerControls`
  * `Stack` at `legacy/flutter/lib/main.dart:642`.
  *
@@ -121,7 +175,7 @@ fun ReaderTopBar(
         if (visibility.libraryButton) {
             AppGlyphButton(
                 glyph = AppGlyph.MENU,
-                label = stringResource(R.string.select_book),
+                label = stringResource(ReaderLibraryButtonLabel),
                 onClick = onOpenLibrary,
             )
         }
@@ -130,31 +184,19 @@ fun ReaderTopBar(
         Spacer(Modifier.weight(1f))
         readerTopBarSlots(visibility.navBar, visibility.devotion).forEach { slot ->
             Spacer(Modifier.width(slot.gapBefore))
-            when (slot.control) {
-                ReaderTopBarControl.ASK -> AppGlyphButton(
-                    glyph = AppGlyph.CHAT,
-                    label = stringResource(R.string.tab_ask),
-                    onClick = onAsk,
-                )
-
-                ReaderTopBarControl.DEVOTION -> AppGlyphButton(
-                    glyph = AppGlyph.SUN,
-                    label = stringResource(R.string.tab_devotion),
-                    onClick = onDevotion,
-                )
-
-                ReaderTopBarControl.SEARCH -> AppGlyphButton(
-                    glyph = AppGlyph.SEARCH,
-                    label = stringResource(R.string.search_whole_bible),
-                    onClick = onSearch,
-                )
-
-                ReaderTopBarControl.SETTINGS -> AppGlyphButton(
-                    glyph = AppGlyph.SETTINGS,
-                    label = stringResource(R.string.settings),
-                    onClick = onSettings,
-                )
+            // Which control this is has already been decided by `readerTopBarSlots`; what is left is
+            // where it goes, and the four callbacks are the only part of the bar that is not a table.
+            val onClick = when (slot.control) {
+                ReaderTopBarControl.ASK -> onAsk
+                ReaderTopBarControl.DEVOTION -> onDevotion
+                ReaderTopBarControl.SEARCH -> onSearch
+                ReaderTopBarControl.SETTINGS -> onSettings
             }
+            AppGlyphButton(
+                glyph = readerTopBarGlyph(slot.control),
+                label = stringResource(readerTopBarLabel(slot.control)),
+                onClick = onClick,
+            )
         }
     }
 }
