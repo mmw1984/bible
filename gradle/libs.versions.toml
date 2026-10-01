@@ -1,14 +1,18 @@
 [versions]
 # Toolchain. Kotlin 2.3.20 ships the Compose compiler plugin, so the Compose and
 # Kotlin versions can never drift apart.
-agp = "8.13.2"
+# AGP 9.1.0 is the floor for compileSdk 37: Compose 1.12.1 and androidx.hilt 1.4.0 both
+# declare minCompileSdk=37 in their AAR metadata, so the whole toolchain moves up together.
+# AGP 9.1.0 declares GRADLE_MIN_VERSION 9.3.1 (see gradle/wrapper/gradle-wrapper.properties).
+agp = "9.1.0"
 kotlin = "2.3.20"
 ksp = "2.3.12" # built against kotlin-stdlib 2.3.20
 jdk = "17"
 
-# DI. 2.59 is the last release that still supports AGP 8.x (2.59.1+ requires AGP 9).
-hilt = "2.59"
-androidxHilt = "1.2.0"
+# DI. 2.59 was pinned only because 2.59.1+ requires AGP 9; now that we are on AGP 9.1.0
+# we take the current release instead.
+hilt = "2.60.1"
+androidxHilt = "1.4.0"
 
 # AndroidX
 composeBom = "2026.09.00"

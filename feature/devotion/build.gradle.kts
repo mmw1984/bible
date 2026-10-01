@@ -10,7 +10,7 @@ plugins {
 
 android {
     namespace = "com.marcow.bible.feature.devotion"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 26

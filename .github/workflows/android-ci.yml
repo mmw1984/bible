@@ -39,6 +39,15 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      # compileSdk 37 ships as the minor-versioned platform `android-37.0` (there is no
+      # bare `android-37` package) and the runner image does not carry it, so install it
+      # before Gradle runs `:app:checkDebugAarMetadata`. Build-tools are auto-downloaded
+      # by AGP.
+      - name: Install Android SDK Platform 37
+        run: |
+          yes | sdkmanager --licenses > /dev/null
+          sdkmanager "platforms;android-37.0"
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
