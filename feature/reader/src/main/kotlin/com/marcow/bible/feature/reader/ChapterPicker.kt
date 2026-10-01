@@ -407,7 +407,7 @@ private val PickerWidthMargin = 32.dp
 private val PickerMinRightMargin = 16.dp
 private val PickerMaxRightMargin = 28.dp
 private val PickerAnchorGap = 10.dp
-private val PickerTopFraction = 0.36f
+private const val PickerTopFraction = 0.36f
 private val PickerHeightCap = 400.dp
 private val PickerHeightMargin = 16.dp
 
