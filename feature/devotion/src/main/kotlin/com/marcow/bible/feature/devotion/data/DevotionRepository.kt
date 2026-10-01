@@ -37,7 +37,14 @@ class DevotionRepository(private val tiers: List<DevotionTier>, private val cach
      * @throws DevotionFetchException when no tier produced anything. The message names the tier that
      *   got furthest, because that is the one worth diagnosing from; the reader shows a generic
      *   message over it.
+     *
+     * The loop jumps as often as it does because every tier has three ways to fail and one way to
+     * succeed, and each is answered by moving on: this is the ordered fallback Dart wrote as three
+     * sequential attempts. The catch stays broad for the same reason the Dart fetch caught `Object?`
+     * — a tier that fails in a way its transport did not anticipate degrades to the next one instead
+     * of ending the load.
      */
+    @Suppress("LoopWithTooManyJumpStatements", "TooGenericExceptionCaught")
     suspend fun fetchPosts(): List<DevotionPost> {
         var failure: DevotionFetchException? = null
         for (tier in tiers) {
