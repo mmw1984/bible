@@ -25,9 +25,7 @@ import javax.inject.Singleton
  * feed's two awkward shapes live — `<content:encoded>` CDATA and RFC-822 dates.
  */
 @Singleton
-class DevotionRssClient @Inject constructor(
-    private val httpClient: OkHttpClient,
-) {
+class DevotionRssClient @Inject constructor(private val httpClient: OkHttpClient) {
     /**
      * The items the feed carries, in the order the feed lists them.
      *

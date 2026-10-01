@@ -32,9 +32,7 @@ import javax.inject.Singleton
  * as one readable pair.
  */
 @Singleton
-class DevotionRestClient @Inject constructor(
-    private val httpClient: OkHttpClient,
-) {
+class DevotionRestClient @Inject constructor(private val httpClient: OkHttpClient) {
     /**
      * The posts the API has, in the order the blog published them.
      *
@@ -101,5 +99,4 @@ private fun JsonObject.string(field: String): String =
     (this[field] as? JsonPrimitive)?.takeIf { it.isString }?.content.orEmpty()
 
 /** `(item['id'] as num?)?.toInt() ?? 0`, with a value that is not an integer counted as absent. */
-private fun JsonObject.long(field: String): Long =
-    (this[field] as? JsonPrimitive)?.content?.toLongOrNull() ?: 0L
+private fun JsonObject.long(field: String): Long = (this[field] as? JsonPrimitive)?.content?.toLongOrNull() ?: 0L

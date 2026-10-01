@@ -24,8 +24,7 @@ import java.io.IOException
  * Every way this can go wrong comes out as a [DevotionFetchException], so a tier's contract is one
  * type: a DNS failure, a refused connection and a 503 are all "this tier did not deliver".
  */
-internal suspend fun OkHttpClient.devotionGetText(url: String): String =
-    withTimeoutOrNull(DEVOTION_TIMEOUT_MS) {
+internal suspend fun OkHttpClient.devotionGetText(url: String): String = withTimeoutOrNull(DEVOTION_TIMEOUT_MS) {
         withContext(Dispatchers.IO) {
             try {
                 newCall(

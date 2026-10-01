@@ -15,9 +15,7 @@ import javax.inject.Singleton
  * parser rather than here.
  */
 @Singleton
-class DevotionPageClient @Inject constructor(
-    private val httpClient: OkHttpClient,
-) {
+class DevotionPageClient @Inject constructor(private val httpClient: OkHttpClient) {
     /**
      * The homepage, whose links are the recent posts.
      *
