@@ -50,6 +50,7 @@ internal fun SearchHitTile(
 ) {
     val colors = appColors
     val reference = searchReferenceLabel(hit, readingMode, locale)
+    val reasonLine = tileReasonLine(reason)
 
     AppTap(
         onClick = onClick,
@@ -76,10 +77,10 @@ internal fun SearchHitTile(
                     color = colors.ink,
                     style = scriptureStyle(size = 14.sp, lineHeight = VERSE_LINE_HEIGHT),
                 )
-                if (!reason.isNullOrEmpty()) {
+                if (reasonLine != null) {
                     Spacer(Modifier.height(REASON_GAP))
                     Text(
-                        text = reason,
+                        text = reasonLine,
                         color = colors.muted,
                         fontSize = 11.sp,
                         lineHeight = REASON_LINE_HEIGHT,
@@ -113,6 +114,23 @@ internal fun bookNameFor(book: BibleBook, readingMode: ReadingMode, locale: AppL
  */
 internal fun verseTextFor(hit: ScriptureHit, locale: AppLocale): String =
     if (locale == AppLocale.EN) hit.verse.en else hit.verse.zh
+
+/**
+ * The AI half's third line for a tile, or null when the tile gets two lines instead.
+ *
+ * `if (reason?.isNotEmpty == true) …` in `legacy/flutter/lib/main.dart:2720`. Both of the halves that
+ * reach this are real: a text search has no reason at all and passes null, and an AI hit whose model
+ * omitted the field arrives as `''` rather than as nothing — `AiScriptureReference.reason` is a
+ * non-null `String` read through `json.stringOrEmpty`, so a model that answers with the reference and
+ * no explanation publishes an empty one. Either way Flutter drew no third line, and the 7 dp above it
+ * with it, so the guard is on emptiness rather than on presence.
+ *
+ * Whitespace is not empty. `isNotEmpty` does not trim, so a reason of `" "` still gets its line and
+ * still adds the gap — a visibly blank row under the verse. That is what Flutter did, and it is
+ * reproduced rather than tidied because the tile is not where the tidying belongs: the prompt asks
+ * for a reason on every reference, and a model that sends blank text is saying something.
+ */
+internal fun tileReasonLine(reason: String?): String? = reason?.takeIf(String::isNotEmpty)
 
 /** `EdgeInsets.only(bottom: 6)` between two tiles. */
 private val TILE_GAP = 6.dp
