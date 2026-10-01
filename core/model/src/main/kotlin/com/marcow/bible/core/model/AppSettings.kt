@@ -37,6 +37,20 @@ enum class AppLocale(val storageValue: String) {
     val languageTag: String
         get() = if (this == ZH_HANT) "zh-Hant-TW" else storageValue
 
+    /**
+     * The language a model is asked to answer in, mirroring `AppLocale.aiLanguage` in
+     * `legacy/flutter/lib/app_settings.dart`.
+     *
+     * This is prompt text, not a UI language: the search prompts are English and name the target
+     * language in prose (`answer in concise natural Traditional Chinese`), which is the tuned
+     * wording the prompts expect.
+     */
+    val aiLanguage: String
+        get() = when (this) {
+            ZH_HANT -> "natural Traditional Chinese"
+            EN -> "natural English"
+        }
+
     companion object {
         fun fromStorage(value: String?): AppLocale = entries.firstOrNull { it.storageValue == value } ?: ZH_HANT
     }
