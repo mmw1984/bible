@@ -45,10 +45,7 @@ internal sealed interface HtmlNode
 /** Raw, undecoded text — a reader never sees `&amp;` because decoding happens per block. */
 internal data class HtmlText(val text: String) : HtmlNode
 
-internal class HtmlElement(
-    val tag: String,
-    val attributes: Map<String, String> = emptyMap(),
-) : HtmlNode {
+internal class HtmlElement(val tag: String, val attributes: Map<String, String> = emptyMap()) : HtmlNode {
     /** Mutable because the tokenizer appends to it while it builds. */
     val children: MutableList<HtmlNode> = mutableListOf()
 
@@ -393,8 +390,10 @@ private fun flattenSections(blocks: List<DevotionBlock>): List<DevotionBlock> {
 /** Wrappers that only group other sections: they keep their own prose, not their children's. */
 private fun isContainerSection(title: String): Boolean {
     val trimmed = title.trim()
-    return trimmed == "安靜" || trimmed == "安静" ||
-        trimmed.startsWith("經文") || trimmed.startsWith("经文")
+    return trimmed == "安靜" ||
+        trimmed == "安静" ||
+        trimmed.startsWith("經文") ||
+        trimmed.startsWith("经文")
 }
 
 /**

@@ -14,10 +14,7 @@ import java.time.LocalDateTime
  */
 
 /** A permalink discovered on the homepage, with the anchor text the blog filled it with. */
-internal data class ScrapedPostLink(
-    val url: String,
-    val title: String,
-)
+internal data class ScrapedPostLink(val url: String, val title: String)
 
 /** `https://devotion.wkphc.org/25436` — a numeric permalink, the blog's only post URL shape. */
 private val ABSOLUTE_POST_URL = Regex("^https?://devotion\\.wkphc\\.org/(\\d{3,})/?$")

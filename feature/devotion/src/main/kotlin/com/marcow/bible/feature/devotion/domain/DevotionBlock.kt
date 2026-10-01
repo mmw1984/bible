@@ -37,10 +37,7 @@ internal data class DevotionVideo(val videoId: String) : DevotionBlock {
 internal data class DevotionEmbed(val url: String) : DevotionBlock
 
 /** A titled section such as `<div class="dove"><div class="title">詩歌</div>…`. */
-internal data class DevotionSection(
-    val title: String,
-    val blocks: List<DevotionBlock>,
-) : DevotionBlock
+internal data class DevotionSection(val title: String, val blocks: List<DevotionBlock>) : DevotionBlock
 
 /**
  * A devotion with its parsed blocks, mirroring `DevotionPost` in the Dart build.
