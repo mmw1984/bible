@@ -237,7 +237,7 @@ private class SignIn(verifier: String?, private val key: String?, private val la
         exchange = object : OpenRouterTokenExchange {
             override suspend fun exchange(code: String, codeVerifier: String, codeChallengeMethod: String): String {
                 exchanges += code to codeVerifier
-                return key ?: throw IllegalStateException("OpenRouter returned no API key.")
+                return key ?: error("OpenRouter returned no API key.")
             }
         },
     )
