@@ -148,6 +148,7 @@ fun AppFloatingNavBar(
  * tab. Deriving the animated value from [selectedIndex] rather than from the drag means a release
  * never has to wait for the host to echo the new index back before the pill starts moving.
  */
+@Suppress("LoopWithTooManyJumpStatements")
 @Composable
 private fun NavBarContent(items: List<AppNavBarItem>, pillWidth: Dp, selectedIndex: Int, onSelected: (Int) -> Unit) {
     val density = LocalDensity.current
