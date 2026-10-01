@@ -4,8 +4,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.marcow.bible.core.model.BibleBook
-import com.marcow.bible.core.model.ReadingMode
 
 /**
  * The reader's measurements, resolved from the two things Flutter resolved them from.
