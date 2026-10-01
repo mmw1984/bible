@@ -33,11 +33,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      # JDK 21, not 17: Paparazzi — which draws the goldens for `feature/reader`, `feature/library`
+      # and `feature/navigation` — publishes variants that declare `org.gradle.jvm.version = 21`, and
+      # Gradle will not resolve them for a 17 daemon. Nothing else moves: the modules still compile
+      # to Java 17 bytecode (`jdk` in `gradle/libs.versions.toml`), which a 21 daemon runs happily,
+      # so the minSdk-26 floor in `app/build.gradle.kts` is still what the APK actually claims.
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       # compileSdk 37 ships as the minor-versioned platform `android-37.0` (there is no
       # bare `android-37` package) and the runner image does not carry it, so install it

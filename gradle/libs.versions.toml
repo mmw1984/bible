@@ -55,6 +55,12 @@ jsoup = "1.23.2"
 junit = "5.14.4"
 mockk = "1.14.11"
 turbine = "1.2.1"
+# Goldens. 2.0.0 is the first line that runs on AGP 9 (the 1.3.x line stops at AGP 8), and
+# alpha05.1 is the build of it that understands the AGP 9 window model, so `Popup`s and sheets
+# render as real windows rather than as a flattened one.
+# Its published variants declare `org.gradle.jvm.version = 21`, so the daemon has to run on JDK 21
+# or Gradle will refuse to resolve it; `.github/workflows/android-ci.yml` is where that is set.
+paparazzi = "2.0.0-alpha05.1"
 
 # Static analysis
 detekt = "1.23.8"
@@ -132,3 +138,4 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobufPlugin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintGradle" }
+paparazzi = { id = "app.cash.paparazzi", version.ref = "paparazzi" }

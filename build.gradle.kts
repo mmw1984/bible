@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.detekt)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.paparazzi) apply false
 }
 
 // Static analysis runs for every module, so a single `./gradlew ktlintCheck detekt`

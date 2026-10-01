@@ -39,6 +39,7 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -194,8 +195,12 @@ private fun ChapterPickerContent(
 ) {
     val colors = appColors
     val shape = bubbleShape(appRadii.screen)
-    val progress = remember { Animatable(0f) }
-    LaunchedEffect(Unit) {
+    // A preview and a golden render one frame, and `Animatable` anchors to the first frame it sees,
+    // so a bubble that started at 0 would be captured at .82 scale and no alpha.
+    val inspection = LocalInspectionMode.current
+    val progress = remember { Animatable(if (inspection) 1f else 0f) }
+    LaunchedEffect(progress, inspection) {
+        if (inspection) return@LaunchedEffect
         progress.animateTo(1f, tween(durationMillis = EnterAnimationMillis, easing = SpringCurve))
     }
 

@@ -5,6 +5,9 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    // Goldens. Only the modules that draw a screen whose pixels are the deliverable carry this;
+    // the rest stay on plain JVM tests.
+    alias(libs.plugins.paparazzi)
 }
 
 android {
@@ -79,4 +82,7 @@ dependencies {
     // The same in-memory DataStore `core/datastore` tests with, so the reader's writes and the
     // legacy scroll offset it converts can be asserted without a file.
     testImplementation(testFixtures(project(":core:datastore")))
+    // No `app.cash.paparazzi:paparazzi` here: the plugin puts it on this source set's own
+    // configurations when it is applied, which is how every Paparazzi project gets `Paparazzi` on
+    // the test compile classpath without saying so.
 }

@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -82,8 +83,12 @@ fun VerseActionSheet(
         explainQuestion = explainQuestion,
     )
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-    val progress = remember { Animatable(0f) }
-    LaunchedEffect(Unit) {
+    // A preview and a golden render one frame, and `Animatable` anchors to the first frame it sees,
+    // so a sheet that starts at 0 would be captured fully transparent. Start it open instead.
+    val inspection = LocalInspectionMode.current
+    val progress = remember { Animatable(if (inspection) 1f else 0f) }
+    LaunchedEffect(progress, inspection) {
+        if (inspection) return@LaunchedEffect
         progress.animateTo(1f, tween(durationMillis = EnterAnimationMillis, easing = SpringCurve))
     }
 

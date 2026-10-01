@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -113,7 +114,13 @@ fun ReaderScreen(
     var actionVerse by remember { mutableStateOf<VersePair?>(null) }
     // A fresh gate per chapter, so its verses arrive one after another and the ones scrolled to later
     // do not: see `ScrollAwareEntrance` for why the question is asked this way round.
-    val entrance = remember(verses) { EntranceGate() }
+    //
+    // A gate that starts closed is what a preview and a golden want. Nothing is playing a stagger
+    // there — an `@Preview` and a Paparazzi snapshot each render one frame — and `Animatable`
+    // anchors to the first frame it sees, so an open gate would leave every verse of the chapter at
+    // `alpha = 0` and the preview would show a title above an empty page.
+    val inspection = LocalInspectionMode.current
+    val entrance = remember(verses) { EntranceGate(open = !inspection) }
     CloseEntrance(entrance)
 
     Box(modifier = modifier.background(colors.canvas)) {

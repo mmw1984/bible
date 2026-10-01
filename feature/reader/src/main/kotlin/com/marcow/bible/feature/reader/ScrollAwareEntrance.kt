@@ -63,14 +63,15 @@ fun entranceDelayMillis(staggerIndex: Int): Int {
  * of them in the same widget — and cannot reach this one, because features do not depend on each
  * other (`NATIVE_PLAN.md` §2.2).
  */
-class EntranceGate {
+class EntranceGate(
     /**
-     * Closed once the chapter's first frame has been laid out. Written from a coroutine and read
-     * during composition, so it is deliberately not snapshot state.
+     * Whether the gate still admits a stagger. Closed once the chapter's first frame has been laid
+     * out, or from the start when the reader is being previewed rather than played — see
+     * [ReaderScreen]. Written from a coroutine and read during composition, so it is deliberately
+     * not snapshot state.
      */
-    @Volatile
-    var open: Boolean = true
-}
+    @Volatile var open: Boolean = true,
+)
 
 /**
  * Fades and raises [content] into place, [staggerIndex] verses after the first one.
