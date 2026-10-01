@@ -225,4 +225,3 @@ internal class ScriptureToolRunnerTest {
         )
     }
 }
-
