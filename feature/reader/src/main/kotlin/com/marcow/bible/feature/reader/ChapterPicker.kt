@@ -275,12 +275,7 @@ private fun ChapterPickerHeader(onDismiss: () -> Unit, modifier: Modifier = Modi
 
 /** One chapter: inverted when it is the one being read, with the Flutter colours exactly. */
 @Composable
-private fun ChapterPickerCell(
-    chapter: Int,
-    active: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun ChapterPickerCell(chapter: Int, active: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val colors = appColors
     val shape = RoundedCornerShape(ChapterCellRadius)
     val label = stringResource(R.string.chapter_number, chapter)

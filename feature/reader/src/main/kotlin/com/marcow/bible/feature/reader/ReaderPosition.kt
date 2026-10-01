@@ -17,12 +17,7 @@ import com.marcow.bible.core.model.ReadingProgress
  * `ReaderLocation` it handed to search, and the `reader_book` / `reader_chapter` / `reader_mode`
  * preferences — and every one of them moved together on a navigation, so they stay together here.
  */
-data class ReaderPosition(
-    val bookIndex: Int,
-    val chapter: Int,
-    val mode: ReadingMode,
-    val scrollRatio: Float,
-) {
+data class ReaderPosition(val bookIndex: Int, val chapter: Int, val mode: ReadingMode, val scrollRatio: Float) {
     /** Flutter reset the offset on every navigation; a ratio is the same decision. */
     fun movedTo(bookIndex: Int, chapter: Int): ReaderPosition =
         copy(bookIndex = bookIndex, chapter = chapter, scrollRatio = 0f)
@@ -96,10 +91,7 @@ fun positionForProgress(books: List<BibleBook>, progress: ReadingProgress): Read
  * A tie goes to the earlier book in canon order, which is the one Flutter would have shown had two
  * writes landed inside the same millisecond and only one of them survived.
  */
-fun mostRecentPosition(
-    books: List<BibleBook>,
-    progressFor: suspend (BibleBook) -> ReadingProgress?,
-): ReaderPosition? {
+fun mostRecentPosition(books: List<BibleBook>, progressFor: suspend (BibleBook) -> ReadingProgress?): ReaderPosition? {
     var newest: ReadingProgress? = null
     var newestIndex = -1
     books.forEachIndexed { index, book ->
@@ -115,20 +107,15 @@ fun mostRecentPosition(
 }
 
 /** [positionForProgress] for a book whose index is already known. */
-private fun positionAt(books: List<BibleBook>, index: Int, progress: ReadingProgress): ReaderPosition =
-    ReaderPosition(
-        bookIndex = index,
-        chapter = clampChapter(books[index].chapters, progress.chapter),
-        mode = progress.mode,
-        scrollRatio = progress.scrollRatio.coerceIn(0f, 1f),
-    )
+private fun positionAt(books: List<BibleBook>, index: Int, progress: ReadingProgress): ReaderPosition = ReaderPosition(
+    bookIndex = index,
+    chapter = clampChapter(books[index].chapters, progress.chapter),
+    mode = progress.mode,
+    scrollRatio = progress.scrollRatio.coerceIn(0f, 1f),
+)
 
 /** The row [position] is stored as, which is what `BibleRepository.saveProgress` writes. */
-fun progressFor(
-    book: BibleBook,
-    position: ReaderPosition,
-    updatedAt: Long,
-): ReadingProgress = ReadingProgress(
+fun progressFor(book: BibleBook, position: ReaderPosition, updatedAt: Long): ReadingProgress = ReadingProgress(
     bookId = book.id,
     chapter = position.chapter,
     // The verse is deliberately null: the Flutter reader stored a pixel offset, not a verse, and

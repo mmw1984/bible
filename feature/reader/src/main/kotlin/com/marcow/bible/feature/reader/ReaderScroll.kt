@@ -15,12 +15,7 @@ package com.marcow.bible.feature.reader
  * ratio by the same amount whether it is two lines or fourteen, which is what a reader means by
  * "further down".
  */
-fun scrollRatioFor(
-    firstVisibleIndex: Int,
-    firstVisibleOffset: Float,
-    viewportHeight: Float,
-    itemCount: Int,
-): Float {
+fun scrollRatioFor(firstVisibleIndex: Int, firstVisibleOffset: Float, viewportHeight: Float, itemCount: Int): Float {
     if (itemCount <= 0) return 0f
     val withinItem = if (viewportHeight > 0f) (firstVisibleOffset / viewportHeight).coerceIn(0f, 1f) else 0f
     val visible = firstVisibleIndex.coerceAtLeast(0) + withinItem

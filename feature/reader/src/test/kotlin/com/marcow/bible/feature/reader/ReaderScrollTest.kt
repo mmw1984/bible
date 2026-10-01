@@ -14,13 +14,26 @@ import org.junit.jupiter.api.Test
 class ReaderScrollTest {
     @Test
     fun `the top of a chapter is zero`() {
-        assertEquals(0f, scrollRatioFor(firstVisibleIndex = 0, firstVisibleOffset = 0f, viewportHeight = 800f, itemCount = 31))
+        assertEquals(
+            0f,
+            scrollRatioFor(
+                firstVisibleIndex = 0,
+                firstVisibleOffset = 0f,
+                viewportHeight = 800f,
+                itemCount = 31,
+            ),
+        )
     }
 
     @Test
     fun `a partly scrolled verse counts as part of the way into the chapter`() {
         // A third of a viewport into the first of thirty-one verses.
-        val ratio = scrollRatioFor(firstVisibleIndex = 0, firstVisibleOffset = 260f, viewportHeight = 780f, itemCount = 31)
+        val ratio = scrollRatioFor(
+            firstVisibleIndex = 0,
+            firstVisibleOffset = 260f,
+            viewportHeight = 780f,
+            itemCount = 31,
+        )
 
         assertEquals((0 + 260f / 780f) / 31, ratio, TOLERANCE)
     }
@@ -29,21 +42,39 @@ class ReaderScrollTest {
     fun `the last verse is not the whole chapter`() {
         // The end of the chapter is reached partway into the last item: the reader has to be able to
         // scroll further than "all the verses are on screen", which is what the footer's offsets buy.
-        val ratio = scrollRatioFor(firstVisibleIndex = 30, firstVisibleOffset = 0f, viewportHeight = 800f, itemCount = 31)
+        val ratio = scrollRatioFor(
+            firstVisibleIndex = 30,
+            firstVisibleOffset = 0f,
+            viewportHeight = 800f,
+            itemCount = 31,
+        )
 
         assertEquals(30f / 31, ratio, TOLERANCE)
     }
 
     @Test
     fun `scrolling past the end of a chapter is still the end of it`() {
-        val ratio = scrollRatioFor(firstVisibleIndex = 99, firstVisibleOffset = 900f, viewportHeight = 800f, itemCount = 31)
+        val ratio = scrollRatioFor(
+            firstVisibleIndex = 99,
+            firstVisibleOffset = 900f,
+            viewportHeight = 800f,
+            itemCount = 31,
+        )
 
         assertEquals(1f, ratio)
     }
 
     @Test
     fun `a chapter with nothing in it has no position to restore`() {
-        assertEquals(0f, scrollRatioFor(firstVisibleIndex = 0, firstVisibleOffset = 0f, viewportHeight = 800f, itemCount = 0))
+        assertEquals(
+            0f,
+            scrollRatioFor(
+                firstVisibleIndex = 0,
+                firstVisibleOffset = 0f,
+                viewportHeight = 800f,
+                itemCount = 0,
+            ),
+        )
     }
 
     @Test

@@ -283,39 +283,37 @@ class ReaderViewModelTest {
     }
 
     @Test
-    fun `an imported Flutter pixel offset becomes a ratio and is not applied twice`() =
-        runTest(dispatcher) {
-            settingsRepository.rememberLegacyScrollPx(400.0)
-            val viewModel = reader()
-            advanceUntilIdle()
+    fun `an imported Flutter pixel offset becomes a ratio and is not applied twice`() = runTest(dispatcher) {
+        settingsRepository.rememberLegacyScrollPx(400.0)
+        val viewModel = reader()
+        advanceUntilIdle()
 
-            viewModel.onChapterMeasured(maxScrollPx = 800f)
-            advanceUntilIdle()
+        viewModel.onChapterMeasured(maxScrollPx = 800f)
+        advanceUntilIdle()
 
-            assertEquals(0.5f, viewModel.state.value.scrollToRatio)
-            assertNull(settingsRepository.pendingLegacyScrollPx())
+        assertEquals(0.5f, viewModel.state.value.scrollToRatio)
+        assertNull(settingsRepository.pendingLegacyScrollPx())
 
-            // The offset was cleared, and the flag keeps a later layout pass from applying it to a
-            // chapter the reader has already scrolled in.
-            viewModel.onScrollRestored()
-            viewModel.onChapterMeasured(maxScrollPx = 1600f)
-            advanceUntilIdle()
+        // The offset was cleared, and the flag keeps a later layout pass from applying it to a
+        // chapter the reader has already scrolled in.
+        viewModel.onScrollRestored()
+        viewModel.onChapterMeasured(maxScrollPx = 1600f)
+        advanceUntilIdle()
 
-            assertNull(viewModel.state.value.scrollToRatio)
-        }
+        assertNull(viewModel.state.value.scrollToRatio)
+    }
 
     @Test
-    fun `an offset beyond the chapter lands on the last verse rather than past it`() =
-        runTest(dispatcher) {
-            settingsRepository.rememberLegacyScrollPx(9_000.0)
-            val viewModel = reader()
-            advanceUntilIdle()
+    fun `an offset beyond the chapter lands on the last verse rather than past it`() = runTest(dispatcher) {
+        settingsRepository.rememberLegacyScrollPx(9_000.0)
+        val viewModel = reader()
+        advanceUntilIdle()
 
-            viewModel.onChapterMeasured(maxScrollPx = 800f)
-            advanceUntilIdle()
+        viewModel.onChapterMeasured(maxScrollPx = 800f)
+        advanceUntilIdle()
 
-            assertEquals(1f, viewModel.state.value.scrollToRatio)
-        }
+        assertEquals(1f, viewModel.state.value.scrollToRatio)
+    }
 
     @Test
     fun `a catalogue with no books is a failure rather than an endless skeleton`() = runTest(dispatcher) {
@@ -390,8 +388,7 @@ class ReaderViewModelTest {
         override suspend fun booksByTestament(testament: Int): List<BookEntity> =
             bookRows.filter { it.testament == testament }.sortedBy { it.ordinal }
 
-        override suspend fun searchContains(pattern: String, limit: Int): List<ScriptureSearchRow> =
-            emptyList()
+        override suspend fun searchContains(pattern: String, limit: Int): List<ScriptureSearchRow> = emptyList()
     }
 
     private class FakeReadingProgressDao : ReadingProgressDao {

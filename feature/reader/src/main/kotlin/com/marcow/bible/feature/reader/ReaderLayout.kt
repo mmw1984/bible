@@ -39,11 +39,7 @@ data class ReaderLayout(
  * The 920 dp threshold is the one Flutter used for both the sidebar and the verse size, so a window
  * that gets the sidebar also gets the larger type.
  */
-fun readerLayout(
-    screenWidth: Dp,
-    topInset: Dp,
-    bottomClearance: Dp,
-): ReaderLayout {
+fun readerLayout(screenWidth: Dp, topInset: Dp, bottomClearance: Dp): ReaderLayout {
     val wide = screenWidth >= WideThreshold
     return ReaderLayout(
         horizontal = if (wide) 46.dp else 20.dp,
