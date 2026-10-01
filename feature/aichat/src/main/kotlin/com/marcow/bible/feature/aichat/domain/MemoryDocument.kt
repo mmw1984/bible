@@ -36,12 +36,11 @@ internal const val MEMORY_DOCUMENT_SEED = "# Bible AI Memory\n\n" +
  * itself is the *last* [maxCharacters] characters, not the first — the head is the oldest thing the
  * user ever asked, which is the least useful part to spend a context window on.
  */
-internal fun memoryBlock(content: String, maxCharacters: Int): String =
-    if (content.length <= maxCharacters) {
-        content
-    } else {
-        TRUNCATED_MEMORY_TITLE + "\n\n" + content.substring(content.length - maxCharacters)
-    }
+internal fun memoryBlock(content: String, maxCharacters: Int): String = if (content.length <= maxCharacters) {
+    content
+} else {
+    TRUNCATED_MEMORY_TITLE + "\n\n" + content.substring(content.length - maxCharacters)
+}
 
 /**
  * The `###` entry `recordMessage` appended for one turn, given the ISO-8601 timestamp it was filed
