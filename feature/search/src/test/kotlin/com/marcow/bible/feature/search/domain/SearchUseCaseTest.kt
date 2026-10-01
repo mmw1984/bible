@@ -240,9 +240,9 @@ private fun JsonObject.reasoning(): JsonObject = this["reasoning"] as? JsonObjec
 
 /** `response_format.json_schema.name`, which is what the provider is told to validate against. */
 private fun JsonObject.schemaName(): String? = (this["response_format"] as? JsonObject)
-        ?.let { it["json_schema"] as? JsonObject }
-        ?.let { it["name"] as? JsonPrimitive }
-        ?.content
+    ?.let { it["json_schema"] as? JsonObject }
+    ?.let { it["name"] as? JsonPrimitive }
+    ?.content
 
 private fun JsonObject.string(key: String): String? = (this[key] as? JsonPrimitive)?.takeIf { it.isString }?.content
 
