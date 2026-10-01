@@ -319,10 +319,26 @@ private fun BookTitleText(title: String, family: FontFamily, titleSize: TextUnit
 
 /** The three reading modes, in the order Flutter listed them. */
 @Composable
-private fun modeChoices(): List<AppChoice<ReadingMode>> = listOf(
-    AppChoice(ReadingMode.CHINESE, stringResource(R.string.chinese)),
-    AppChoice(ReadingMode.ENGLISH, stringResource(R.string.english)),
-    AppChoice(ReadingMode.BILINGUAL, stringResource(R.string.bilingual)),
+private fun modeChoices(): List<AppChoice<ReadingMode>> =
+    readingModeLabels().map { (mode, label) -> AppChoice(mode, stringResource(label)) }
+
+/**
+ * The three modes and the string each one is named by, kept apart from [modeChoices] so a test can
+ * read them.
+ *
+ * The order is Flutter's — Chinese, English, Bilingual, the order of `_Segmented`'s `choices` at
+ * `legacy/flutter/lib/main.dart:1665` — and it is an order rather than a set: `AppSegmented` lays the
+ * cells out left to right and puts the selected one where it is, so a mode moved to the end would
+ * put the reading a reader is in under their finger somewhere else every time they switched back.
+ *
+ * Three separate resources rather than one formatted string, because they are three languages rather
+ * than three values: a translated reading is not a formatted version of the same label, and the
+ * widths Flutter's 180 dp control gave each cell came out of the longest of them.
+ */
+fun readingModeLabels(): List<Pair<ReadingMode, Int>> = listOf(
+    ReadingMode.CHINESE to R.string.chinese,
+    ReadingMode.ENGLISH to R.string.english,
+    ReadingMode.BILINGUAL to R.string.bilingual,
 )
 
 /**
@@ -470,8 +486,12 @@ private fun ChapterLink(
  * last chapter of a book there is no name to put in it, because the link crosses into the next book
  * and Flutter only ever named the chapter. So the caller decides whether the link exists and this
  * only says what it reads.
+ *
+ * The book is named in the reading the reader is in — [ReaderScreen] hands this the title's own name —
+ * and so the two links either side of a chapter read in the same language as the chapter between
+ * them, which is the one thing about them that a reader would read as an error.
  */
-private fun chapterLinkLabel(bookName: String, chapter: Int, exists: Boolean): String =
+fun chapterLinkLabel(bookName: String, chapter: Int, exists: Boolean): String =
     if (exists) "$bookName $chapter" else NO_CHAPTER_LABEL
 
 /**
