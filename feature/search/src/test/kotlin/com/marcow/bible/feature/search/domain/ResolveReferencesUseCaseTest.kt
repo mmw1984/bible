@@ -182,11 +182,11 @@ private fun verse(bookId: String, chapter: Int, number: Int, zh: String = "", en
 
 /** John 3 has 36 verses, and 3:35-36 is how the clamping is tested: 400 is past the last of them. */
 private fun johnThree() = listOf(
-    verse("JHN", 3, 15, zh: "神愛世人"),
+    verse("JHN", 3, 15, zh = "神愛世人"),
     verse("JHN", 3, 16, zh = VERSE_16_ZH, en = VERSE_16_EN),
     verse("JHN", 3, 17, zh = "神差他的兒來", en = "For God did not send his Son"),
-    verse("JHN", 3, 35, zh: "父愛子", en = "The Father loves the Son"),
-    verse("JHN", 3, 36, zh: "信從子的必有永生", en = "Whoever believes the Son has eternal life"),
+    verse("JHN", 3, 35, zh = "父愛子", en = "The Father loves the Son"),
+    verse("JHN", 3, 36, zh = "信從子的必有永生", en = "Whoever believes the Son has eternal life"),
     verse("JHN", 4, 24, zh = "敬拜父", en = "Worship the Father in spirit and truth"),
 )
 
