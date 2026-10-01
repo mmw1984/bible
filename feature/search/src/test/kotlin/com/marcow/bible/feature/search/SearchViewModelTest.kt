@@ -461,10 +461,8 @@ class SearchViewModelTest {
 }
 
 /** A text search that answers with a fixed list, or fails, and remembers what it was asked. */
-private class FakeTraditionalSearch(
-    var hits: List<ScriptureHit> = emptyList(),
-    var failure: Throwable? = null,
-) : TraditionalSearch {
+private class FakeTraditionalSearch(var hits: List<ScriptureHit> = emptyList(), var failure: Throwable? = null) :
+    TraditionalSearch {
     var lastQuery: String? = null
 
     override suspend fun invoke(query: String): List<ScriptureHit> {
