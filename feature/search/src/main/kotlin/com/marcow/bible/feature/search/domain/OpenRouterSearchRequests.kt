@@ -131,12 +131,12 @@ internal object OpenRouterSearchRequests {
         put("type", "object")
         put("additionalProperties", false)
         putJsonArray("required") {
-            if (!includeOverview) add("overview")
+            if (includeOverview) add("overview")
             add("scriptures")
             add("suggestedQuestions")
         }
         putJsonObject("properties") {
-            if (!includeOverview) putJsonObject("overview") { put("type", "string") }
+            if (includeOverview) putJsonObject("overview") { put("type", "string") }
             putJsonObject("scriptures") {
                 put("type", "array")
                 put("maxItems", 16)
