@@ -166,4 +166,4 @@ const val PillHorizontalPadding = 4f
 const val IndicatorInset = 4f
 
 /** `math.max(120.0, …)` — the pill never narrows past a readable single tab. */
-private val PILL_MIN_WIDTH_DP = 120.0
+private const val PILL_MIN_WIDTH_DP = 120.0
