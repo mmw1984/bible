@@ -136,10 +136,10 @@ object SidebarChrome {
      * The chapter grid: `SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5)`, whose cells
      * are square because it defaults to a child aspect ratio of one.
      */
-    val chapterColumns = 5
+    const val chapterColumns = 5
     val chapterSpacing: Dp = 5.dp
     val chapterNumberSize = 10.sp
-    val chapterFillMillis = 220
+    const val chapterFillMillis = 220
 }
 
 /**
@@ -176,8 +176,8 @@ object PanelChrome {
     val closeGlyphSize: Dp = 19.dp
 
     /** The list arriving: 430 in on the spring curve, 240 out on the way to the other testament. */
-    val listEnterMillis = 430
-    val listExitMillis = 240
+    const val listEnterMillis = 430
+    const val listExitMillis = 240
 
     /** The fraction of its own height the list slides down as it arrives, `Offset(0, .025)`. */
     const val ListSlideFraction = 0.025f

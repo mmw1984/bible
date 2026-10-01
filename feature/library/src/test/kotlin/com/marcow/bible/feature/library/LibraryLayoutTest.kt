@@ -90,6 +90,6 @@ class LibraryLayoutTest {
  * A hundredth of a dp: a hundredth is far below anything that could be seen, and far above the
  * float error in `width * .92`.
  */
-private val DpTolerance = 0.01f
+private const val DpTolerance = 0.01f
 
 private fun assertWidth(expected: Dp, actual: Dp) = assertEquals(expected.value, actual.value, DpTolerance)
