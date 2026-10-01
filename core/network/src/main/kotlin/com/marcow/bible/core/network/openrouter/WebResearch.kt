@@ -100,6 +100,7 @@ sealed class WebResearchException(message: String) : Exception(message) {
  * [WebResearchException.InvalidResponse] is reserved for the answer that parsed and was still not the
  * object this reads.
  */
+@Suppress("ThrowsCount")
 internal fun readWebResearch(raw: String): WebResearchResponse {
     // `jsonDecode` in Dart, and its `is! Map` check: a JSON array or a bare scalar is an answer of
     // some other shape, not a malformed one.
@@ -138,6 +139,7 @@ internal fun readWebResearch(raw: String): WebResearchResponse {
  * provider's citation types that are not web citations belong here in the list too, and one of them is
  * not a reason to refuse an answer that has real sources in it.
  */
+@Suppress("LoopWithTooManyJumpStatements")
 internal fun researchSources(annotations: JsonElement?): List<WebResearchSource> {
     if (annotations !is JsonArray) return emptyList()
     val sources = mutableListOf<WebResearchSource>()
