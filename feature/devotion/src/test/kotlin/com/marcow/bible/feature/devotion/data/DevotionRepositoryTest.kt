@@ -137,7 +137,7 @@ class DevotionRepositoryTest {
         id = id,
         publishedAt = LocalDateTime.of(day.atTime(9, 0)),
         devotionDate = day,
-        title = "${day} 默想",
+        title = "$day 默想",
         link = "https://devotion.wkphc.org/$id",
         contentHtml = "<p>內文</p>",
         blocks = listOf(DevotionParagraph("內文")),
@@ -173,10 +173,7 @@ private class FailingTier(private val tierName: String, private val reason: Stri
     }
 }
 
-private class ExplodingTier(
-    private val tierName: String,
-    private val error: Exception,
-) : DevotionTier {
+private class ExplodingTier(private val tierName: String, private val error: Exception) : DevotionTier {
     override val name: String = tierName
 
     override suspend fun posts(): List<DevotionPost> = throw error
