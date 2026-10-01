@@ -2,8 +2,6 @@ package com.marcow.bible.core.database
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.marcow.bible.core.model.BibleBook
 import com.marcow.bible.core.model.Testament

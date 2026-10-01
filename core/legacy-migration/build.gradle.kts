@@ -51,7 +51,6 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:database"))
     implementation(project(":core:datastore"))
-    implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.security.crypto)
     implementation(libs.kotlinx.coroutines.android)
 
@@ -59,4 +58,6 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.kotlinx.coroutines.test)
+    // The importer test drives a real (file-less) Proto DataStore instead of a hand-written double.
+    testImplementation(libs.androidx.datastore.core)
 }

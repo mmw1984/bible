@@ -1,5 +1,6 @@
 package com.marcow.bible.core.datastore
 
+import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.Serializer
@@ -14,13 +15,13 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import android.content.Context
-import java.io.InputStream
-import java.io.OutputStream
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import java.io.File
+import java.io.InputStream
+import java.io.OutputStream
+import javax.inject.Singleton
 
 private const val SETTINGS_FILE = "settings.preferences_pb"
 
@@ -46,11 +47,19 @@ object SettingsDataStoreModule {
     @Singleton
     fun provideSettingsDataStore(@ApplicationContext context: Context): DataStore<Settings> =
         DataStoreFactory.create(
-        context = context,
-        fileName = SETTINGS_FILE,
-        serializer = SettingsSerializer,
-        corruptionHandler = CorruptSettingsHandler,
-    )
+            // 1.2.x dropped the `create(context = …, fileName = …)` overload from
+            // `datastore-core` (the `androidx.datastore:datastore` artifact is now an empty
+            // relocation), so the path is spelled out here. `filesDir/datastore` is the same
+            // location `preferencesDataStoreFile` uses.
+            produceFile = { File(context.filesDir, "datastore/$SETTINGS_FILE") },
+            serializer = SettingsSerializer,
+            corruptionHandler = CorruptSettingsHandler,
+        )
+
+    @Provides
+    @Singleton
+    fun provideSettingsRepository(dataStore: DataStore<Settings>): SettingsRepository =
+        SettingsRepository(dataStore)
 }
 
 /**
@@ -124,6 +133,21 @@ class SettingsRepository(private val dataStore: DataStore<Settings>) {
 
     suspend fun markLegacyImportCompleted() = update { current ->
         current.toBuilder().setLegacyImported(true).build()
+    }
+
+    /**
+     * The absolute pixel offset the Flutter reader last used for the imported chapter, waiting to be
+     * turned into a `scroll_ratio` once the viewport is measured, or null when there is nothing to
+     * convert.
+     */
+    suspend fun pendingLegacyScrollPx(): Double? = current().takeIf { it.hasLegacyScrollPx() }?.legacyScrollPx
+
+    suspend fun rememberLegacyScrollPx(scrollPx: Double) = update { current ->
+        current.toBuilder().setLegacyScrollPx(scrollPx).build()
+    }
+
+    suspend fun clearPendingLegacyScroll() = update { current ->
+        current.toBuilder().clearLegacyScrollPx().build()
     }
 }
 

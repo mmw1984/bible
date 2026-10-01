@@ -1,12 +1,12 @@
 package com.marcow.bible.core.database
 
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Path
 import java.sql.Connection
 import java.sql.ResultSet
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
 
 /**
  * Verifies the committed pre-packaged database, the same guarantees `tool/build_bible_db.mjs`
@@ -134,14 +134,13 @@ class PrepackagedBibleDbTest {
 
     private fun Connection.query(sql: String): ResultSet = createStatement().executeQuery(sql)
 
-    private fun Connection.columns(table: String): List<Column> =
-        query("PRAGMA table_info($table)").use { rs ->
-            buildList {
-                while (rs.next()) {
-                    add(Column(name = rs.getString("name"), notNull = rs.getInt("notnull") == 1))
-                }
+    private fun Connection.columns(table: String): List<Column> = query("PRAGMA table_info($table)").use { rs ->
+        buildList {
+            while (rs.next()) {
+                add(Column(name = rs.getString("name"), notNull = rs.getInt("notnull") == 1))
             }
         }
+    }
 
     private fun Connection.tableNames(): Set<String> =
         query("SELECT name FROM sqlite_master WHERE type = 'table'").use { rs ->

@@ -3,13 +3,13 @@ package com.marcow.bible.core.datastore
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
 import com.marcow.bible.core.datastore.proto.Settings
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.runBlocking
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.runBlocking
 
 /**
  * A [DataStore] that keeps the message in memory.

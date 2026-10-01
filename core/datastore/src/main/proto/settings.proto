@@ -51,4 +51,10 @@ message Settings {
   // user who later changes a setting in the native app must not have it overwritten by the next
   // launch reading stale Flutter values.
   bool legacy_imported = 7;
+  // The Flutter reader stored an absolute pixel offset per (book, chapter)
+  // (`lib/main.dart:_scrollKey`), while `reading_progress.scroll_ratio` wants a fraction of the
+  // content height. Pixels cannot be converted during the import because the viewport is unknown
+  // until Compose measures it, so the value is parked here until the reader first lays that chapter
+  // out, and the reader clears it after writing the ratio.
+  optional double legacy_scroll_px = 8;
 }

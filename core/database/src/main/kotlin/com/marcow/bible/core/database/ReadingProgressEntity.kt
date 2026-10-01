@@ -4,8 +4,8 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import com.marcow.bible.core.model.ReadingProgress
 import com.marcow.bible.core.model.ReadingMode
+import com.marcow.bible.core.model.ReadingProgress
 
 /**
  * Row of the `reading_progress` table, one per book. Empty by default; the reader writes it from
