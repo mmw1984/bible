@@ -317,6 +317,32 @@ class SearchViewModelTest {
         assertTrue(state.showsHint)
     }
 
+    @Test
+    fun `switching mode does not sign you out`() = runTest(dispatcher) {
+        val viewModel = searchViewModel()
+
+        viewModel.changeMode(SearchMode.AI)
+        viewModel.changeMode(SearchMode.TRADITIONAL)
+        viewModel.changeMode(SearchMode.AI)
+
+        assertTrue(viewModel.state.value.signedIn)
+        assertFalse(viewModel.state.value.requiresLogin)
+    }
+
+    @Test
+    fun `an AI search runs after the mode was switched into`() = runTest(dispatcher) {
+        val aiSearch = FakeAiSearch(MutableSharedFlow())
+        val viewModel = searchViewModel(aiSearch = aiSearch)
+
+        // The switch is what `searchAi` does first, and it used to take the sign-in down with it, so
+        // `aiReady` was false and the submit returned without asking anything.
+        searchAi(viewModel)
+        advanceUntilIdle()
+
+        assertEquals("love", aiSearch.lastQuery)
+        assertTrue(viewModel.state.value.referencesSearching)
+    }
+
     /** Submits the box in AI mode, the way the sheet's forward button does. */
     private fun searchAi(viewModel: SearchViewModel, query: String = "love") {
         viewModel.changeMode(SearchMode.AI)

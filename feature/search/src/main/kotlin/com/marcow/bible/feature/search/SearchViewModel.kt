@@ -101,11 +101,16 @@ class SearchViewModel @Inject constructor(
      * The two refusals are Flutter's. A search that is still running is not interrupted, and picking
      * the mode already in control does nothing at all — so a user cannot clear the results out from
      * under a request that is on its way back.
+     *
+     * Flutter's setState listed seven fields to reset and the session was not one of them: it read
+     * `openRouterSignedIn` off the controller on every build, so no mode switch could sign anyone
+     * out. Everything here starts from a fresh state, and the sign-in is the one value that has to
+     * survive it.
      */
     fun changeMode(mode: SearchMode) {
         val current = _state.value
         if (current.mode == mode || current.searching) return
-        _state.value = SearchSheetState(mode = mode, input = current.input)
+        _state.value = SearchSheetState(mode = mode, input = current.input, signedIn = current.signedIn)
     }
 
     /**
