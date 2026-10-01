@@ -5,6 +5,10 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    // Goldens. The pill is Phase 2 pixels: the indicator under the selected tab, the 58 dp
+    // height, the 16 dp cap, and the difference between the blurred and the solid fill are all
+    // things that compile, pass all eighteen tests in this module, and still read wrong.
+    alias(libs.plugins.paparazzi)
 }
 
 android {

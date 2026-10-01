@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import com.marcow.bible.core.designsystem.components.AppControlSurface
 import com.marcow.bible.core.designsystem.components.AppGlyphView
 import com.marcow.bible.core.designsystem.theme.AppColors
+import com.marcow.bible.core.designsystem.theme.LocalAppBlurEnabled
 import com.marcow.bible.core.designsystem.theme.appColors
 import com.marcow.bible.core.model.NavBarStyle
 import kotlin.math.abs
@@ -77,49 +79,62 @@ fun AppFloatingNavBar(
     if (items.isEmpty()) return
     val colors = appColors
     val shape = RoundedCornerShape(AppNavBarHeight / 2)
-    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
-        // The inset Flutter's shell applied with `Positioned(left: 16, right: 16)` lives here rather
-        // than in the host, because it is what the pill is *measured* against: `kAppNavBarMaxWidth`
-        // is compared against the inset box, not the window. A host that forgot to inset would let
-        // the pill grow 32 dp wider than Flutter's on a screen narrower than the cap.
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = AppNavBarHorizontalInset),
-        ) {
-            val pillWidth = navBarPillWidth(maxWidth, items.size)
-            AppControlSurface(
+    // The style settles both halves of "blurred or solid", not just the tint. `AppControlSurface`
+    // reads the blur from `LocalAppBlurEnabled` and the tint from `emphasized`, and passing only
+    // `emphasized` left `MATERIAL` rendering a blurred, half-transparent pill — which is neither
+    // Flutter style, and is a difference no test of this module could see because the geometry is
+    // identical in all three cases.
+    //
+    // It is provided here rather than left to the host because the host's own value is a different
+    // decision: `LocalAppBlurEnabled` is the user's "glass off" switch, which has to win when it is
+    // off, and a host that had to coordinate the two would have to know this bar's style argument
+    // before calling it. Flutter asked one question — `navbarStyle == materialBlur` — and this is
+    // the same one, asked where the answer is available.
+    CompositionLocalProvider(LocalAppBlurEnabled provides (style == NavBarStyle.MATERIAL_BLUR)) {
+        Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
+            // The inset Flutter's shell applied with `Positioned(left: 16, right: 16)` lives here rather
+            // than in the host, because it is what the pill is *measured* against: `kAppNavBarMaxWidth`
+            // is compared against the inset box, not the window. A host that forgot to inset would let
+            // the pill grow 32 dp wider than Flutter's on a screen narrower than the cap.
+            BoxWithConstraints(
                 modifier = Modifier
-                    .width(pillWidth)
-                    .height(AppNavBarHeight)
-                    // `BoxShadow(black @ .28 dark / .08 light, blurRadius: 14, offset: (0, 4))`.
-                    // Compose has no CSS box-shadow and its shadow offset tracks the elevation, so
-                    // the elevation carries the 4 px offset and the tint carries the darkness.
-                    .shadow(
-                        elevation = PillShadowElevation,
-                        shape = shape,
-                        clip = false,
-                        ambientColor = pillShadowColor(colors),
-                        spotColor = pillShadowColor(colors),
-                    ),
-                shape = shape,
-                // Flutter filled the solid pill with `surfaceRaised` and the blurred one with a
-                // translucent `surface`, which is exactly the pair AppControlSurface calls
-                // "emphasized" and its default frosted tint — and letting the component pick means
-                // the pill picks up the API 31+ blur and the pre-31 scrim with it.
-                emphasized = style == NavBarStyle.MATERIAL,
-                // Flutter stroked the pill as a foreground decoration at a flat `.72` in both styles,
-                // because a background border would lose its inner half to the blur clip. Spelling
-                // the alpha out keeps the solid style at `.72` too: `AppControlSurface` re-applies
-                // it when it blurs.
-                borderColor = colors.line.copy(alpha = PillStrokeAlpha),
+                    .fillMaxWidth()
+                    .padding(horizontal = AppNavBarHorizontalInset),
             ) {
-                NavBarContent(
-                    items = items,
-                    pillWidth = pillWidth,
-                    selectedIndex = selectedIndex,
-                    onSelected = onSelected,
-                )
+                val pillWidth = navBarPillWidth(maxWidth, items.size)
+                AppControlSurface(
+                    modifier = Modifier
+                        .width(pillWidth)
+                        .height(AppNavBarHeight)
+                        // `BoxShadow(black @ .28 dark / .08 light, blurRadius: 14, offset: (0, 4))`.
+                        // Compose has no CSS box-shadow and its shadow offset tracks the elevation, so
+                        // the elevation carries the 4 px offset and the tint carries the darkness.
+                        .shadow(
+                            elevation = PillShadowElevation,
+                            shape = shape,
+                            clip = false,
+                            ambientColor = pillShadowColor(colors),
+                            spotColor = pillShadowColor(colors),
+                        ),
+                    shape = shape,
+                    // Flutter filled the solid pill with `surfaceRaised` and the blurred one with a
+                    // translucent `surface`, which is exactly the pair `AppControlSurface` calls
+                    // "emphasized" and its frosted default. Which of the two pairs is reached is decided
+                    // above, by the same `style`; this only says which pair.
+                    emphasized = style == NavBarStyle.MATERIAL,
+                    // Flutter stroked the pill as a foreground decoration at a flat `.72` in both styles,
+                    // because a background border would lose its inner half to the blur clip. Spelling
+                    // the alpha out keeps the solid style at `.72` too: `AppControlSurface` re-applies
+                    // it when it blurs.
+                    borderColor = colors.line.copy(alpha = PillStrokeAlpha),
+                ) {
+                    NavBarContent(
+                        items = items,
+                        pillWidth = pillWidth,
+                        selectedIndex = selectedIndex,
+                        onSelected = onSelected,
+                    )
+                }
             }
         }
     }
