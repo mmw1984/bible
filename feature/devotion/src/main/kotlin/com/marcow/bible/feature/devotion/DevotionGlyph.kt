@@ -97,7 +97,7 @@ private fun DevotionGlyph.imageVector(): ImageVector = ImageVector.Builder(
             "M22 10v3",
         )
 
-// `Icons.play_arrow` on the 24 grid Flutter drew it on: a filled triangle, and so
+        // `Icons.play_arrow` on the 24 grid Flutter drew it on: a filled triangle, and so
         // the one shape here that paints rather than strokes.
         DevotionGlyph.PLAY -> materialFilled(
             "M8 5v14l11-7z",
