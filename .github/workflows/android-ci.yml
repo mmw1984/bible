@@ -57,6 +57,11 @@ jobs:
       - name: detekt
         run: ./gradlew detekt --stacktrace
 
+      # NATIVE_PLAN.md §3.4 item 6: the two ARB key sets have to stay identical, and the generated
+      # resources have to stay in sync with them. The tool fails on both, so it runs before Gradle.
+      - name: l10n resources in sync
+        run: node tool/arb_to_strings.mjs --check
+
       - name: Unit tests
         run: ./gradlew test --stacktrace
 

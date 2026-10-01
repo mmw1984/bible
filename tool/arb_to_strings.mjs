@@ -1,8 +1,14 @@
 #!/usr/bin/env node
 // Converts the frozen Flutter ARB files into Android string resources (NATIVE_PLAN.md §3.4).
 //
-//   legacy/flutter/lib/l10n/app_en.arb      -> app/src/main/res/values/strings.xml
-//   legacy/flutter/lib/l10n/app_zh_Hant.arb  -> app/src/main/res/values-zh-rTW/strings.xml
+//   legacy/flutter/lib/l10n/app_en.arb      -> core/design-system/src/main/res/values/strings.xml
+//   legacy/flutter/lib/l10n/app_zh_Hant.arb  -> core/design-system/src/main/res/values-zh-rTW/strings.xml
+//
+// The output lives in `core/design-system` rather than in `app` because every screen needs it and
+// `android.nonTransitiveRClass=true` gives each module an R class holding only its own resources:
+// strings declared in `app` are unreachable from `feature/*`. `core/design-system` is already an
+// `api` dependency of every feature, and it already ships the other generated assets (the font
+// subset), so the call sites read `com.marcow.bible.core.designsystem.R` with no per-feature wiring.
 //
 // `app_zh.arb` (Simplified) has no native locale in Phase 1, so it is deliberately not emitted.
 //
@@ -26,7 +32,7 @@ import { fileURLToPath } from "node:url";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const arbDir = join(root, "legacy", "flutter", "lib", "l10n");
-const resDir = join(root, "app", "src", "main", "res");
+const resDir = join(root, "core", "design-system", "src", "main", "res");
 
 /** `selectChapterCurrent` -> `select_chapter_current`. */
 function toSnakeCase(key) {

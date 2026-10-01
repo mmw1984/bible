@@ -317,7 +317,7 @@ CREATE VIRTUAL TABLE verses_fts USING fts4(
 `l10n.yaml` 定義：`template = app_zh_Hant.arb`，所以 `AppLocalizations` 的 key 以中文版為準。
 
 步驟：
-1. 寫 `tool/arb_to_strings.mjs`：讀 `app_zh_Hant.arb` → `res/values-zh-rTW/strings.xml`；讀 `app_en.arb` → `res/values/strings.xml`
+1. 寫 `tool/arb_to_strings.mjs`：讀 `app_zh_Hant.arb` → `res/values-zh-rTW/strings.xml`；讀 `app_en.arb` → `res/values/strings.xml`（放喺 `core/design-system/src/main/res/`：`android.nonTransitiveRClass=true`之下，宣告喺 `app` 嘅 string 係 `feature/*` 睇唔到嘅）
 2. Key命名：**保留 arb 的 camelCase key 不變**（例如 `selectBook`、`tabAsk`、`followUpHint`），但 Android 慣例是 snake_case。建議一次性轉換 `selectBook` → `select_book`，並在 script 內建 map，重跑穩定
 3. **具名參數**：跟 `context.l10n.chapterNumber(value)`、`followUpHint(ref)`、`selectChapterCurrent(ch)`、`traditionalResultCount(n)`、`aiResultCount(n)` → Android `stringResource(R.string.chapter_number, n)`，佔位符用 `%1$s` / `%1$d`
 4. `app_zh.arb`（簡體）目前無對應原生 locale：`values-zh-rCN/strings.xml` 可留作將來，Phase 1 先只出 `values/` + `values-zh-rTW/`
