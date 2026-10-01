@@ -9,6 +9,7 @@ import com.marcow.bible.core.database.ScriptureSearchRow
 import com.marcow.bible.core.database.VerseEntity
 import com.marcow.bible.core.datastore.InMemorySettingsDataStore
 import com.marcow.bible.core.datastore.SettingsRepository
+import com.marcow.bible.core.model.AppLocale
 import com.marcow.bible.core.model.ReadingMode
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -326,6 +327,46 @@ class ReaderViewModelTest {
         assertFalse(state.loading)
         assertTrue(state.failed)
         assertNull(state.book)
+    }
+
+    @Test
+    fun `the book name follows the stored interface language`() = runTest(dispatcher) {
+        val viewModel = reader()
+        advanceUntilIdle()
+
+        // The default locale is zh-Hant, so the state starts on the Chinese name.
+        assertFalse(viewModel.state.value.usesEnglishUi)
+
+        settingsRepository.setLocale(AppLocale.EN)
+        advanceUntilIdle()
+
+        // Flutter's `_bookName` reached for the ambient `AppSettingsScope` on every build, so a
+        // language change in Settings repainted the title without the reader having moved. The one
+        // boolean in the state is what carries that here; `ReaderLayoutTest` covers the naming.
+        assertTrue(viewModel.state.value.usesEnglishUi)
+    }
+
+    @Test
+    fun `switching the language does not disturb where the reader is`() = runTest(dispatcher) {
+        val viewModel = reader()
+        advanceUntilIdle()
+        viewModel.selectChapter(2)
+        advanceUntilIdle()
+        viewModel.onScrolled(0.3f)
+        advanceUntilIdle()
+        val writesBefore = progressDao.writes.size
+
+        settingsRepository.setLocale(AppLocale.EN)
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertEquals("GEN", state.book?.id)
+        assertEquals(2, state.chapter)
+        assertEquals(ReadingMode.CHINESE, state.mode)
+        assertEquals(listOf("起初"), state.verses.map { it.zh })
+        // A language is not a navigation: the chapter is not refetched and the position is not
+        // rewritten, so the row the reader left stays exactly as it was written.
+        assertEquals(writesBefore, progressDao.writes.size)
     }
 
     private fun reader() = ReaderViewModel(
