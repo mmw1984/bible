@@ -21,6 +21,10 @@ object OpenRouterModule {
     @Singleton
     fun provideOpenRouterSession(session: SignedOutOpenRouterSession): OpenRouterSession = session
 
+    @Provides
+    @Singleton
+    fun provideOpenRouterModelId(modelId: DefaultOpenRouterModelId): OpenRouterModelId = modelId
+
     /**
      * One shared client for the whole app.
      *
