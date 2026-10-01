@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.marcow.bible.core.database.BibleRepository
 import com.marcow.bible.core.datastore.SettingsRepository
+import com.marcow.bible.core.model.AppLocale
 import com.marcow.bible.core.model.BibleBook
 import com.marcow.bible.core.model.ReadingMode
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,6 +15,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -66,6 +69,7 @@ class ReaderViewModel @Inject constructor(
             for (write in writes) save(write)
         }
         viewModelScope.launch { openLastPosition() }
+        viewModelScope.launch { watchInterfaceLanguage() }
     }
 
     /**
@@ -180,6 +184,25 @@ class ReaderViewModel @Inject constructor(
         scrollRatio = target.scrollRatio
         writes.trySend(target)
         viewModelScope.launch { open(target) }
+    }
+
+    /**
+     * Watches the interface language, mirroring the ambient settings lookup behind Flutter's
+     * `_bookName`.
+     *
+     * Watched rather than read once because the language can be changed from Settings while the
+     * reader is open, and Flutter's title followed it without a reload. Nothing is written: a
+     * language is not a position, so the row the reader is on stays as it was left.
+     */
+    private suspend fun watchInterfaceLanguage() {
+        settingsRepository.settings
+            .map { it.locale == AppLocale.EN }
+            .distinctUntilChanged()
+            .collect { english ->
+                _state.update {
+                    if (it.usesEnglishUi == english) it else it.copy(usesEnglishUi = english)
+                }
+            }
     }
 
     /**
