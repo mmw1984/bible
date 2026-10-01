@@ -11,6 +11,7 @@ import com.marcow.bible.core.network.ai.AiRequest
 import com.marcow.bible.core.network.ai.AiRequestOptions
 import com.marcow.bible.core.network.ai.AiResponse
 import com.marcow.bible.core.network.ai.ChatEvent
+import com.marcow.bible.core.network.openrouter.FREE_ROUTER_MODEL_ID
 import com.marcow.bible.feature.aichat.domain.AiChatSignIn
 import com.marcow.bible.feature.aichat.domain.AiMemoryStore
 import com.marcow.bible.feature.aichat.domain.AiMessage
@@ -477,6 +478,55 @@ internal class AiChatViewModelTest {
         assertEquals("半個答案", viewModel.state.value.messages.last().text)
     }
 
+    @Test
+    fun `the settings panel can sign out, and the button follows the store rather than the press`() =
+        runTest(dispatcher) {
+            val signIn = FakeSignIn(signedIn = true)
+            val viewModel = viewModel(signIn = signIn)
+
+            assertFalse(viewModel.state.value.requiresLogin)
+
+            viewModel.signOut()
+            advanceUntilIdle()
+
+            assertTrue(signIn.signOutRequested)
+            // The conversation is not the sign-out's to clear: a reader who signs back in finds what
+            // they left, which is what Flutter did when it dropped the key and nothing else.
+            assertTrue(viewModel.state.value.requiresLogin)
+        }
+
+    @Test
+    fun `a saved model reaches the settings field, and the free router is the starting value`() =
+        runTest(dispatcher) {
+            val signIn = FakeSignIn(signedIn = true)
+            val viewModel = viewModel(signIn = signIn)
+
+            assertEquals(FREE_ROUTER_MODEL_ID, viewModel.state.value.modelId)
+
+            viewModel.setModel("anthropic/claude-sonnet-4")
+            advanceUntilIdle()
+
+            assertEquals(listOf("anthropic/claude-sonnet-4"), signIn.savedModels)
+            assertEquals("anthropic/claude-sonnet-4", viewModel.state.value.modelId)
+        }
+
+    @Test
+    fun `a model that could not be saved is reported rather than left looking saved`() =
+        runTest(dispatcher) {
+            val signIn = FakeSignIn(signedIn = true).apply {
+                saveFailure = IllegalStateException("Could not save the model.")
+            }
+            val viewModel = viewModel(signIn = signIn)
+
+            viewModel.setModel("anthropic/claude-sonnet-4")
+            advanceUntilIdle()
+
+            assertEquals("Could not save the model.", viewModel.state.value.authError)
+            // The field is still showing what the reader typed, so the failure is the only thing that
+            // says it did not take.
+            assertEquals(FREE_ROUTER_MODEL_ID, viewModel.state.value.modelId)
+        }
+
     /** The chat over fakes, with the sign-in and locale watchers already run. */
     private fun TestScope.viewModel(
         ask: ScriptedAsk = ScriptedAsk(),
@@ -567,17 +617,26 @@ private class RecordingMemoryStore(
 private class FakeSignIn(signedIn: Boolean) : AiChatSignIn {
     private val state = MutableStateFlow(signedIn)
     private val errors = MutableStateFlow<String?>(null)
+    private val models = MutableStateFlow(FREE_ROUTER_MODEL_ID)
 
     override val signedIn: StateFlow<Boolean> = state.asStateFlow()
     override val lastError: StateFlow<String?> = errors.asStateFlow()
+    override val modelId: StateFlow<String> = models.asStateFlow()
 
     var initialized = false
     var signInRequested = false
+    var signOutRequested = false
+
+    /** Every model the reader saved, in order, so a test can see what was asked for. */
+    val savedModels = mutableListOf<String>()
 
     /** The reader finished signing in, which is what releases a question held for want of a provider. */
     fun signedIn() {
         state.value = true
     }
+
+    /** A failed save, which is the case the settings panel has to show something about. */
+    var saveFailure: Exception? = null
 
     override suspend fun initialize() {
         initialized = true
@@ -585,6 +644,17 @@ private class FakeSignIn(signedIn: Boolean) : AiChatSignIn {
 
     override suspend fun beginSignIn() {
         signInRequested = true
+    }
+
+    override suspend fun signOut() {
+        signOutRequested = true
+        state.value = false
+    }
+
+    override suspend fun setModel(model: String) {
+        saveFailure?.let { throw it }
+        savedModels += model
+        models.value = model
     }
 }
 

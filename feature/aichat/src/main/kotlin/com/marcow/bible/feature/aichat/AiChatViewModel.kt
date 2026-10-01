@@ -120,6 +120,13 @@ class AiChatViewModel @Inject constructor(
             signIn.lastError.collect { error -> holder.update { it.copy(authError = error) } }
         }
         viewModelScope.launch {
+            // `String modelId`, read once per launch and written through `setModel`. It is the settings
+            // field's value, so it is a flow rather than something read at construction: the field is
+            // drawn after the restore lands, and a saved model read too early would be seeded over
+            // with the free router.
+            signIn.modelId.collect { model -> holder.update { it.copy(modelId = model) } }
+        }
+        viewModelScope.launch {
             // `setResponseLocale`: the language is a prompt input rather than the chat's own, so it
             // follows the app's locale and a reader who changes it re-asks in the new language.
             settingsRepository.settings.collect { settings ->
@@ -248,6 +255,40 @@ class AiChatViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 signIn.beginSignIn()
+            } catch (error: Exception) {
+                holder.update { it.copy(authError = error.describe()) }
+            }
+        }
+    }
+
+    /**
+     * `signOutOpenRouter()`: the same button, the other way round.
+     *
+     * Nothing is held across it — the conversation stays and the saved model stays — because Flutter
+     * dropped the key and nothing else, and a reader who signs back in should find the conversation
+     * they left. [AiChatState.signedIn] follows on its own: it is watched rather than set here, so the
+     * button cannot claim a sign-out that the store has not taken yet.
+     */
+    fun signOut() {
+        viewModelScope.launch {
+            try {
+                signIn.signOut()
+            } catch (error: Exception) {
+                holder.update { it.copy(authError = error.describe()) }
+            }
+        }
+    }
+
+    /**
+     * `setModel(value)`: the settings field's save button and its keyboard action.
+     *
+     * Reported as [AiChatState.authError] on a failure rather than silently dropped, because a model
+     * that was not saved is one the next request will not use, and the field would still be showing it.
+     */
+    fun setModel(model: String) {
+        viewModelScope.launch {
+            try {
+                signIn.setModel(model)
             } catch (error: Exception) {
                 holder.update { it.copy(authError = error.describe()) }
             }

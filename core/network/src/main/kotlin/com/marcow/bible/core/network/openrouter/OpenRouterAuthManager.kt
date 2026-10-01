@@ -26,6 +26,11 @@ import javax.inject.Singleton
  * being in the foreground, so the code is written to disk first and the exchange is retried on the next
  * [initialize]. `NATIVE_PLAN.md` §4.7 keeps that.
  *
+ * [modelId] is published beside [signedIn] rather than read on demand, because the settings field is
+ * seeded from it: `String modelId = 'openrouter/free'` was a field Dart read once in [initialize] and
+ * wrote back through [setModel], and a caller that asked the store per keystroke would be answering a
+ * different question from the one the field was drawn from.
+ *
  * Two deliberate differences from the Dart, both about being a `StateFlow` rather than a
  * `ChangeNotifier`:
  *
@@ -43,6 +48,7 @@ class OpenRouterAuthManager @Inject constructor(
 ) : OpenRouterSession {
     private val signedInState = MutableStateFlow(false)
     private val errorState = MutableStateFlow<String?>(null)
+    private val modelIdState = MutableStateFlow(FREE_ROUTER_MODEL_ID)
 
     /**
      * The codes already exchanged, `_handledCodes`.
@@ -62,6 +68,15 @@ class OpenRouterAuthManager @Inject constructor(
     val lastError: StateFlow<String?> = errorState.asStateFlow()
 
     /**
+     * `String modelId`, the settings field's value: what was saved, or `openrouter/free`.
+     *
+     * The free router is the starting value rather than a store read, because [initialize] is what
+     * replaces it with the saved one and a caller asking before then would get the same answer the
+     * Flutter build gave a fresh install.
+     */
+    val modelId: StateFlow<String> = modelIdState.asStateFlow()
+
+    /**
      * `initialize()`: read what is already stored, then finish any exchange the last run left parked.
      *
      * The failing retry is swallowed, as it was in Dart: "A failed exchange remains pending and can be
@@ -69,6 +84,7 @@ class OpenRouterAuthManager @Inject constructor(
      */
     suspend fun initialize() {
         publishSignedIn()
+        publishModelId()
         try {
             retryPendingExchange()
         } catch (_: Exception) {
@@ -133,6 +149,7 @@ class OpenRouterAuthManager @Inject constructor(
         val trimmed = model.trim()
         if (trimmed.isEmpty()) return
         store.write(OPENROUTER_MODEL, trimmed)
+        modelIdState.value = trimmed
     }
 
     /** `_handleLink(uri)`. */
@@ -188,6 +205,17 @@ class OpenRouterAuthManager @Inject constructor(
     /** Reads the stored key into [signedIn], which is what `isSignedIn` answered by reading the store. */
     private suspend fun publishSignedIn() {
         signedInState.value = !store.read(OPENROUTER_API_KEY).isNullOrEmpty()
+    }
+
+    /**
+     * `modelId = await _settings.read('openrouter_model') ?? 'openrouter/free'`, read once per launch.
+     *
+     * The same default as [StoredOpenRouterModelId] gives, and deliberately so: the settings field is
+     * seeded from this while every request asks through that, so two defaults would let the field
+     * promise one model while the request asked another.
+     */
+    private suspend fun publishModelId() {
+        modelIdState.value = store.read(OPENROUTER_MODEL)?.takeIf { it.isNotBlank() } ?: FREE_ROUTER_MODEL_ID
     }
 }
 

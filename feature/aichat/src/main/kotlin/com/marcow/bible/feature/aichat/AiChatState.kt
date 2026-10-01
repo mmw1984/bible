@@ -1,6 +1,7 @@
 package com.marcow.bible.feature.aichat
 
 import com.marcow.bible.core.model.AppLocale
+import com.marcow.bible.core.network.openrouter.FREE_ROUTER_MODEL_ID
 import com.marcow.bible.feature.aichat.domain.AiMessage
 import com.marcow.bible.feature.aichat.domain.AiMessageRole
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +44,14 @@ data class AiChatState(
     val generationError: String? = null,
     /** `String? authError`, `openRouterAuthError`: the last sign-in failure. */
     val authError: String? = null,
+    /**
+     * `String modelId`, the OpenRouter model the settings field is seeded with and saved from.
+     *
+     * `openrouter/free` rather than null, which is what `String modelId = 'openrouter/free'` was before
+     * `_performInitialization` read the saved one back: the field has to hold something a reader can
+     * edit, and an empty field is a model the app cannot ask.
+     */
+    val modelId: String = FREE_ROUTER_MODEL_ID,
     /** `AppLocale responseLocale`, which is the language the prompt asks the answer in. */
     val responseLocale: AppLocale = AppLocale.ZH_HANT,
     /** `String? attachedScriptureContext`, the chapter the chat was opened on. */

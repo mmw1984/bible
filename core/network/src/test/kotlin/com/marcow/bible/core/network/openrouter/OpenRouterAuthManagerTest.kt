@@ -187,6 +187,36 @@ class OpenRouterAuthManagerTest {
         signIn.auth.setModel("   ")
         assertEquals("anthropic/claude-sonnet-4", modelId.modelId())
     }
+
+    @Test
+    fun `the published model id is the saved one, and survives the next launch`() = runTest {
+        val signIn = signIn()
+
+        // Before `initialize` the field shows the free router, which is what a fresh install showed.
+        assertEquals(FREE_ROUTER_MODEL_ID, signIn.auth.modelId.first())
+
+        signIn.auth.setModel("anthropic/claude-sonnet-4")
+        assertEquals("anthropic/claude-sonnet-4", signIn.auth.modelId.first())
+
+        // A second launch reads it back rather than starting from the default again, which is what
+        // stops the settings field being seeded over the model every request is actually sent to.
+        val relaunched = signIn()
+        relaunched.store.write(OPENROUTER_MODEL, "anthropic/claude-sonnet-4")
+        relaunched.auth.initialize()
+        assertEquals("anthropic/claude-sonnet-4", relaunched.auth.modelId.first())
+    }
+
+    @Test
+    fun `signing out keeps the model the reader chose`() = runTest {
+        val signIn = signIn()
+        signIn.store.write(OPENROUTER_MODEL, "anthropic/claude-sonnet-4")
+
+        signIn.auth.signOut()
+
+        // The model is a preference rather than a secret: Flutter's `signOut` dropped the key and left
+        // `openrouter_model` alone, so a reader who signs back in is not asked to choose a model again.
+        assertEquals("anthropic/claude-sonnet-4", signIn.store.read(OPENROUTER_MODEL))
+    }
 }
 
 private const val THE_VERIFIER = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
