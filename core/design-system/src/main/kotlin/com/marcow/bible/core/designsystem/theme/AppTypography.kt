@@ -82,7 +82,7 @@ fun scriptureStyle(
     lineHeight: androidx.compose.ui.unit.TextUnit,
     weight: Int = AppFontWeights.SERIF_REGULAR,
     color: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Unspecified,
-): TextStyle = TextStyle(
+): TextStyle = TextStyle.Default.copy(
     fontFamily = AppFonts.NotoSerifTC,
     fontSize = size,
     lineHeight = lineHeight,
