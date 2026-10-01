@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package bible.settings;
+
+option java_package = "com.marcow.bible.core.datastore.proto";
+option java_multiple_files = true;
+option java_outer_classname = "SettingsProto";
+
+// Persisted app settings, stored by Proto DataStore in `settings.preferences_pb`.
+//
+// This is the native replacement for the Flutter SharedPreferences file
+// (`FlutterSharedPreferences.xml`, every key prefixed `flutter.`). Field numbers are permanent:
+// once assigned, a field may only be renamed with `reserved` keeping the old number, because
+// existing installs already hold a serialized copy of this message.
+//
+// Enum zero values are named `*_UNSPECIFIED` on purpose. Proto3 defaults to 0, so the unset case
+// has to be distinguishable from a real choice: `SettingsRepository` resolves UNSPECIFIED to the
+// same default the Flutter app used, which is not always the proto default.
+message Settings {
+  // `system` is the native-only value: it follows the platform dark-mode setting. The Flutter app
+  // has no equivalent and stored an already-resolved light/dark, so it never migrates in here.
+  enum ThemeMode {
+    THEME_MODE_UNSPECIFIED = 0;
+    THEME_MODE_LIGHT = 1;
+    THEME_MODE_DARK = 2;
+    THEME_MODE_SYSTEM = 3;
+  }
+
+  // Mirrors `AppNavBarStyle` in legacy/flutter/lib/app_settings.dart. `MATERIAL_BLUR` is the
+  // Flutter default.
+  enum NavBarStyle {
+    NAV_BAR_STYLE_UNSPECIFIED = 0;
+    NAV_BAR_STYLE_MATERIAL = 1;
+    NAV_BAR_STYLE_MATERIAL_BLUR = 2;
+  }
+
+  ThemeMode theme_mode = 1;
+  NavBarStyle navbar_style = 2;
+  // "zh-Hant" or "en", matching `AppLocale.storageValue` in the Flutter app. Kept as a string
+  // rather than an enum because it is also handed to `LocaleListCompat.forLanguageTags()`.
+  string locale_tag = 3;
+  // The Flutter meaning was "the glass pipeline measured jank, so the runtime fell back". The
+  // native reader uses `Modifier.blur` directly, so this is now "the user forced blur off".
+  bool glass_perf_blocked = 4;
+  // When false the reader top bar exposes the Ask / Devotion shortcuts instead. Declared `optional`
+  // (explicit presence) because both default to true, so proto3's implicit false would be
+  // indistinguishable from a user who deliberately turned them off.
+  optional bool show_navbar = 5;
+  optional bool show_devotion = 6;
+  // Set once `LegacyPrefsImporter` has copied the Flutter preferences. The import is one-shot: a
+  // user who later changes a setting in the native app must not have it overwritten by the next
+  // launch reading stale Flutter values.
+  bool legacy_imported = 7;
+}

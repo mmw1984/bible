@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.protobuf)
 }
 
 android {
@@ -44,12 +45,33 @@ hilt {
     enableAggregatingTask = false
 }
 
+protobuf {
+    protoc {
+        artifact = libs.protoc.get().toString()
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            // javalite is enough: the settings message has no `Any`, no extensions and no maps,
+            // and it keeps the generated `Settings` class small.
+            task.builtins {
+                named("java") {
+                    option("lite")
+                }
+            }
+        }
+    }
+}
+
 dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     api(project(":core:model"))
     implementation(project(":core:common"))
-    implementation(libs.androidx.datastore.preferences)
+    // Proto DataStore: `datastore-core` for DataStore/Serializer, `datastore` for the Android
+    // file-backed factory. The Preferences flavour is only needed to read the legacy
+    // SharedPreferences file, which core:legacy-migration owns.
+    api(libs.androidx.datastore.core)
+    api(libs.protobuf.javalite)
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(platform(libs.junit.bom))
