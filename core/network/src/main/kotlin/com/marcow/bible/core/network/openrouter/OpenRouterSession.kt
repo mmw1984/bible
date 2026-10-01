@@ -1,5 +1,8 @@
 package com.marcow.bible.core.network.openrouter
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -12,6 +15,20 @@ import javax.inject.Singleton
  * the search feature does not have to move when that arrives.
  */
 interface OpenRouterSession {
+    /**
+     * Whether a key is held, for the UI to watch.
+     *
+     * `BibleAiController.openRouterSignedIn` in `legacy/flutter/lib/ai_service.dart` was a
+     * `ChangeNotifier` field, and the search sheet answered it twice: `requiresLogin` decided whether
+     * to draw the `login_to_search` panel instead of results, and the sheet's listener re-ran the AI
+     * search the moment a sign-in landed (`pendingCloudSearch`). Both are reactions to a *change*, so
+     * the value is a flow here rather than something each caller polls for.
+     *
+     * `apiKey()` stays the answer to "what do I send", because a caller about to make a request
+     * wants the key rather than a yes/no about it.
+     */
+    val signedIn: StateFlow<Boolean>
+
     /** The key to authenticate with, or null when nobody is signed in. */
     suspend fun apiKey(): String?
 
@@ -34,6 +51,10 @@ interface OpenRouterSession {
  */
 @Singleton
 class SignedOutOpenRouterSession @Inject constructor() : OpenRouterSession {
+    private val state = MutableStateFlow(false)
+
+    override val signedIn: StateFlow<Boolean> = state.asStateFlow()
+
     override suspend fun apiKey(): String? = null
 
     override suspend fun signOut() = Unit
