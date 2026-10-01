@@ -208,9 +208,15 @@ fun ChapterPickerBubble(
  * backdrop equivalent, and blurring the bubble would blur the chapters inside it. The `.82` surface
  * is left to do the work, the same way `AppControlSurface` leaves its tint to carry the frosted look
  * below API 31.
+ *
+ * Snapshotting needs it on its own. A `Popup` is a window of its own and layoutlib draws only the
+ * composition it is handed, so a golden of [ChapterPickerBubble] would be a golden of an empty frame;
+ * internal to the module for the same reason [VerseActionSheetContent] is, a seam for the golden
+ * rather than a second public bubble. Where the bubble goes is the arithmetic of the four functions
+ * above and [ChapterPickerTest] holds that down — this is here to pin the bubble's own pixels.
  */
 @Composable
-private fun ChapterPickerContent(
+internal fun ChapterPickerContent(
     chapter: Int,
     chapterCount: Int,
     maxHeight: Dp,

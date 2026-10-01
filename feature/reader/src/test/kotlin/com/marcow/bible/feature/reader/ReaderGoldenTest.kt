@@ -2,9 +2,12 @@ package com.marcow.bible.feature.reader
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.DeviceConfig
@@ -141,6 +144,99 @@ class ReaderGoldenTest {
                     scroll = SilentScrollSink,
                     bottomClearance = NAV_BAR_CLEARANCE,
                     onVerseAction = null,
+                )
+            }
+        }
+    }
+
+    /**
+     * A chapter in an English-only reading, which is the third of the three and the one the other two
+     * cannot stand in for.
+     *
+     * English is its own branch all the way down — its own 17 px, its own 1.78 line height instead of
+     * the bilingual pair's 17 over 14, and no Chinese above it to share a row with — so it is the
+     * only reading in which the verse number's neighbour changes. A font size moved by one dp on that
+     * branch compiles, passes every arithmetic test in this module and passes the other two goldens.
+     */
+    @Test
+    fun `a chapter in an English reading`() {
+        paparazzi.snapshot(name = "ReaderScreen_english") {
+            ReaderGoldenHarness {
+                ReaderScreen(
+                    state = JOHN_1.copy(mode = ReadingMode.ENGLISH),
+                    navigator = SilentNavigator,
+                    scroll = SilentScrollSink,
+                    bottomClearance = NAV_BAR_CLEARANCE,
+                    onVerseAction = null,
+                )
+            }
+        }
+    }
+
+    /**
+     * The last row of the reader: the links to the chapters either side, which nothing above had ever
+     * put a pixel in.
+     *
+     * It takes a shorter chapter than [JOHN_1] to be in frame at all. The links come after the verses,
+     * so five verses of John carry them off the bottom of a 393 x 851 window and three bring them back
+     * onto it — which is why this is its own fixture rather than a sixth verse on the existing one.
+     *
+     * Chapter one is the chapter worth looking at: there is nothing before it, so the left link is
+     * Flutter's dash on a disabled row and the right one is live. A book in the middle would show the
+     * two named links and never the end the reader actually reaches.
+     */
+    @Test
+    fun `the ends of a book`() {
+        paparazzi.snapshot(name = "ReaderScreen_chapterLinks") {
+            ReaderGoldenHarness {
+                ReaderScreen(
+                    state = JOHN_1.copy(verses = JOHN_1.verses.take(3)),
+                    navigator = SilentNavigator,
+                    scroll = SilentScrollSink,
+                    bottomClearance = NAV_BAR_CLEARANCE,
+                    onVerseAction = null,
+                )
+            }
+        }
+    }
+
+    /**
+     * The chapter picker: the one control the reader has that no golden had reached, because it opens
+     * in a `Popup` and a snapshot has no tap to open it with.
+     *
+     * It is a golden of [ChapterPickerContent] for the same reason the action sheet's is — the popup
+     * composes into a window layoutlib does not draw, so the bubble would come out an empty frame — and
+     * it is handed the width and the height cap [ChapterPickerBubble] computes on this device, so the
+     * bubble is drawn at the size it is really given. Where it sits in the window is left out, since
+     * that is the four functions' arithmetic and `ChapterPickerTest` holds it down.
+     *
+     * John at chapter three: 21 chapters over five columns leaves the last cell of the last row empty,
+     * which is the shape most of the shorter books have, and the cell being read is the one inverted.
+     * Whether the grid scrolls is left to that test too, because a grid taller than its cap is clipped
+     * to the cap either way and a picture could not tell the two apart.
+     */
+    @Test
+    fun `the chapter picker over the chapter`() {
+        paparazzi.snapshot(name = "ChapterPicker") {
+            ReaderGoldenHarness {
+                val configuration = LocalConfiguration.current
+                val windowWidth = configuration.screenWidthDp.dp
+                // A top of zero leaves the cap itself — `min(400, height - top - bottom - 16)` — which
+                // is the largest the bubble is ever handed, and the widest a 393 dp window gets.
+                val maxHeight = chapterPickerMaxHeight(
+                    top = 0.dp,
+                    windowHeight = configuration.screenHeightDp.dp,
+                    bottomInset = 0.dp,
+                )
+                ChapterPickerContent(
+                    chapter = 3,
+                    chapterCount = JOHN.chapters,
+                    maxHeight = maxHeight,
+                    onChapterSelected = {},
+                    onDismiss = {},
+                    modifier = Modifier
+                        .width(chapterPickerWidth(windowWidth))
+                        .heightIn(max = maxHeight),
                 )
             }
         }
