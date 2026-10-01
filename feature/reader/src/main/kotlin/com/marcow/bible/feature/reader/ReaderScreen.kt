@@ -39,6 +39,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -111,6 +112,10 @@ fun ReaderScreen(
     var anchorBounds by remember { mutableStateOf<IntRect?>(null) }
     var pickerOpen by remember { mutableStateOf(false) }
     var actionVerse by remember { mutableStateOf<VersePair?>(null) }
+    // A fresh gate per chapter, so its verses arrive one after another and the ones scrolled to later
+    // do not: see `ScrollAwareEntrance` for why the question is asked this way round.
+    val entrance = remember(verses) { EntranceGate() }
+    CloseEntrance(entrance)
 
     Box(modifier = modifier.background(colors.canvas)) {
         key(book?.id, state.chapter) {
@@ -133,12 +138,14 @@ fun ReaderScreen(
                         )
                     }
                     items(count = verses.size, key = { index -> verses[index].number }) { index ->
-                        VerseRow(
-                            verse = verses[index],
-                            mode = state.mode,
-                            verseSize = layout.verseSize,
-                            onLongPress = { actionVerse = verses[index] },
-                        )
+                        ScrollAwareEntrance(staggerIndex = index, gate = entrance) {
+                            VerseRow(
+                                verse = verses[index],
+                                mode = state.mode,
+                                verseSize = layout.verseSize,
+                                onLongPress = { actionVerse = verses[index] },
+                            )
+                        }
                     }
                     item(key = LINKS_ITEM_KEY) {
                         ChapterLinks(
@@ -448,6 +455,22 @@ private fun ChapterLink(
  */
 private fun chapterLinkLabel(bookName: String, chapter: Int, exists: Boolean): String =
     if (exists) "$bookName $chapter" else NO_CHAPTER_LABEL
+
+/**
+ * Closes the chapter's entrance once the frame its verses were laid out in has passed.
+ *
+ * One frame, and not one composition: a `LazyColumn` builds its items while it is measured rather
+ * than while this composable runs, so the items of the first frame exist before any effect here
+ * could have closed the gate. Closing on the following frame is what separates "the chapter arrived"
+ * from "the reader scrolled to another verse".
+ */
+@Composable
+private fun CloseEntrance(gate: EntranceGate) {
+    LaunchedEffect(gate) {
+        withFrameNanos { }
+        gate.open = false
+    }
+}
 
 /**
  * Reports where the list is, on every frame, which is what `ScrollEndNotification` did in Flutter.
