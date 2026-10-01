@@ -39,17 +39,20 @@ class ResolveReferencesUseCase @Inject constructor(private val bibleRepository: 
         val canon: Map<String, BibleBook> = bibleRepository.books().associateBy { it.id }
         val hits = mutableListOf<AiSearchHit>()
         for (reference in references) {
-            val book = canon[reference.bookId] ?: continue
-            if (reference.chapter < 1 || reference.chapter > book.chapters) continue
-            val verses = bibleRepository.chapter(book.id, reference.chapter)
-            verses
-                .filter { it.number >= reference.verseStart && it.number <= reference.verseEnd }
-                .forEach { verse ->
-                    hits += AiSearchHit(
-                        hit = ScriptureHit(book = book, chapter = reference.chapter, verse = verse),
-                        reason = reference.reason,
-                    )
-                }
+            val book = canon[reference.bookId]
+            // The two rejections are one question with two answers — is this reference something the
+            // canon holds a chapter for? — so `let` carries the answer rather than two `continue`s.
+            book?.takeIf { reference.chapter in 1..it.chapters }?.let { knownBook ->
+                val verses = bibleRepository.chapter(knownBook.id, reference.chapter)
+                verses
+                    .filter { it.number >= reference.verseStart && it.number <= reference.verseEnd }
+                    .forEach { verse ->
+                        hits += AiSearchHit(
+                            hit = ScriptureHit(book = knownBook, chapter = reference.chapter, verse = verse),
+                            reason = reference.reason,
+                        )
+                    }
+            }
         }
         return hits
     }

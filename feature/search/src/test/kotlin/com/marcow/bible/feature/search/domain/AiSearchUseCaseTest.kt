@@ -231,7 +231,7 @@ private fun ChatCompletionRequest.prompt(): String {
 }
 
 /** What the transport throws for a 429, which is the failure the `catch` on each branch exists for. */
-private suspend fun fail(): Nothing = throw IllegalStateException("OpenRouter request failed (429): rate limited")
+private suspend fun fail(): Nothing = error("OpenRouter request failed (429): rate limited")
 
 private const val OVERVIEW_MARKER = "BIBLE_SEARCH_OVERVIEW"
 

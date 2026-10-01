@@ -346,7 +346,7 @@ class SearchViewModelTest {
 
     @Test
     fun `a search that throws is panels rather than spinners`() = runTest(dispatcher) {
-        val viewModel = searchViewModel(aiSearch = FakeAiSearch(flow { throw IllegalStateException("no key") }))
+        val viewModel = searchViewModel(aiSearch = FakeAiSearch(flow { error("no key") }))
         searchAi(viewModel)
         advanceUntilIdle()
 

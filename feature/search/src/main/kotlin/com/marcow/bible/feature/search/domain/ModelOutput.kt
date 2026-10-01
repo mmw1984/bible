@@ -47,12 +47,15 @@ private fun stripWebCitations(source: String): String {
  * The check on the last line is for a preamble that was cut off mid-word by a token ceiling, which
  * still has to go — otherwise the overview opens with `safety: sa`.
  */
+@Suppress("LoopWithTooManyJumpStatements")
 private fun stripLeadingInternalMetadata(source: String): String {
     val lines = source.split("\n")
     var firstVisible = 0
     var removedMetadata = false
     while (firstVisible < lines.size) {
         val line = lines[firstVisible].trim()
+        // Both exits are one step, so this reads as the scan it is: skip the blank line the preamble
+        // leaves behind once one has been removed, and stop at the first line that is not metadata.
         if (line.isEmpty() && removedMetadata) {
             firstVisible++
             continue

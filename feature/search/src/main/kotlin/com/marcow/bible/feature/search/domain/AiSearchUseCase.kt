@@ -81,6 +81,17 @@ class AiSearchUseCase @Inject constructor(
     private val searchReferences: SearchReferencesUseCase,
     private val resolveReferences: ResolveReferencesUseCase,
 ) : AiSearch {
+    /**
+     * The three catches are deliberately broad, and each names [CancellationException] first so the
+     * one exception that must not be swallowed still propagates.
+     *
+     * The three collaborators are ports — a request can fail with a socket error, a decode error, a
+     * 429 the retry logic gives up on, or a type the port does not declare — and Dart's `catch (_)`
+     * was equally blind to all of them. What a failure means for the sheet is the caller's decision,
+     * not this file's: an overview failure must not hide a references answer and the other way round,
+     * which is why each catch publishes its own update and lets its peer carry on.
+     */
+    @Suppress("TooGenericExceptionCaught")
     override fun search(query: String, memory: String, aiLanguage: String): Flow<AiSearchUpdate> = channelFlow {
         coroutineScope {
             async {

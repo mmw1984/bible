@@ -133,7 +133,15 @@ class SearchViewModel @Inject constructor(
         pendingCloudSearch = _state.value.input.isNotBlank()
     }
 
-    /** Flutter's `_search` half for text search: the hits, or the `search_status` failure panel. */
+    /**
+     * Flutter's `_search` half for text search: the hits, or the `search_status` failure panel.
+     *
+     * The catch is deliberately broad, and names [CancellationException] first so a cancelled search
+     * still unwinds: [traditionalSearch] is a port, a failure of the database or of the index is not
+     * enumerated here, and Dart's `catch (_)` at the same place was blind to all of them. `null` is
+     * the whole contract — the panel wants a flag, not a message.
+     */
+    @Suppress("TooGenericExceptionCaught")
     private fun runTraditional(value: String) {
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
@@ -161,7 +169,14 @@ class SearchViewModel @Inject constructor(
      * The memory block and the language are read here, before the search starts, because Dart read
      * them inside `BibleAiController.search` — one memory read and one settings read per search
      * rather than one per half of it.
+     *
+     * The catch is deliberately broad, and names [CancellationException] first so the one exception
+     * that must not be swallowed still propagates: [aiMemory] and [aiSearch] are ports, and Dart's
+     * `catch (error)` around this collector was equally blind to what they might throw. It has
+     * nothing to report because each half publishes its own failure, and [finishedWithoutAnswering]
+     * in the `finally` below turns whatever is still spinning into a panel.
      */
+    @Suppress("TooGenericExceptionCaught")
     private fun runAiSearch(value: String) {
         // `_searchAi` guards the same three things as `_search` does, because both the signed-in
         // watcher and the submit button reach this: a query the watcher is holding on to can have
