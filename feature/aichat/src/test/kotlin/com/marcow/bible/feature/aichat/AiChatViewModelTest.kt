@@ -496,36 +496,34 @@ internal class AiChatViewModelTest {
         }
 
     @Test
-    fun `a saved model reaches the settings field, and the free router is the starting value`() =
-        runTest(dispatcher) {
-            val signIn = FakeSignIn(signedIn = true)
-            val viewModel = viewModel(signIn = signIn)
+    fun `a saved model reaches the settings field, and the free router is the starting value`() = runTest(dispatcher) {
+        val signIn = FakeSignIn(signedIn = true)
+        val viewModel = viewModel(signIn = signIn)
 
-            assertEquals(FREE_ROUTER_MODEL_ID, viewModel.state.value.modelId)
+        assertEquals(FREE_ROUTER_MODEL_ID, viewModel.state.value.modelId)
 
-            viewModel.setModel("anthropic/claude-sonnet-4")
-            advanceUntilIdle()
+        viewModel.setModel("anthropic/claude-sonnet-4")
+        advanceUntilIdle()
 
-            assertEquals(listOf("anthropic/claude-sonnet-4"), signIn.savedModels)
-            assertEquals("anthropic/claude-sonnet-4", viewModel.state.value.modelId)
-        }
+        assertEquals(listOf("anthropic/claude-sonnet-4"), signIn.savedModels)
+        assertEquals("anthropic/claude-sonnet-4", viewModel.state.value.modelId)
+    }
 
     @Test
-    fun `a model that could not be saved is reported rather than left looking saved`() =
-        runTest(dispatcher) {
-            val signIn = FakeSignIn(signedIn = true).apply {
-                saveFailure = IllegalStateException("Could not save the model.")
-            }
-            val viewModel = viewModel(signIn = signIn)
-
-            viewModel.setModel("anthropic/claude-sonnet-4")
-            advanceUntilIdle()
-
-            assertEquals("Could not save the model.", viewModel.state.value.authError)
-            // The field is still showing what the reader typed, so the failure is the only thing that
-            // says it did not take.
-            assertEquals(FREE_ROUTER_MODEL_ID, viewModel.state.value.modelId)
+    fun `a model that could not be saved is reported rather than left looking saved`() = runTest(dispatcher) {
+        val signIn = FakeSignIn(signedIn = true).apply {
+            saveFailure = IllegalStateException("Could not save the model.")
         }
+        val viewModel = viewModel(signIn = signIn)
+
+        viewModel.setModel("anthropic/claude-sonnet-4")
+        advanceUntilIdle()
+
+        assertEquals("Could not save the model.", viewModel.state.value.authError)
+        // The field is still showing what the reader typed, so the failure is the only thing that
+        // says it did not take.
+        assertEquals(FREE_ROUTER_MODEL_ID, viewModel.state.value.modelId)
+    }
 
     /** The chat over fakes, with the sign-in and locale watchers already run. */
     private fun TestScope.viewModel(
