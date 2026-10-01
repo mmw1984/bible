@@ -10,22 +10,22 @@ import java.time.LocalDateTime
  * Every shape the blog publishes lands in exactly one of these, so the reader renders a
  * [LazyColumn] of them without knowing anything about WordPress.
  */
-internal sealed interface DevotionBlock
+sealed interface DevotionBlock
 
 /** A run of text, including a list item, which is prefixed with `• ` when it came from one. */
-internal data class DevotionParagraph(val text: String) : DevotionBlock
+data class DevotionParagraph(val text: String) : DevotionBlock
 
 /** `<h1>`…`<h6>` flattened to one level — the blog has no outline worth preserving. */
-internal data class DevotionHeading(val text: String) : DevotionBlock
+data class DevotionHeading(val text: String) : DevotionBlock
 
 /** `<blockquote>`, which carries 詩歌 1:1–2 and the 經文 quotes. */
-internal data class DevotionQuote(val text: String) : DevotionBlock
+data class DevotionQuote(val text: String) : DevotionBlock
 
 /** An `<img>`, with [url] already percent-encoded and lazy-load placeholders resolved. */
-internal data class DevotionImage(val url: String) : DevotionBlock
+data class DevotionImage(val url: String) : DevotionBlock
 
 /** A YouTube embed (`<iframe src="…youtube.com/embed/…">`). */
-internal data class DevotionVideo(val videoId: String) : DevotionBlock {
+data class DevotionVideo(val videoId: String) : DevotionBlock {
     val watchUrl: String get() = "https://www.youtube.com/watch?v=$videoId"
     val thumbnailUrl: String get() = "https://img.youtube.com/vi/$videoId/hqdefault.jpg"
 }
@@ -34,10 +34,10 @@ internal data class DevotionVideo(val videoId: String) : DevotionBlock {
  * Any other `<iframe>` embed — the SoundCloud player that opens several 靈修默想 posts. The native
  * reader cannot render it inline, so it surfaces as a tappable card; the web reader opens it.
  */
-internal data class DevotionEmbed(val url: String) : DevotionBlock
+data class DevotionEmbed(val url: String) : DevotionBlock
 
 /** A titled section such as `<div class="dove"><div class="title">詩歌</div>…`. */
-internal data class DevotionSection(val title: String, val blocks: List<DevotionBlock>) : DevotionBlock
+data class DevotionSection(val title: String, val blocks: List<DevotionBlock>) : DevotionBlock
 
 /**
  * A devotion with its parsed blocks, mirroring `DevotionPost` in the Dart build.
@@ -45,7 +45,7 @@ internal data class DevotionSection(val title: String, val blocks: List<Devotion
  * [contentHtml] is the WordPress HTML [blocks] came from, kept verbatim: the offline cache stores
  * raw post data so a parser improvement re-parses on next launch instead of serving old blocks.
  */
-internal data class DevotionPost(
+data class DevotionPost(
     val id: Long,
     /** Publish time as the API reported it, local time, without a zone of its own. */
     val publishedAt: LocalDateTime,

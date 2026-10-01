@@ -1,6 +1,5 @@
 package com.marcow.bible.feature.devotion.data
 
-import com.marcow.bible.core.database.DevotionCacheDao
 import com.marcow.bible.core.database.DevotionCacheEntity
 import com.marcow.bible.feature.devotion.domain.DevotionHeading
 import com.marcow.bible.feature.devotion.domain.DevotionParagraph
@@ -149,28 +148,4 @@ class DevotionCacheTest {
         contentHtml = html,
         blocks = emptyList(),
     )
-}
-
-/** The one row the cache writes, which is the only query the tests need to observe. */
-private class FakeDevotionCacheDao : DevotionCacheDao {
-    val rows = mutableMapOf<String, DevotionCacheEntity>()
-
-    override suspend fun entry(id: String): DevotionCacheEntity? = rows[id]
-
-    override suspend fun upsert(entry: DevotionCacheEntity) {
-        rows[entry.id] = entry
-    }
-
-    override suspend fun clear() {
-        rows.clear()
-    }
-}
-
-/** A database that refuses everything, which is what a full disk looks like to the cache. */
-private class FailingDevotionCacheDao : DevotionCacheDao {
-    override suspend fun entry(id: String): DevotionCacheEntity? = throw IllegalStateException("disk full")
-
-    override suspend fun upsert(entry: DevotionCacheEntity): Unit = throw IllegalStateException("disk full")
-
-    override suspend fun clear(): Unit = throw IllegalStateException("disk full")
 }
