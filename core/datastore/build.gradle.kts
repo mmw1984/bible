@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.protobuf)
 }
 
 android {
@@ -51,24 +50,15 @@ hilt {
     enableAggregatingTask = false
 }
 
-protobuf {
-    protoc {
-        artifact = libs.protoc.get().toString()
-    }
-    generateProtoTasks {
-        all().forEach { task ->
-            // javalite is enough: the settings message has no `Any`, no extensions and no maps,
-            // and it keeps the generated `Settings` class small.
-            // `maybeCreate` rather than `named`: the plugin adds the `java` builtin itself while
-            // the task is being configured, and `all()` can run before that happens.
-            task.builtins.maybeCreate("java").option("lite")
-        }
-    }
-}
-
 dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    // The proto message is generated in its own module: KSP analyses this module's Kotlin with
+    // the Analysis API, which cannot see the Java sources the protobuf plugin generates into this
+    // module, so `DataStore<Settings>` in a @Provides signature failed to resolve. Compiling the
+    // message in core:datastore-proto puts real classes on the KSP classpath instead, and the
+    // `com.marcow.bible.core.datastore.proto.Settings` name every caller imports stays the same.
+    api(project(":core:datastore-proto"))
     api(project(":core:model"))
     implementation(project(":core:common"))
     // Proto DataStore: `datastore-core` for DataStore/Serializer, `datastore` for the Android
