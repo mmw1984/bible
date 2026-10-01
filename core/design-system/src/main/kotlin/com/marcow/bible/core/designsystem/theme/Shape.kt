@@ -1,10 +1,12 @@
 package com.marcow.bible.core.designsystem.theme
 
-import androidx.compose.animation.core.CubicEasing
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
@@ -14,7 +16,7 @@ import androidx.compose.ui.unit.dp
  * selection pill (260 ms), so the easing is a single token here too. Compose has no `Cubic` type and
  * this curve has no physical spring to fit, so it stays a bezier easing.
  */
-val SpringCurve: Easing = CubicEasing(0.16f, 1f, 0.3f, 1f)
+val SpringCurve: Easing = CubicBezierEasing(0.16f, 1f, 0.3f, 1f)
 
 /** The theme crossfade duration, `themeAnimationDuration` in `main.dart`. */
 const val THEME_ANIMATION_MILLIS = 420
@@ -27,12 +29,15 @@ const val TAP_ANIMATION_MILLIS = 120
 
 fun themeAnimationSpec() = tween<Float>(durationMillis = THEME_ANIMATION_MILLIS, easing = SpringCurve)
 
-fun segmentAnimationSpec() = tween<Float>(durationMillis = SEGMENT_ANIMATION_MILLIS, easing = SpringCurve)
+fun segmentAnimationSpec(): TweenSpec<Dp> = tween(
+    durationMillis = SEGMENT_ANIMATION_MILLIS,
+    easing = SpringCurve,
+)
 
 fun tapAnimationSpec() = tween<Float>(durationMillis = TAP_ANIMATION_MILLIS, easing = TAP_EASING)
 
 /** `Curves.easeOutCubic`, the press curve in `AppTap`. */
-private val TAP_EASING = CubicEasing(0.215f, 0.61f, 0.355f, 1f)
+private val TAP_EASING = CubicBezierEasing(0.215f, 0.61f, 0.355f, 1f)
 
 /**
  * The Material shapes for a set of [AppRadii].
