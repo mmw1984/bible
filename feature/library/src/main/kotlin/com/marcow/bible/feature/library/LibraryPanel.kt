@@ -11,12 +11,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -94,9 +96,13 @@ fun LibraryPanel(
             .fillMaxHeight()
             .clip(shape = RoundedCornerShape(topEnd = appRadii.screen, bottomEnd = appRadii.screen))
             .background(colors.canvas)
-            // The status bar only: Flutter's `SafeArea(bottom: false)` let the sheet's list run under
-            // the navigation bar, which is where its last book ends up.
-            .windowInsetsPadding(WindowInsets.statusBars),
+            // The status bar and the sides, but not the navigation bar: Flutter's
+            // `SafeArea(bottom: false)` let the sheet's list run under it, which is where its last
+            // book ends up. The cutout is Flutter's `MediaQuery.padding` and so is `safeDrawing`,
+            // which matters on a landscape phone where a notch cuts into the side the panel is on.
+            .windowInsetsPadding(
+                WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
+            ),
     ) {
         Column(
             modifier = Modifier
