@@ -14,8 +14,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.marcow.bible.core.designsystem.R
 import com.marcow.bible.core.model.AppLocale
 import com.marcow.bible.core.model.ReadingMode
 import com.marcow.bible.core.model.ScriptureHit
@@ -70,6 +74,10 @@ fun SearchDialog(
         LaunchedEffect(Unit) {
             alpha.animateTo(1f, tween(BARRIER_MILLIS, easing = LinearOutSlowInEasing))
         }
+        // `barrierLabel: context.l10n.closeSearch` at `legacy/flutter/lib/main.dart:839`, read here
+        // rather than in the barrier's own lambda because `stringResource` is a composable call and
+        // `semantics` is not.
+        val barrierLabel = stringResource(R.string.close_search)
         Box(
             modifier = modifier
                 .fillMaxSize()
@@ -85,6 +93,10 @@ fun SearchDialog(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    // `barrierLabel` made the scrim a labelled control rather than decoration, and the
+                    // label is the only thing that says what a tap out here does. The role and the
+                    // action come from `clickable` below.
+                    .semantics { contentDescription = barrierLabel }
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
