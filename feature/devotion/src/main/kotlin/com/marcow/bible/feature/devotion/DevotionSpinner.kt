@@ -31,11 +31,7 @@ import kotlin.math.max
  * `pi * 1.35`, and the whole canvas turned once per revolution.
  */
 @Composable
-fun DevotionSpinner(
-    color: Color,
-    modifier: Modifier = Modifier,
-    size: Dp = DevotionChrome.SPINNER_SIZE,
-) {
+fun DevotionSpinner(color: Color, modifier: Modifier = Modifier, size: Dp = DevotionChrome.SPINNER_SIZE) {
     val turn by rememberInfiniteTransition(label = DevotionSpinnerLabel).animateFloat(
         initialValue = 0f,
         targetValue = 360f,
