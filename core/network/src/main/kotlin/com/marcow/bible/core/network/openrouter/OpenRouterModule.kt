@@ -60,9 +60,8 @@ object OpenRouterModule {
 
     @Provides
     @Singleton
-    fun provideFlutterSecureStorageReader(
-        reader: EncryptedFlutterSecureStorageReader,
-    ): FlutterSecureStorageReader = reader
+    fun provideFlutterSecureStorageReader(reader: EncryptedFlutterSecureStorageReader): FlutterSecureStorageReader =
+        reader
 
     @Provides
     @Singleton
