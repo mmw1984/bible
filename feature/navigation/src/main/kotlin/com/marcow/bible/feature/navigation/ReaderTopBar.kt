@@ -68,10 +68,12 @@ data class ReaderTopBarSlot(val control: ReaderTopBarControl, val gapBefore: Dp)
  * would duplicate destinations the bar is already showing.
  */
 fun readerTopBarSlots(showNavBar: Boolean, showDevotion: Boolean): List<ReaderTopBarSlot> {
-    if (showNavBar) return listOf(
-        ReaderTopBarSlot(ReaderTopBarControl.SEARCH, gapBefore = 0.dp),
-        ReaderTopBarSlot(ReaderTopBarControl.SETTINGS, gapBefore = ReaderTopBarControlGap),
-    )
+    if (showNavBar) {
+        return listOf(
+            ReaderTopBarSlot(ReaderTopBarControl.SEARCH, gapBefore = 0.dp),
+            ReaderTopBarSlot(ReaderTopBarControl.SETTINGS, gapBefore = ReaderTopBarControlGap),
+        )
+    }
     val slots = mutableListOf(ReaderTopBarSlot(ReaderTopBarControl.ASK, gapBefore = 0.dp))
     if (showDevotion) slots += ReaderTopBarSlot(ReaderTopBarControl.DEVOTION, gapBefore = ReaderTopBarControlGap)
     slots += ReaderTopBarSlot(ReaderTopBarControl.SEARCH, gapBefore = ReaderTopBarControlGap)
