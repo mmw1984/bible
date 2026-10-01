@@ -268,10 +268,19 @@ private fun ReaderHeader(
  * The `AnimatedSwitcher` is keyed on the text itself rather than on `'${book.id}-${mode.name}'`, so
  * changing the interface language also animates the title. Flutter did not animate there; a language
  * is changed deliberately, from another screen, and a fade is not a surprise.
+ *
+ * The switcher is skipped where [LocalInspectionMode] is true, and this is the one place in the
+ * reader that has to skip rather than start settled. `Animatable` can be handed its finished value
+ * up front, but `AnimatedContent` holds the entering title at `alpha = 0` until its first frame
+ * advances, and a preview or a golden is exactly one frame that never advances — so the title would
+ * be the one thing on the page a reader never sees, and the golden would pin a page with no heading.
  */
-@OptIn(ExperimentalTextApi::class)
 @Composable
 private fun BookTitle(title: String, family: FontFamily, titleSize: TextUnit, modifier: Modifier = Modifier) {
+    if (LocalInspectionMode.current) {
+        BookTitleText(title = title, family = family, titleSize = titleSize, modifier = modifier)
+        return
+    }
     AnimatedContent(
         targetState = title,
         modifier = modifier,
@@ -285,19 +294,27 @@ private fun BookTitle(title: String, family: FontFamily, titleSize: TextUnit, mo
         },
         label = "readerTitle",
     ) { text ->
-        Text(
-            text = text,
-            color = appColors.ink,
-            fontFamily = family,
-            fontSize = titleSize,
-            lineHeight = titleSize * ReaderChrome.titleLineHeight,
-            fontWeight = FontWeight.Medium,
-            maxLines = TitleMaxLines,
-            // Flutter's `overflow: TextOverflow.fade`, so a two-line title softens rather than
-            // growing an ellipsis.
-            overflow = TextOverflow.Fade,
-        )
+        BookTitleText(title = text, family = family, titleSize = titleSize)
     }
+}
+
+/** The title as it is set, whichever way [BookTitle] decided to arrive at it. */
+@OptIn(ExperimentalTextApi::class)
+@Composable
+private fun BookTitleText(title: String, family: FontFamily, titleSize: TextUnit, modifier: Modifier = Modifier) {
+    Text(
+        text = title,
+        color = appColors.ink,
+        fontFamily = family,
+        fontSize = titleSize,
+        lineHeight = titleSize * ReaderChrome.titleLineHeight,
+        fontWeight = FontWeight.Medium,
+        maxLines = TitleMaxLines,
+        // Flutter's `overflow: TextOverflow.fade`, so a two-line title softens rather than growing an
+        // ellipsis.
+        overflow = TextOverflow.Fade,
+        modifier = modifier,
+    )
 }
 
 /** The three reading modes, in the order Flutter listed them. */
