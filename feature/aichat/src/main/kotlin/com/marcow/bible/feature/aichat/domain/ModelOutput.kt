@@ -150,27 +150,29 @@ private fun stripWebCitations(source: String): String {
  * The check on the last line is for a preamble that was cut off mid-word by a token ceiling, which
  * still has to go — otherwise the answer opens with `safety: sa`.
  *
- * The loop keeps both of its jumps on purpose: the blank line only a removed preamble leaves behind,
- * and the first line that is none. They are two endings of one forward scan, so folding them away
- * would mean deriving the same stopping point twice.
+ * The two endings of the scan — the blank line only a removed preamble leaves behind, and the first
+ * line that is none of the above — are decided on one branch rather than two jumps, which reads the
+ * same and keeps `LoopWithTooManyJumpStatements` off a loop that is not actually tangled.
  */
-@Suppress("LoopWithTooManyJumpStatements")
 private fun stripLeadingInternalMetadata(source: String): String {
     val lines = source.split("\n")
+    val cutOffByCeiling = !source.endsWith("\n")
     var firstVisible = 0
     var removedMetadata = false
     while (firstVisible < lines.size) {
         val line = lines[firstVisible].trim()
-        if (line.isEmpty() && removedMetadata) {
-            firstVisible++
-            continue
-        }
-        val incompleteLastLine = firstVisible == lines.size - 1 && !source.endsWith("\n")
+        val incompleteLastLine = firstVisible == lines.size - 1 && cutOffByCeiling
         val isMetadata = REASONING_METADATA_LINE.containsMatchIn(line) ||
             (incompleteLastLine && looksLikeReasoningMetadataPrefix(line))
-        if (!isMetadata) break
-        removedMetadata = true
-        firstVisible++
+        // A blank line only goes while the preamble is still going. One after the first visible line
+        // separates that line from the answer and belongs to the answer, and a blank line before any
+        // metadata is not metadata: neither carries a match, so both stop the walk on the same branch.
+        if (isMetadata || (line.isEmpty() && removedMetadata)) {
+            removedMetadata = true
+            firstVisible++
+        } else {
+            break
+        }
     }
     return if (removedMetadata) lines.drop(firstVisible).joinToString("\n") else source
 }

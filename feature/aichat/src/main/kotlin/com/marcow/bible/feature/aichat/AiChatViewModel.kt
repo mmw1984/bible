@@ -77,9 +77,44 @@ class AiChatViewModel @Inject constructor(
     /** `_performInitialization`, and the job it runs in, so a second caller can wait for it. */
     private var initializing: Job? = null
 
+    /**
+     * The reader's handoff, held until the chat is ready to act on it.
+     *
+     * Kept as a field rather than read once in the constructor because Flutter's payload could
+     * arrive after the page was built — `deliverLaunchPayload` and `getLaunchPayload` both called
+     * `_applyLaunchPayload`, which reset `sentInitial` and tried again — and a reader tapping a
+     * second verse while the chat is still restoring is the same case.
+     */
+    private var handoff: ScriptureHandoff? = null
+
+    /**
+     * `bool sentInitial`: the handoff's question has been asked, or is deliberately not going to be.
+     *
+     * Set before the question is handed to [send] rather than after, because [send] can decline it —
+     * an answer already in flight, a question that trims to nothing — and a declined launch would
+     * otherwise be retried on every state change and fire the moment the chat went quiet.
+     */
+    private var sentInitial = false
+
+    /**
+     * `pendingQuestion` / `pendingKind`: a question asked before there was a provider to answer it.
+     *
+     * Flutter held both on the page and sent them from `_controllerChanged` the moment
+     * `openRouterSignedIn` went true, having opened the sign-in sheet in between. Dropping the
+     * question instead would lose 「解釋經文」 outright for any reader who opened it while signed
+     * out, which is precisely the reader the feature is for.
+     */
+    private var pendingQuestion: Pair<String, AiMessageKind>? = null
+
     init {
         viewModelScope.launch {
-            signIn.signedIn.collect { signedIn -> holder.update { it.copy(signedIn = signedIn) } }
+            signIn.signedIn.collect { signedIn ->
+                holder.update { it.copy(signedIn = signedIn) }
+                // `_controllerChanged` re-ran both of these on every notification, and signing in is
+                // the one that unblocks a question asked before a provider was there.
+                flushPendingQuestion()
+                maybeSendInitial()
+            }
         }
         viewModelScope.launch {
             signIn.lastError.collect { error -> holder.update { it.copy(authError = error) } }
@@ -114,6 +149,9 @@ class AiChatViewModel @Inject constructor(
                 holder.update { it.copy(initialized = false, initializationError = error.describe()) }
             } finally {
                 initializing = null
+                // The launch question is asked against a restored transcript, so this is the first
+                // moment it can be asked at all.
+                maybeSendInitial()
             }
         }
     }
@@ -142,7 +180,13 @@ class AiChatViewModel @Inject constructor(
             }
             return
         }
-        if (!holder.current.signedIn) return
+        if (!holder.current.signedIn) {
+            // `_send` put the question on `pendingQuestion` and opened the sign-in sheet rather than
+            // dropping it, so it is asked as soon as there is a provider to ask.
+            pendingQuestion = text to kind
+            return
+        }
+        pendingQuestion = null
         val question0 = AiMessage(
             role = AiMessageRole.USER,
             text = text,
@@ -212,18 +256,84 @@ class AiChatViewModel @Inject constructor(
 
     /** The reader removed the attached passage, so later questions are asked without it. */
     fun detachScripture() {
-        holder.update { it.copy(attachedScriptureContext = null, attachedScriptureReference = null) }
+        holder.update {
+            it.copy(attachedScriptureContext = null, attachedScriptureReference = null, attachedScriptureText = null)
+        }
     }
 
     /**
-     * The reader's chapter arrived with the chat — the reader's 「解釋經文」 shortcut.
+     * `_applyLaunchPayload` and `_maybeSendInitial`: a verse action opened the chat with a passage,
+     * and maybe a question already written.
      *
-     * Both halves are set together because the reference is what the chip shows and the context is what
-     * the prompt interpolates, and one without the other would either show a passage the model was
-     * never given or supply a chapter the reader cannot see attached.
+     * Applying and asking are separate because the chat is not ready when the reader taps: the
+     * transcript has not been read back and there may be no provider yet. So the payload is recorded
+     * and the question is asked by [maybeSendInitial] from whichever of those arrives first.
+     *
+     * A handoff with no question — 「問 AI」 — attaches the passage and stops there, which is what
+     * left the reader an empty composer to type into.
      */
-    fun attachScripture(context: String?, reference: String?) {
-        holder.update { it.copy(attachedScriptureContext = context, attachedScriptureReference = reference) }
+    fun openFromReader(handoff: ScriptureHandoff) {
+        // A re-delivery of the same payload is a re-render, not a second question. Flutter re-asked
+        // on every `_applyLaunchPayload` because the page rebuilt instead, which posted the question
+        // twice whenever `getLaunchPayload` and `deliverLaunchPayload` both answered; only a
+        // genuinely new handoff re-arms the auto-send here.
+        if (this.handoff == handoff) {
+            maybeSendInitial()
+            return
+        }
+        this.handoff = handoff
+        sentInitial = false
+        val attached = handoff.contextAttached
+        holder.update {
+            it.copy(
+                // Flutter passed `contextAttached ? launchScripture… : null` to all three — the chip,
+                // `send`'s `scriptureContext` and `send`'s `scriptureReference` — so a handoff
+                // carrying a blank chapter shows no chip and asks with no chapter at all.
+                attachedScriptureContext = handoff.context.takeIf { attached },
+                attachedScriptureReference = handoff.reference.takeIf { attached },
+                attachedScriptureText = handoff.attachment.takeIf { attached },
+            )
+        }
+        // `AiChatPage.initState` initialized the controller however the page was opened, and the
+        // question cannot be asked until it has. `initialize()` returns early if it is already run or
+        // running, so this is not a second restore.
+        initialize()
+        maybeSendInitial()
+    }
+
+    /**
+     * `_maybeSendInitial`: ask the handoff's question, once, as soon as it can be asked.
+     *
+     * Every guard is one Flutter had. The chat must be restored, because a question asked against an
+     * empty transcript is one the restore then overwrites; nothing may be generating, because the
+     * answer would queue behind a turn the reader can see; and there must be something to ask, since
+     * an empty question is not a question. It is not attempted at all without [ScriptureHandoff.autoSend].
+     *
+     * The kind is [AiMessageKind.EXPLANATION] even though the reader never chose it, because
+     * `_send(supplied: question, kind: 'explanation')` filed every launch question as an explanation
+     * — that is what puts it under 「解釋經文」 in the memory document days later.
+     */
+    private fun maybeSendInitial() {
+        val launch = handoff ?: return
+        if (sentInitial || !launch.autoSend) return
+        if (holder.current.generating || !holder.current.isReady) return
+        val question = launch.trimmedQuestion ?: return
+        sentInitial = true
+        send(question, AiMessageKind.EXPLANATION)
+    }
+
+    /**
+     * `pendingQuestion`, asked as soon as there is a provider.
+     *
+     * Guarded rather than unconditional so the held question cannot start an answer on top of one
+     * already in flight, and so a restore that has not landed still gets it sent afterwards — which
+     * is the same ordering [send] itself applies.
+     */
+    private fun flushPendingQuestion() {
+        val held = pendingQuestion ?: return
+        if (holder.current.generating || !holder.current.initialized || !holder.current.signedIn) return
+        pendingQuestion = null
+        send(held.first, held.second)
     }
 
     /**
@@ -322,6 +432,9 @@ class AiChatViewModel @Inject constructor(
                     stopRequested = false
                     holder.update { it.copy(generating = false) }
                     generation = null
+                    // A handoff that arrived mid-answer was declined rather than queued, and the
+                    // moment the chat goes quiet is the moment it can be asked.
+                    maybeSendInitial()
                 }
             }
         }

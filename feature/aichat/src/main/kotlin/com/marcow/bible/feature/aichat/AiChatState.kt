@@ -47,8 +47,23 @@ data class AiChatState(
     val responseLocale: AppLocale = AppLocale.ZH_HANT,
     /** `String? attachedScriptureContext`, the chapter the chat was opened on. */
     val attachedScriptureContext: String? = null,
-    /** `String? attachedScriptureReference`, the passage shown as the attachment chip. */
+    /**
+     * `String? attachedScriptureReference`, the reference filed on each turn taken with this chapter.
+     *
+     * The passage *as the model is given it* is [attachedScriptureContext]; this is the short
+     * `"Genesis 1:1"` that goes into `AiMessage.scripture` and into the memory document, which is
+     * why it is filed separately rather than being read back out of the context.
+     */
     val attachedScriptureReference: String? = null,
+    /**
+     * `String? scriptureAttachment`, the selected verse the chip prints.
+     *
+     * A third string rather than something derived, because Flutter had three: the chapter, the
+     * reference and the verse the reader actually tapped. The chip showed the verse while the turn
+     * recorded the reference, so collapsing them would either misfile the memory or show the reader
+     * a chip they never pressed.
+     */
+    val attachedScriptureText: String? = null,
 ) {
     /**
      * `bool get requiresLogin`: the chat cannot answer without a provider, and OpenRouter needs a key.
@@ -78,6 +93,16 @@ data class AiChatState(
      */
     val contextAttached: Boolean
         get() = !attachedScriptureContext.isNullOrBlank()
+
+    /**
+     * What the attachment chip shows, or null when nothing is attached.
+     *
+     * `launchScriptureAttachment ?? launchScriptureReference`, and null when the chapter is gone —
+     * so removing the chip removes the text as well as the context, which is what passing `null` for
+     * both to `_ChatComposer` did.
+     */
+    val attachmentChip: String?
+        get() = if (contextAttached) attachedScriptureText ?: attachedScriptureReference else null
 
     /**
      * The `AiMessage` the regenerate action applies to, which is the last thing the reader asked.

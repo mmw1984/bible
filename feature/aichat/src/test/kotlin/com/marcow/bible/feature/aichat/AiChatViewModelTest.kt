@@ -259,7 +259,7 @@ internal class AiChatViewModelTest {
     }
 
     @Test
-    fun `a signed-out chat refuses the question rather than failing it`() = runTest(dispatcher) {
+    fun `a signed-out chat holds the question rather than failing it`() = runTest(dispatcher) {
         val ask = ScriptedAsk(answers = listOf(chatAnswer("答案")))
         val viewModel = viewModel(ask = ask, signIn = FakeSignIn(signedIn = false))
         advanceUntilIdle()
@@ -277,7 +277,9 @@ internal class AiChatViewModelTest {
         val viewModel = viewModel(ask = ask)
         advanceUntilIdle()
 
-        viewModel.attachScripture(context = "JHN 3:16\n中文：…\nEnglish: …", reference = "JHN 3:16")
+        viewModel.openFromReader(
+            ScriptureHandoff(reference = "JHN 3:16", context = "JHN 3:16\n中文：…\nEnglish: …"),
+        )
         viewModel.send("解釋一下", kind = AiMessageKind.EXPLANATION)
         advanceUntilIdle()
 
@@ -292,12 +294,137 @@ internal class AiChatViewModelTest {
         val viewModel = viewModel(ask = ask)
         advanceUntilIdle()
 
-        viewModel.attachScripture(context = "JHN 3:16", reference = "JHN 3:16")
+        viewModel.openFromReader(ScriptureHandoff(reference = "JHN 3:16", context = "JHN 3:16"))
         viewModel.detachScripture()
         viewModel.send("再問")
         advanceUntilIdle()
 
         assertNull(ask.questions.last().scriptureContext)
+        assertNull(viewModel.state.value.attachedScriptureReference)
+    }
+
+    @Test
+    fun `a handoff with a question asks it without the reader touching the composer`() = runTest(dispatcher) {
+        val ask = ScriptedAsk(answers = listOf(chatAnswer("答案")))
+        val viewModel = viewModel(ask = ask)
+        advanceUntilIdle()
+
+        viewModel.openFromReader(
+            ScriptureHandoff(
+                reference = "JHN 3:16",
+                context = "JHN 3:16\n中文：…\nEnglish: …",
+                attachment = "JHN 3:16\n中文：…\nEnglish: …",
+                question = "解釋這節經文",
+                autoSend = true,
+            ),
+        )
+        advanceUntilIdle()
+
+        assertEquals(listOf("解釋這節經文"), ask.questions.map { it.question })
+        val turn = viewModel.state.value.messages.first()
+        assertEquals(AiMessageKind.EXPLANATION, turn.kind)
+        assertEquals("JHN 3:16", turn.scripture)
+        assertTrue(ask.questions.single().scriptureContext?.startsWith("JHN 3:16") == true)
+    }
+
+    @Test
+    fun `a handoff without a question only attaches the passage`() = runTest(dispatcher) {
+        val ask = ScriptedAsk()
+        val viewModel = viewModel(ask = ask)
+        advanceUntilIdle()
+
+        viewModel.openFromReader(
+            ScriptureHandoff(reference = "JHN 3:16", context = "JHN 3:16\n中文：…", attachment = "JHN 3:16"),
+        )
+        advanceUntilIdle()
+
+        assertTrue(ask.questions.isEmpty())
+        assertEquals("JHN 3:16", viewModel.state.value.attachmentChip)
+    }
+
+    @Test
+    fun `the handoff's question is asked once, however often the chat is disturbed`() = runTest(dispatcher) {
+        val ask = ScriptedAsk(answers = listOf(chatAnswer("答案"), chatAnswer("追答")))
+        val viewModel = viewModel(ask = ask)
+        advanceUntilIdle()
+
+        val handoff = ScriptureHandoff(
+            reference = "JHN 3:16",
+            context = "JHN 3:16",
+            question = "解釋這節經文",
+            autoSend = true,
+        )
+        viewModel.openFromReader(handoff)
+        advanceUntilIdle()
+        viewModel.openFromReader(handoff)
+        advanceUntilIdle()
+        viewModel.send("追問")
+        advanceUntilIdle()
+
+        assertEquals(listOf("解釋這節經文", "追問"), ask.questions.map { it.question })
+    }
+
+    @Test
+    fun `a handoff arriving before sign-in is asked once the provider arrives`() = runTest(dispatcher) {
+        val ask = ScriptedAsk(answers = listOf(chatAnswer("答案")))
+        val signIn = FakeSignIn(signedIn = false)
+        val viewModel = viewModel(ask = ask, signIn = signIn)
+        viewModel.initialize()
+        advanceUntilIdle()
+
+        viewModel.openFromReader(
+            ScriptureHandoff(
+                reference = "JHN 3:16",
+                context = "JHN 3:16",
+                question = "解釋這節經文",
+                autoSend = true,
+            ),
+        )
+        advanceUntilIdle()
+        assertTrue(ask.questions.isEmpty())
+
+        signIn.signIn()
+        advanceUntilIdle()
+
+        assertEquals(listOf("解釋這節經文"), ask.questions.map { it.question })
+    }
+
+    @Test
+    fun `a question typed before sign-in survives being asked too early`() = runTest(dispatcher) {
+        val ask = ScriptedAsk(answers = listOf(chatAnswer("答案")))
+        val signIn = FakeSignIn(signedIn = false)
+        val viewModel = viewModel(ask = ask, signIn = signIn)
+        advanceUntilIdle()
+
+        viewModel.send("我還沒登入")
+        advanceUntilIdle()
+        assertTrue(ask.questions.isEmpty())
+
+        signIn.signIn()
+        advanceUntilIdle()
+
+        assertEquals(listOf("我還沒登入"), ask.questions.map { it.question })
+    }
+
+    @Test
+    fun `a handoff with a blank chapter attaches nothing to ask with`() = runTest(dispatcher) {
+        val ask = ScriptedAsk(answers = listOf(chatAnswer("答案")))
+        val viewModel = viewModel(ask = ask)
+        advanceUntilIdle()
+
+        viewModel.openFromReader(
+            ScriptureHandoff(
+                reference = "JHN 3:16",
+                context = "   ",
+                attachment = "JHN 3:16",
+                question = "解釋這節經文",
+                autoSend = true,
+            ),
+        )
+        advanceUntilIdle()
+
+        assertNull(ask.questions.single().scriptureContext)
+        assertNull(viewModel.state.value.attachmentChip)
         assertNull(viewModel.state.value.attachedScriptureReference)
     }
 
@@ -431,7 +558,12 @@ private class RecordingMemoryStore(
     }
 }
 
-/** The sign-in, as a change the view model can watch. */
+/**
+ * The sign-in, as a change the view model can watch.
+ *
+ * [signedIn] is a method as well as a constructor argument because the reader can ask a question
+ * before a provider exists, and the behaviour worth pinning is what happens *after* they sign in.
+ */
 private class FakeSignIn(signedIn: Boolean) : AiChatSignIn {
     private val state = MutableStateFlow(signedIn)
     private val errors = MutableStateFlow<String?>(null)
@@ -441,6 +573,11 @@ private class FakeSignIn(signedIn: Boolean) : AiChatSignIn {
 
     var initialized = false
     var signInRequested = false
+
+    /** The reader finished signing in, which is what releases a question held for want of a provider. */
+    fun signedIn() {
+        state.value = true
+    }
 
     override suspend fun initialize() {
         initialized = true
