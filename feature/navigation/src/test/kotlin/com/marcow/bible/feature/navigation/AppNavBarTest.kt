@@ -1,5 +1,7 @@
 package com.marcow.bible.feature.navigation
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -88,5 +90,27 @@ class AppNavBarTest {
     fun `the indicator sits inside the pill's padding at either end`() {
         assertEquals(8f, navBarIndicatorOffset(indicatorPosition = 0f, itemWidth = 84f))
         assertEquals(92f, navBarIndicatorOffset(indicatorPosition = 1f, itemWidth = 84f))
+    }
+
+    @Test
+    fun `an untouched tab reads muted, not ink`() {
+        // The regression this pins: the two ends of the interpolation are near-identical dark
+        // colours, so a swapped pair still looks like a plausible nav bar in a screenshot.
+        assertEquals(Muted, navBarTabTint(muted = Muted, selectedness = 0f))
+    }
+
+    @Test
+    fun `the selected tab darkens to black87 rather than to the theme's ink`() {
+        assertEquals(Color(0xDD000000), navBarTabTint(muted = Muted, selectedness = 1f))
+    }
+
+    @Test
+    fun `a tab half way under a drag reads the colour between the two ends`() {
+        assertEquals(lerp(Muted, Color(0xDD000000), 0.5f), navBarTabTint(muted = Muted, selectedness = 0.5f))
+    }
+
+    private companion object {
+        /** `AppColors.muted` in the light theme, `0xFF696760`. */
+        val Muted = Color(0xFF696760)
     }
 }

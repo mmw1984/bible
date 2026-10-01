@@ -29,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.isDark
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -79,7 +78,15 @@ fun AppFloatingNavBar(
     val colors = appColors
     val shape = RoundedCornerShape(AppNavBarHeight / 2)
     Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        // The inset Flutter's shell applied with `Positioned(left: 16, right: 16)` lives here rather
+        // than in the host, because it is what the pill is *measured* against: `kAppNavBarMaxWidth`
+        // is compared against the inset box, not the window. A host that forgot to inset would let
+        // the pill grow 32 dp wider than Flutter's on a screen narrower than the cap.
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = AppNavBarHorizontalInset),
+        ) {
             val pillWidth = navBarPillWidth(maxWidth, items.size)
             AppControlSurface(
                 modifier = Modifier
@@ -244,9 +251,7 @@ private fun NavBarTab(
     modifier: Modifier = Modifier,
 ) {
     val colors = appColors
-    // `Color.lerp(Colors.black87, colors.ink, t)` verbatim — including the fact that the dark end of
-    // the interpolation stays black in both themes, which is what the Flutter build shipped.
-    val tint = lerp(UnselectedInk, colors.ink, effectiveSelectedness)
+    val tint = navBarTabTint(muted = colors.muted, selectedness = effectiveSelectedness)
     Column(
         modifier = modifier
             .height(AppNavBarHeight)
@@ -274,9 +279,6 @@ private fun NavBarTab(
 /** The pill's drop shadow, heavier in dark mode because the canvas is nearly black there. */
 private fun pillShadowColor(colors: AppColors): Color =
     Color.Black.copy(alpha = if (colors.canvas.isDark()) PillShadowDarkAlpha else PillShadowLightAlpha)
-
-/** `Colors.black87`, the dark end of the icon and label interpolation. */
-private val UnselectedInk = Color(0xDD000000)
 
 /** The indicator is a pure white fill in both themes, as it was in Flutter. */
 private val IndicatorFill = Color.White

@@ -1,6 +1,8 @@
 package com.marcow.bible.feature.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -139,6 +141,23 @@ fun navBarIndexForRelease(indicatorPosition: Float, itemCount: Int): Int {
 /** Left edge of the sliding indicator, `horizontalPadding + clampedPosition * itemWidth + 4`. */
 fun navBarIndicatorOffset(indicatorPosition: Float, itemWidth: Float): Float =
     PillHorizontalPadding + indicatorPosition * itemWidth + IndicatorInset
+
+/**
+ * The colour a tab's glyph and label are drawn in, `Color.lerp(colors.muted, Colors.black87, t)`.
+ *
+ * The order of the two ends is the whole behaviour: [muted] is where an untouched tab sits and
+ * `black87` is where the selected one sits, so a tab *darkens* as the indicator reaches it. The dark
+ * end is the literal `Colors.black87` rather than the theme's `ink` because Flutter interpolated to
+ * that constant in both themes — it is the one place in the bar where a dark theme does not invert.
+ *
+ * Lives here, rather than inline in the tab, so the endpoint order is something a test can pin: the
+ * two colours are close enough in the light theme (near-black and `0xFF191918`) for a swapped pair
+ * to look almost right, and only the muted end of it is visible.
+ */
+fun navBarTabTint(muted: Color, selectedness: Float): Color = lerp(muted, SelectedInk, selectedness)
+
+/** `Colors.black87`, the end of the tab interpolation the selected tab sits on. */
+private val SelectedInk = Color(0xDD000000)
 
 /** Padding inside the pill before the tabs start, `horizontalPadding = 4.0` in `app_navbar.dart`. */
 const val PillHorizontalPadding = 4f
