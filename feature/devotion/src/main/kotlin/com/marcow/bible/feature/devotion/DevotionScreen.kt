@@ -505,9 +505,6 @@ private fun FailureButton(label: String, onClick: () -> Unit, emphasized: Boolea
 private fun devotionTitleFamily(usesEnglishUi: Boolean): FontFamily =
     if (usesEnglishUi) AppFonts.Exposure else AppFonts.NotoSerifTC
 
-/** The language the dates are written in, `AppLocale.zhHant` being Flutter's fallback. */
-private fun DevotionUiState.devotionLocale(): AppLocale = if (usesEnglishUi) AppLocale.EN else AppLocale.ZH_HANT
-
 /** `colors.surfaceRaised.withValues(alpha: .6)`, the idle fill of both the refresh button and a chip. */
 private const val CONTROL_FILL_ALPHA = 0.6f
 

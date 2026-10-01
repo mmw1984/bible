@@ -1,5 +1,6 @@
 package com.marcow.bible.feature.devotion
 
+import com.marcow.bible.core.model.AppLocale
 import com.marcow.bible.feature.devotion.domain.DevotionPost
 
 /**
@@ -37,3 +38,12 @@ data class DevotionUiState(
     /** Whether there is more than one day to choose between, which is what draws the date chips. */
     val hasDateChips: Boolean get() = posts.size > 1
 }
+
+/**
+ * The language the dates — and a copied article — are written in, `AppLocale.zhHant` being Flutter's
+ * fallback for a screen whose settings scope was missing.
+ *
+ * Shared rather than written twice because the page draws dates and the route copies one: a chip and a
+ * pasted paragraph that disagreed about the month would be the same bug in two places.
+ */
+internal fun DevotionUiState.devotionLocale(): AppLocale = if (usesEnglishUi) AppLocale.EN else AppLocale.ZH_HANT

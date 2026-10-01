@@ -216,8 +216,14 @@ class DevotionViewModel @Inject constructor(
     /** `index.clamp(0, list.isEmpty ? 0 : list.length - 1)`, which Dart's `clamp` does on an empty list. */
     private fun clamp(index: Int, size: Int): Int = if (size == 0) 0 else index.coerceIn(0, size - 1)
 
-    private companion object {
-        /** `const Duration(minutes: 30)`. */
+    internal companion object {
+        /**
+         * `const Duration(minutes: 30)`.
+         *
+         * Also how often the page asks: the route's poll waits this long before calling
+         * [refreshIfStale] again, because Flutter's timer was the same half hour its staleness rule
+         * tested against and one of the two should not be free to drift from the other.
+         */
         val STALE_AFTER: Duration = Duration.ofMinutes(30)
     }
 }
