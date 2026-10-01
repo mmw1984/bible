@@ -282,8 +282,7 @@ private class FakeBibleDao(private val chapterFailure: Throwable? = null) : Bibl
     override suspend fun versesByTestament(testament: Int): List<VerseEntity> =
         rows.filter { verse -> canon.any { it.id == verse.bookId && it.testament == testament } }
 
-    override suspend fun booksByTestament(testament: Int): List<BookEntity> =
-        canon.filter { it.testament == testament }
+    override suspend fun booksByTestament(testament: Int): List<BookEntity> = canon.filter { it.testament == testament }
 
     override suspend fun searchContains(pattern: String, limit: Int): List<ScriptureSearchRow> = emptyList()
 }
