@@ -271,6 +271,7 @@ class AiChatViewModel @Inject constructor(
      * they left. [AiChatState.signedIn] follows on its own: it is watched rather than set here, so the
      * button cannot claim a sign-out that the store has not taken yet.
      */
+    @Suppress("TooGenericExceptionCaught")
     fun signOut() {
         viewModelScope.launch {
             try {
@@ -287,6 +288,7 @@ class AiChatViewModel @Inject constructor(
      * Reported as [AiChatState.authError] on a failure rather than silently dropped, because a model
      * that was not saved is one the next request will not use, and the field would still be showing it.
      */
+    @Suppress("TooGenericExceptionCaught")
     fun setModel(model: String) {
         viewModelScope.launch {
             try {
