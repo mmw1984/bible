@@ -1,8 +1,125 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Generated from legacy/flutter/lib/l10n/app_en.arb by tool/arb_to_strings.mjs.
+  Do not edit by hand; re-run the script and commit the result.
+-->
 <resources>
-    <!--
-        Phase 0 only ships the static shell. The ~120 user facing strings are generated
-        from lib/l10n/*.arb by tool/arb_to_strings.mjs in Phase 1 (NATIVE_PLAN.md §3.4).
-    -->
-    <string name="app_name">Bible</string>
+    <string name="app_name" translatable="false">Bible</string>
+    <string name="app_title">Bible</string>
+    <string name="settings">Settings</string>
+    <string name="back">Back</string>
+    <string name="close">Close</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="clear">Clear</string>
+    <string name="cancel">Cancel</string>
+    <string name="options">Options</string>
+    <string name="retry">Retry</string>
+    <string name="search">Search</string>
+    <string name="bible_ai">Bible AI</string>
+    <string name="bible_ai_conversation">Bible AI chat</string>
+    <string name="clear_conversation">Clear conversation</string>
+    <string name="clear_conversation_question">Clear conversation?</string>
+    <string name="clear_conversation_body">All Bible AI conversation history will be removed from this device.</string>
+    <string name="no_conversation">No conversation yet</string>
+    <string name="answer_incomplete">The answer stopped or is incomplete</string>
+    <string name="ask_ai">Ask AI</string>
+    <string name="explain_scripture">Explain scripture</string>
+    <string name="copy_scripture">Copy scripture</string>
+    <string name="copy_answer">Copy answer</string>
+    <string name="remove_scripture_attachment">Remove scripture attachment</string>
+    <string name="regenerate">Regenerate</string>
+    <string name="go_to_latest">Go to latest answer</string>
+    <string name="thinking">Thinking</string>
+    <string name="thinking_content">Thinking content</string>
+    <string name="expand_thinking">Expand thinking content</string>
+    <string name="collapse_thinking">Collapse thinking content</string>
+    <string name="question_hint">Enter your question</string>
+    <string name="follow_up_hint">Ask about %1$s</string>
+    <string name="send">Send</string>
+    <string name="stop">Stop generating</string>
+    <string name="ai_initializing_failed">Bible AI could not initialize. Please retry.</string>
+    <string name="answer_failed">The answer could not be completed. Your text is preserved; please retry.</string>
+    <string name="regenerate_failed">The answer could not be regenerated. Please retry.</string>
+    <string name="open_router_not_connected">OpenRouter is not connected</string>
+    <string name="open_router_connect_body">Sign in to use Bible AI.</string>
+    <string name="login">Sign in</string>
+    <string name="logout">Sign out</string>
+    <string name="connected_securely">Securely connected</string>
+    <string name="not_signed_in">Not signed in</string>
+    <string name="open_router_connection">OpenRouter connection</string>
+    <string name="model_id">Model ID</string>
+    <string name="model_helper">Uses Free Models Router by default. You can enter another OpenRouter model ID.</string>
+    <string name="save_model">Save model</string>
+    <string name="appearance">Appearance</string>
+    <string name="theme">Theme</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+    <string name="app_language">App language</string>
+    <string name="chinese">Chinese</string>
+    <string name="english">English</string>
+    <string name="bilingual">Bilingual</string>
+    <string name="select_book">Select book</string>
+    <string name="select_chapter">Select chapter</string>
+    <string name="select_chapter_current">Select chapter, currently chapter %1$d</string>
+    <string name="chapter_number">Chapter %1$d</string>
+    <string name="chapter_count">%1$d chapters</string>
+    <string name="reading_language">Reading language</string>
+    <string name="currently_reading">Currently reading</string>
+    <string name="previous_chapter">Previous chapter</string>
+    <string name="next_chapter">Next chapter</string>
+    <string name="scripture_load_failed">Scripture could not be loaded</string>
+    <string name="close_search">Close search</string>
+    <string name="close_chapter_picker">Close chapter picker</string>
+    <string name="close_library">Close book library</string>
+    <string name="close_scripture_actions">Close scripture actions</string>
+    <string name="explain_scripture_prompt">Explain %1$s, including its context, main message, and how it can be understood today.</string>
+    <string name="search_whole_bible">Search the whole Bible</string>
+    <string name="search_hint_body">Enter words, a person, event, or topic</string>
+    <string name="traditional_search">Text search</string>
+    <string name="ai_search">AI search</string>
+    <string name="ai_overview">AI Overview</string>
+    <string name="ai_scripture_results">AI scripture results</string>
+    <string name="search_status">Search status</string>
+    <string name="searching_overview">Preparing overview</string>
+    <string name="searching_scripture">Matching scripture</string>
+    <string name="no_results">No matching scripture found</string>
+    <string name="search_failed">Search could not be completed. Please retry.</string>
+    <string name="overview_failed">AI Overview could not be completed.</string>
+    <string name="references_failed">AI scripture search could not be completed.</string>
+    <string name="verse_results_failed">Scripture results could not be loaded.</string>
+    <string name="login_to_search">Sign in to OpenRouter to continue AI search. Text search works without signing in.</string>
+    <string name="traditional_result_count">Text results · %1$s</string>
+    <string name="ai_result_count">AI scripture results · %1$d</string>
+    <string name="old_testament_count">Old Testament · 39</string>
+    <string name="new_testament_count">New Testament · 27</string>
+    <string name="return_to_search_origin">Return to previous reading position</string>
+    <string name="ai_settings">Settings</string>
+    <string name="open_router_login_failed">OpenRouter sign-in could not be opened.</string>
+    <string name="tab_bible">Bible</string>
+    <string name="tab_ask">Ask</string>
+    <string name="tab_devotion">Devotions</string>
+    <string name="navbar_style">Navigation bar style</string>
+    <string name="navbar_style_liquid_glass">Liquid Glass</string>
+    <string name="navbar_style_solid">Solid</string>
+    <string name="navbar_style_blur">Blur</string>
+    <string name="liquid_glass_unsupported_hint">Liquid Glass isn\'t supported on this device (requires Android 13 or later); using the blur style instead.</string>
+    <string name="glass_perf_fallback_notice">Switched to the blur style automatically to keep things smooth. You can re-enable Liquid Glass in Settings.</string>
+    <string name="devotion_loading">Loading devotion…</string>
+    <string name="devotion_load_failed">Devotion could not be loaded</string>
+    <string name="devotion_retry">Retry</string>
+    <string name="devotion_refresh">Refresh</string>
+    <string name="devotion_open_in_browser">Open in browser</string>
+    <string name="devotion_open_web_reader">Web reader</string>
+    <string name="devotion_web_load_failed">Page failed to load</string>
+    <string name="devotion_open_embed">Open embedded audio</string>
+    <string name="devotion_watch_video">Play video</string>
+    <string name="devotion_copy_article">Copy article</string>
+    <string name="devotion_copied">Copied to clipboard</string>
+    <string name="layout_section">Layout</string>
+    <string name="navbar_visibility">Navigation bar</string>
+    <string name="devotion_visibility">Devotions</string>
+    <string name="option_show">Show</string>
+    <string name="option_hide">Hide</string>
+    <string name="app_version">Version</string>
 </resources>
