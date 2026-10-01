@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName")
+
 package com.marcow.bible.feature.search.domain
 
 import com.marcow.bible.core.model.BibleBook
@@ -34,6 +36,7 @@ data class AiSearchReferences(val scriptures: List<AiScriptureReference>, val su
  * is the Flutter build's and it matters, because the filters below need `chapters` and resolution
  * only has the id.
  */
+@Suppress("ThrowsCount")
 internal fun parseSearchReferences(raw: String, books: List<BibleBook>): AiSearchReferences {
     val json = jsonObjectOrNull(raw) ?: throw AiSearchFormatException(INVALID_REFERENCES_JSON_MESSAGE)
     val scriptures = json["scriptures"] as? JsonArray
