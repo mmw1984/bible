@@ -255,7 +255,7 @@ private val REFERENCES = """
      "suggestedQuestions":["神的愛從哪裡來？"]}
 """.trimIndent()
 
-private val NO_REFERENCES = """{"scriptures":[],"suggestedQuestions":[]}"""
+private const val NO_REFERENCES = """{"scriptures":[],"suggestedQuestions":[]}"""
 
 private val GENESIS = BookEntity("GEN", 1, "創世記", "Genesis", 50, 0)
 
