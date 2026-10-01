@@ -56,12 +56,11 @@ class OpenRouterAiProvider @Inject constructor(
      * nothing to wait for. The `suspend` is on the port because Gemini Nano's answer is a device gate
      * that has to be asked for.
      */
-    override suspend fun availability(): AiAvailability =
-        if (session.signedIn.value) {
-            AiAvailability.Available
-        } else {
-            AiAvailability.Unavailable(reason = SIGN_IN_REASON, signInRequired = true)
-        }
+    override suspend fun availability(): AiAvailability = if (session.signedIn.value) {
+        AiAvailability.Available
+    } else {
+        AiAvailability.Unavailable(reason = SIGN_IN_REASON, signInRequired = true)
+    }
 
     /**
      * The answer as it arrives.

@@ -78,12 +78,11 @@ internal fun openRouterChatEvents(lines: Flow<String>): Flow<ChatEvent> = flow {
 }
 
 /** Dart's `finishReason is String && finishReason.isNotEmpty` guard, mapped to the enum. */
-private fun finishReasonOf(raw: JsonElement?): FinishReason? =
-    (raw as? JsonPrimitive)
-        ?.takeIf { it.isString }
-        ?.content
-        ?.takeIf { it.isNotEmpty() }
-        ?.let(FinishReason::of)
+private fun finishReasonOf(raw: JsonElement?): FinishReason? = (raw as? JsonPrimitive)
+    ?.takeIf { it.isString }
+    ?.content
+    ?.takeIf { it.isNotEmpty() }
+    ?.let(FinishReason::of)
 
 /**
  * `_reasoningText` in `legacy/flutter/lib/openrouter_service.dart:544`.
@@ -120,9 +119,10 @@ private fun reasoningText(delta: JsonObject): String {
 private fun reasoningValue(value: JsonElement?): String = when (value) {
     is JsonPrimitive -> if (value.isString) value.content else ""
     is JsonArray -> value.joinToString(separator = "") { reasoningValue(it) }
-    is JsonObject -> REASONING_VALUE_KEYS
-        .firstNotNullOfOrNull { key -> reasoningValue(value[key]).takeIf { it.isNotEmpty() } }
-        .orEmpty()
+    is JsonObject ->
+        REASONING_VALUE_KEYS
+            .firstNotNullOfOrNull { key -> reasoningValue(value[key]).takeIf { it.isNotEmpty() } }
+            .orEmpty()
 
     null -> ""
 }

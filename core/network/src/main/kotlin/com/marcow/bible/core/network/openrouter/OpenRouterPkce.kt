@@ -179,13 +179,12 @@ private fun percentDecode(value: String): String {
     return String(bytes.toByteArray(), Charsets.UTF_8)
 }
 
-private fun isUnreserved(code: Int): Boolean =
-    code in 'a'.code..'z'.code ||
-        code in 'A'.code..'Z'.code ||
-        code in '0'.code..'9'.code ||
-        code == '-'.code ||
-        code == '.'.code ||
-        code == '_'.code ||
-        code == '~'.code
+private fun isUnreserved(code: Int): Boolean = code in 'a'.code..'z'.code ||
+    code in 'A'.code..'Z'.code ||
+    code in '0'.code..'9'.code ||
+    code == '-'.code ||
+    code == '.'.code ||
+    code == '_'.code ||
+    code == '~'.code
 
 private const val HEX = "0123456789ABCDEF"
