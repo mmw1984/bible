@@ -120,9 +120,9 @@ private fun blurTint(colors: AppColors, requested: Color?, emphasized: Boolean):
  * translucent fill is what actually sells it either way; the blur is the finish on top.
  */
 private fun Modifier.appFrosted(shape: Shape): Modifier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-    this.blur(FROST_SIGMA.dp, shape)
+    this.clip(shape).blur(FROST_SIGMA.dp)
 } else {
-    this
+    this.clip(shape)
 }
 
 /**
