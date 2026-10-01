@@ -28,9 +28,9 @@ internal class FakeDevotionCacheDao : DevotionCacheDao {
 
 /** A database that refuses everything, which is what a full disk looks like to the cache. */
 internal class FailingDevotionCacheDao : DevotionCacheDao {
-    override suspend fun entry(id: String): DevotionCacheEntity? = throw IllegalStateException("disk full")
+    override suspend fun entry(id: String): DevotionCacheEntity? = error("disk full")
 
-    override suspend fun upsert(entry: DevotionCacheEntity): Unit = throw IllegalStateException("disk full")
+    override suspend fun upsert(entry: DevotionCacheEntity): Unit = error("disk full")
 
-    override suspend fun clear(): Unit = throw IllegalStateException("disk full")
+    override suspend fun clear(): Unit = error("disk full")
 }
