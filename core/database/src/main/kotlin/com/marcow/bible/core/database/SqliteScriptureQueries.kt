@@ -20,24 +20,23 @@ class SqliteScriptureQueries @Inject constructor(
     private val connection: ScriptureConnection,
 ) : ScriptureQueries {
 
-    override fun books(): List<BibleBook> =
-        connection.read { db -> db.query(ALL_BOOKS_SQL).use(::readBooks) }
+    override fun books(): List<BibleBook> = connection.read { db ->
+        db.query(ALL_BOOKS_SQL).use { cursor -> readBooks(cursor) }
+    }
 
-    override fun book(bookId: String): BibleBook? =
-        connection.read { db ->
-            db.query(BOOKS_SQL, arrayOf(bookId)).use { cursor -> readBooks(cursor).firstOrNull() }
-        }
+    override fun book(bookId: String): BibleBook? = connection.read { db ->
+        db.query(BOOKS_SQL, arrayOf(bookId)).use { cursor -> readBooks(cursor).firstOrNull() }
+    }
 
-    override fun booksByTestament(testament: Testament): List<BibleBook> =
-        connection.read { db ->
-            db.query(BOOKS_BY_TESTAMENT_SQL, arrayOf(testament.storageValue.toString()))
-                .use(::readBooks)
-        }
+    override fun booksByTestament(testament: Testament): List<BibleBook> = connection.read { db ->
+        db.query(BOOKS_BY_TESTAMENT_SQL, arrayOf(testament.storageValue.toString()))
+            .use { cursor -> readBooks(cursor) }
+    }
 
     override fun chapter(bookId: String, chapter: Int): List<VersePair> {
         if (chapter < 1) return emptyList()
         return connection.read { db ->
-            db.query(VERSES_SQL, arrayOf(bookId, chapter.toString())).use(::readVerses)
+            db.query(VERSES_SQL, arrayOf(bookId, chapter.toString())).use { cursor -> readVerses(cursor) }
         }
     }
 
@@ -54,13 +53,12 @@ class SqliteScriptureQueries @Inject constructor(
             db.rawQuery(SEARCH_SQL, arrayOf(pattern, pattern, limit.toString())).use { cursor ->
                 buildList {
                     while (cursor.moveToNext()) {
-                        add(
-                            ScriptureHit(
-                                book = readBook(cursor),
-                                chapter = cursor.getInt(CHAPTER),
-                                verse = readVerse(cursor, VERSE),
-                            ),
+                        val hit = ScriptureHit(
+                            book = readBook(cursor),
+                            chapter = cursor.getInt(CHAPTER),
+                            verse = readVerse(cursor, VERSE),
                         )
+                        add(hit)
                     }
                 }
             }
@@ -69,32 +67,29 @@ class SqliteScriptureQueries @Inject constructor(
 
     override fun rangeText(ref: ScriptureRef): String {
         val book = book(ref.bookId) ?: return ""
-        val end = minOf(ref.verseEnd, ref.verseStart + ScriptureQueries.MAX_RANGE_VERSES - 1)
-        return chapter(ref.bookId, ref.chapter)
-            .filter { it.number in ref.verseStart..end }
-            .joinToString("\n\n") { verse ->
-                "${book.nameZh} ${ref.chapter}:${verse.number}\n" +
-                    "中文：${verse.zh}\nEnglish: ${verse.en}"
-            }
+        val last = minOf(ref.verseEnd, ref.verseStart + ScriptureQueries.MAX_RANGE_VERSES - 1)
+        val blocks = chapter(ref.bookId, ref.chapter).filter { it.number in ref.verseStart..last }
+        return blocks.joinToString("\n\n") { verse ->
+            "${book.nameZh} ${ref.chapter}:${verse.number}\n中文：${verse.zh}\nEnglish: ${verse.en}"
+        }
     }
 
-    override fun progress(bookId: String): ReadingProgress? =
-        connection.read { db ->
-            db.query(PROGRESS_SQL, arrayOf(bookId)).use { cursor ->
-                if (!cursor.moveToFirst()) {
-                    null
-                } else {
-                    ReadingProgress(
-                        bookId = bookId,
-                        chapter = cursor.getInt(0),
-                        verse = cursor.intOrNull(PROGRESS_VERSE),
-                        scrollRatio = cursor.getFloat(2),
-                        mode = ReadingMode.fromStorageKey(cursor.getString(3)),
-                        updatedAtMillis = cursor.getLong(4),
-                    )
-                }
+    override fun progress(bookId: String): ReadingProgress? = connection.read { db ->
+        db.query(PROGRESS_SQL, arrayOf(bookId)).use { cursor ->
+            if (!cursor.moveToFirst()) {
+                null
+            } else {
+                ReadingProgress(
+                    bookId = bookId,
+                    chapter = cursor.getInt(0),
+                    verse = cursor.intOrNull(PROGRESS_VERSE),
+                    scrollRatio = cursor.getFloat(2),
+                    mode = ReadingMode.fromStorageKey(cursor.getString(3)),
+                    updatedAtMillis = cursor.getLong(4),
+                )
             }
         }
+    }
 
     override fun saveProgress(progress: ReadingProgress) {
         connection.write { db ->
@@ -112,19 +107,23 @@ class SqliteScriptureQueries @Inject constructor(
         }
     }
 
-    private fun readBooks(cursor: Cursor): List<BibleBook> = buildList {
+    private fun readBooks(cursor: Cursor): List<BibleBook> {
+        val books = ArrayList<BibleBook>(BOOK_LIST_CAPACITY)
         while (cursor.moveToNext()) {
-            add(readBook(cursor))
+            books.add(readBook(cursor))
         }
+        return books
     }
 
-    private fun readVerses(cursor: Cursor): List<VersePair> = buildList {
+    private fun readVerses(cursor: Cursor): List<VersePair> {
+        val verses = ArrayList<VersePair>(cursor.count.coerceAtLeast(0))
         while (cursor.moveToNext()) {
-            add(readVerse(cursor, VERSE))
+            verses.add(readVerse(cursor, 0))
         }
+        return verses
     }
 
-    /** Both queries that reach this point select the `books` columns in schema order. */
+    /** Both queries that reach this select the `books` columns in schema order. */
     private fun readBook(cursor: Cursor) = BibleBook(
         id = cursor.getString(0),
         ordinal = cursor.getInt(1),
@@ -142,34 +141,33 @@ class SqliteScriptureQueries @Inject constructor(
         en = cursor.stringOrEmpty(firstIndex + 2),
     )
 
-    private fun Cursor.intOrNull(index: Int): Int? =
-        if (isNull(index)) null else getInt(index)
+    private fun Cursor.intOrNull(index: Int): Int? = if (isNull(index)) null else getInt(index)
 
-    private fun Cursor.stringOrEmpty(index: Int): String =
-        if (isNull(index)) "" else getString(index)
+    private fun Cursor.stringOrEmpty(index: Int): String = if (isNull(index)) "" else getString(index)
 
     private companion object {
-        /** Column offsets of the joined result sets. */
+        /** Column offsets of the joined search result. */
         const val CHAPTER = 6
         const val VERSE = 7
 
         /** Offset of `verse` inside PROGRESS_SQL. */
         const val PROGRESS_VERSE = 1
 
-        const val BOOKS_SQL = "SELECT id, ordinal, name_zh, name_en, chapters, testament FROM books WHERE id = ?"
-        const val BOOKS_BY_TESTAMENT_SQL =
-            "SELECT id, ordinal, name_zh, name_en, chapters, testament FROM books " +
-                "WHERE testament = ? ORDER BY ordinal"
-        const val ALL_BOOKS_SQL =
-            "SELECT id, ordinal, name_zh, name_en, chapters, testament FROM books ORDER BY ordinal"
+        const val BOOK_LIST_CAPACITY = 128
+
+        const val BOOK_COLUMNS = "id, ordinal, name_zh, name_en, chapters, testament"
+
+        const val BOOKS_SQL = "SELECT $BOOK_COLUMNS FROM books WHERE id = ?"
+
+        const val BOOKS_BY_TESTAMENT_SQL = "SELECT $BOOK_COLUMNS FROM books WHERE testament = ? ORDER BY ordinal"
+
+        const val ALL_BOOKS_SQL = "SELECT $BOOK_COLUMNS FROM books ORDER BY ordinal"
 
         const val VERSES_SQL =
-            "SELECT verse, text_cuv, text_web FROM verses " +
-                "WHERE book_id = ? AND chapter = ? ORDER BY verse"
+            "SELECT verse, text_cuv, text_web FROM verses WHERE book_id = ? AND chapter = ? ORDER BY verse"
 
         const val PROGRESS_SQL =
-            "SELECT chapter, verse, scroll_ratio, mode, updated_at FROM reading_progress " +
-                "WHERE book_id = ?"
+            "SELECT chapter, verse, scroll_ratio, mode, updated_at FROM reading_progress WHERE book_id = ?"
 
         const val UPSERT_PROGRESS_SQL = """
             INSERT INTO reading_progress (book_id, chapter, verse, scroll_ratio, mode, updated_at)

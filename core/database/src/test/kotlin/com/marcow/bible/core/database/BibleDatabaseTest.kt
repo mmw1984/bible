@@ -229,13 +229,14 @@ class BibleDatabaseTest {
 
     private fun Map<String, Any?>.int(key: String): Int = (this[key] as Number).toInt()
 
-    /** The database lives in the app module; core/database only reads a copy. */
     /**
-     * Supplied by core/database/build.gradle.kts, so the test does not depend on
-     * its working directory.
+     * The path comes from core/database/build.gradle.kts, so the test does not
+     * depend on its working directory. The database itself is committed under the
+     * app module, which owns the assets.
      */
-    private fun databaseFile(): File? =
-        System.getProperty("bible.db.path")?.let(::File)?.takeIf { it.isFile }
+    private fun databaseFile(): File? = System.getProperty("bible.db.path")
+        ?.let(::File)
+        ?.takeIf { it.isFile }
 
     private companion object {
         const val EXPECTED_BOOKS = 66

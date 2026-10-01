@@ -1,11 +1,11 @@
 package com.marcow.bible.core.database
 
+import com.marcow.bible.core.common.IoDispatcher
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import com.marcow.bible.core.common.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Singleton
