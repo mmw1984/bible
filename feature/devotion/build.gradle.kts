@@ -79,7 +79,8 @@ dependencies {
     implementation(libs.androidx.webkit)
     implementation(libs.androidx.media3.exoplayer)
 
-testImplementation(platform(libs.junit.bom))
+    testImplementation(platform(libs.junit.bom))
+
     testImplementation(libs.junit.jupiter)
 
     testImplementation(libs.kotlinx.coroutines.test)
