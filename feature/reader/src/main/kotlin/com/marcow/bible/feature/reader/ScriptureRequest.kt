@@ -36,8 +36,7 @@ data class ScriptureRequest(
 )
 
 /** `'$bookName $chapter:$verse'`, the reference at the top of the copied text in Flutter. */
-fun scriptureReference(bookName: String, chapter: Int, verseNumber: Int): String =
-    "$bookName $chapter:$verseNumber"
+fun scriptureReference(bookName: String, chapter: Int, verseNumber: Int): String = "$bookName $chapter:$verseNumber"
 
 /**
  * The text the clipboard and the AI attachment are both given, mirroring
@@ -46,8 +45,7 @@ fun scriptureReference(bookName: String, chapter: Int, verseNumber: Int): String
  * Both translations whatever the reading mode is, because this is not what is on screen: a Chinese
  * reader copying an English verse still wanted the pairing, which is what Flutter sent.
  */
-fun verseSelectionText(reference: String, verse: VersePair): String =
-    "$reference\n${verse.zh}\n${verse.en}"
+fun verseSelectionText(reference: String, verse: VersePair): String = "$reference\n${verse.zh}\n${verse.en}"
 
 /**
  * The chapter as the model is given it, one blank line between verses.

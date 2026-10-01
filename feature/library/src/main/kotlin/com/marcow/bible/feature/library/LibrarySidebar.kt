@@ -136,11 +136,7 @@ fun LibrarySidebar(
  * 220 ms.
  */
 @Composable
-private fun ChapterGrid(
-    chapterCount: Int,
-    chapter: Int,
-    onChapterSelected: (Int) -> Unit,
-) {
+private fun ChapterGrid(chapterCount: Int, chapter: Int, onChapterSelected: (Int) -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(SidebarChrome.chapterColumns),
         modifier = Modifier.fillMaxSize(),

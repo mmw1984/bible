@@ -264,12 +264,7 @@ private fun ReaderHeader(
  */
 @OptIn(ExperimentalTextApi::class)
 @Composable
-private fun BookTitle(
-    title: String,
-    family: FontFamily,
-    titleSize: TextUnit,
-    modifier: Modifier = Modifier,
-) {
+private fun BookTitle(title: String, family: FontFamily, titleSize: TextUnit, modifier: Modifier = Modifier) {
     AnimatedContent(
         targetState = title,
         modifier = modifier,

@@ -95,12 +95,7 @@ fun VerseRow(
  * the same `layoutBuilder` stacked on.
  */
 @Composable
-private fun VerseText(
-    verse: VersePair,
-    mode: ReadingMode,
-    verseSize: TextUnit,
-    modifier: Modifier = Modifier,
-) {
+private fun VerseText(verse: VersePair, mode: ReadingMode, verseSize: TextUnit, modifier: Modifier = Modifier) {
     AnimatedContent(
         targetState = mode,
         modifier = modifier,

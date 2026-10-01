@@ -209,13 +209,7 @@ private fun CloseRowGate(gate: RowGate) {
 
 /** One book: its canon number, its name, and how many chapters it has. */
 @Composable
-private fun BookRow(
-    ordinal: Int,
-    name: String,
-    selected: Boolean,
-    chapterCount: Int,
-    onClick: () -> Unit,
-) {
+private fun BookRow(ordinal: Int, name: String, selected: Boolean, chapterCount: Int, onClick: () -> Unit) {
     val colors = appColors
     AppTap(
         onClick = onClick,

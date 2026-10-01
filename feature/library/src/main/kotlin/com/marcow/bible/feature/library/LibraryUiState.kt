@@ -25,6 +25,5 @@ data class LibraryUiState(
     fun booksIn(testament: Testament): List<BibleBook> = booksInTestament(books, testament)
 
     /** What a book is called under the current reading mode and interface language. */
-    fun displayName(book: BibleBook, readingMode: ReadingMode): String =
-        book.displayName(readingMode, usesEnglishUi)
+    fun displayName(book: BibleBook, readingMode: ReadingMode): String = book.displayName(readingMode, usesEnglishUi)
 }

@@ -43,7 +43,7 @@ class LibraryViewModel @Inject constructor(
     /**
      * Loads all 66 books rather than one testament.
      *
- * The panel filters in memory, so a switch between the Old and New Testament is instant — Flutter's
+     * The panel filters in memory, so a switch between the Old and New Testament is instant — Flutter's
      * `bibleBooks` was a compile-time constant and the `where` ran on every build. Room's `books()`
      * is a single ordered read of a table that is seeded once and never written again, so paying for
      * it here rather than per testament costs nothing that matters.

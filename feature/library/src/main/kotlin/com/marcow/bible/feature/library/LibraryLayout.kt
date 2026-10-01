@@ -1,5 +1,7 @@
 package com.marcow.bible.feature.library
 
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.Easing
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,6 +45,53 @@ private const val PanelWidthFraction = 0.92f
 
 /** The 440 the panel is never wider than, on a tablet or a landscape phone. */
 private val PanelWidthCap = 440.dp
+
+/**
+ * The 420 ms `_BibleHomeState.transitionDuration` took the panel to arrive.
+ *
+ * `LibraryRoute` drives its own progress with this, and the navigation-compose destination drives it
+ * through its slide in and out transitions, so both arrivals read the token here rather than each
+ * repeating the number Flutter chose.
+ */
+const val LIBRARY_ARRIVE_MILLIS = 420
+
+/** The 300 ms `reverseTransitionDuration` takes the panel back out again. */
+const val LIBRARY_DISMISS_MILLIS = 300
+
+/**
+ * `Offset(-.12, 0)` — how far off the left edge the panel starts.
+ *
+ * A twelfth of the *panel*, not of the window, so the books travel with it and their columns never
+ * shift under the reader while it moves. The Flutter build could say the same thing by measuring the
+ * panel's own width rather than the page it was sliding across.
+ */
+const val LIBRARY_PANEL_SLIDE = 0.12f
+
+/** `Color(0, 0, 0, .62)`, the scrim the `Container` drew over the reader behind the panel. */
+const val LIBRARY_SCRIM_ALPHA = 0.62f
+
+/** `Curves.easeInOutCubic` — the way the panel leaves, which is slower than the way it arrives. */
+val LibraryDismissCurve: Easing = CubicBezierEasing(0.645f, 0.045f, 0.355f, 1f)
+
+/**
+ * How far to the left of its resting place the panel sits at [progress] on its way in, in pixels.
+ *
+ * Zero once it has arrived and [LIBRARY_PANEL_SLIDE] of [panelWidth] before it starts. Both arrival
+ * paths go through this — the self-drawn sheet with its own measured width, the destination with the
+ * width of the page it is sliding across — so the two can only ever differ in what they measure, and
+ * never in how far they travel.
+ */
+fun libraryPanelSlideOffset(panelWidth: Float, progress: Float): Float =
+    -LIBRARY_PANEL_SLIDE * panelWidth * (1f - progress)
+
+/**
+ * Where the panel starts on a page [pageWidth] pixels across, as a whole-pixel translation.
+ *
+ * [libraryPanelSlideOffset] is a float because a `graphicsLayer` wants one; a destination transition
+ * wants an [androidx.compose.ui.unit.IntOffset], so the fraction is floored rather than rounded on
+ * its way there.
+ */
+fun libraryPageSlideOffset(pageWidth: Int): Int = libraryPanelSlideOffset(pageWidth.toFloat(), 1f).toInt()
 
 /**
  * Every measurement inside the sidebar that Flutter chose against its fixed width, rather than

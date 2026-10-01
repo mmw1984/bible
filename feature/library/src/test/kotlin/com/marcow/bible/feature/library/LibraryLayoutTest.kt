@@ -92,5 +92,4 @@ class LibraryLayoutTest {
  */
 private val DpTolerance = 0.01f
 
-private fun assertWidth(expected: Dp, actual: Dp) =
-    assertEquals(expected.value, actual.value, DpTolerance)
+private fun assertWidth(expected: Dp, actual: Dp) = assertEquals(expected.value, actual.value, DpTolerance)

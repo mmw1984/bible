@@ -161,12 +161,7 @@ fun VerseActionSheet(
 
 /** `_ActionTile`: a 54 dp row, a glyph, a gap of 13, and the label — 7 dp below each one. */
 @Composable
-private fun ActionTile(
-    glyph: AppGlyph,
-    label: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun ActionTile(glyph: AppGlyph, label: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val colors = appColors
     val shape = RoundedCornerShape(appRadii.surface)
     AppTap(

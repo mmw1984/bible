@@ -45,12 +45,7 @@ class RowGate {
 
 /** Fades and raises [content] into place, [staggerIndex] rows after the first one. */
 @Composable
-fun RowEntrance(
-    staggerIndex: Int,
-    gate: RowGate,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
+fun RowEntrance(staggerIndex: Int, gate: RowGate, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val progress = remember { Animatable(if (gate.open) 0f else 1f) }
     LaunchedEffect(progress) {
         if (!gate.open) return@LaunchedEffect

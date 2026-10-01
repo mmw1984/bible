@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -78,35 +77,62 @@ fun NavGraphBuilder.libraryRoute(
     selectedBookId: String?,
     onBookSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: LibraryViewModel = hiltViewModel(),
+    viewModel: LibraryViewModel? = null,
 ) {
     composable(
         route = LibraryDestination,
         enterTransition = { libraryEnter() },
         exitTransition = { libraryExit() },
     ) {
-        val state by viewModel.state.collectAsStateWithLifecycle()
-
-        LibrarySheet(
-            state = state,
+        LibraryDestination(
+            navController = navController,
             readingMode = readingMode,
             selectedBookId = selectedBookId,
-            // The transition above is the animation; the sheet itself is drawn at rest, which is what
-            // keeps the two from fighting over the same 420 ms.
-            progress = 1f,
-            onBookSelected = { book ->
-                // Flutter popped first and selected second, so the reader was already moving as the
-                // sheet left.
-                navController.popBackStack()
-                onBookSelected(book.id)
-            },
-            // The back press is the `NavHost`'s own: it pops this destination, which runs the exit
-            // transition above. `LibraryRoute` needs a `BackHandler` for exactly this reason and
-            // `LibrarySheet` needs none, or the press would be handled twice.
-            onDismiss = { navController.popBackStack() },
+            onBookSelected = onBookSelected,
             modifier = modifier,
+            viewModel = viewModel ?: hiltViewModel(),
         )
     }
+}
+
+/**
+ * The destination's content, split out so that [hiltViewModel] is only ever called from a
+ * composable scope.
+ *
+ * It takes its view model as a parameter rather than resolving one itself so that the destination can
+ * be rendered with a stub, and so the scope it is resolved in is the destination's own back stack
+ * entry — the panel outlives nothing, so a view model held by the host `NavHost` would outlive it.
+ */
+@Composable
+private fun LibraryDestination(
+    navController: NavHostController,
+    readingMode: ReadingMode,
+    selectedBookId: String?,
+    onBookSelected: (String) -> Unit,
+    modifier: Modifier,
+    viewModel: LibraryViewModel,
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    LibrarySheet(
+        state = state,
+        readingMode = readingMode,
+        selectedBookId = selectedBookId,
+        // The transition above is the animation; the sheet itself is drawn at rest, which is what
+        // keeps the two from fighting over the same 420 ms.
+        progress = 1f,
+        onBookSelected = { book ->
+            // Flutter popped first and selected second, so the reader was already moving as the
+            // sheet left.
+            navController.popBackStack()
+            onBookSelected(book.id)
+        },
+        // The back press is the `NavHost`'s own: it pops this destination, which runs the exit
+        // transition above. `LibraryRoute` needs a `BackHandler` for exactly this reason and
+        // `LibrarySheet` needs none, or the press would be handled twice.
+        onDismiss = { navController.popBackStack() },
+        modifier = modifier,
+    )
 }
 
 /**
@@ -230,7 +256,7 @@ fun LibrarySheet(
                     // A fraction of the sheet's own width, the way `SlideTransition` read
                     // `Offset(-.12, 0)`. The measured width is used rather than the window's, because
                     // the two differ on a tablet — the panel is capped at 440.
-                    translationX = -PanelSlideFraction * size.width * (1f - progress)
+                    translationX = libraryPanelSlideOffset(size.width, progress)
                     alpha = progress
                 },
         )
@@ -238,43 +264,30 @@ fun LibrarySheet(
 }
 
 /** The way in, for the destination: [fadeIn] and [slideIn] on the same spring curve Flutter's page had. */
-private fun libraryEnter(): EnterTransition =
-    fadeIn(tween(EnterMillis, easing = SpringCurve)) +
-        slideIn(tween(EnterMillis, easing = SpringCurve), initialOffset = offPanelLeft)
+private fun libraryEnter(): EnterTransition = fadeIn(tween(LIBRARY_ARRIVE_MILLIS, easing = SpringCurve)) +
+    slideIn(tween(LIBRARY_ARRIVE_MILLIS, easing = SpringCurve), initialOffset = offPanelLeft)
 
 /** The way out. `easeInOutCubic` in Flutter, as `reverseAnimation`, and the same slide. */
-private fun libraryExit(): ExitTransition =
-    fadeOut(tween(ExitMillis, easing = ExitCurve)) +
-        slideOut(tween(ExitMillis, easing = ExitCurve), targetOffset = offPanelLeft)
+private fun libraryExit(): ExitTransition = fadeOut(tween(LIBRARY_DISMISS_MILLIS, easing = LibraryDismissCurve)) +
+    slideOut(tween(LIBRARY_DISMISS_MILLIS, easing = LibraryDismissCurve), targetOffset = offPanelLeft)
 
 /**
  * `Offset(-.12, 0)`, resolved against the page.
  *
  * A fraction of the *page* here and a fraction of the *panel* in [LibraryRoute]: Flutter slid the
  * whole pushed route, which filled the window, while a sheet that draws itself has only its own
- * width to slide within, and the panel is capped at 440 on a tablet.
+ * width to slide within, and the panel is capped at 440 on a tablet. Both read
+ * [libraryPanelSlideOffset], so the two only ever differ in what they measure.
  */
-private val offPanelLeft: (IntSize) -> IntOffset = { page ->
-    IntOffset(-(page.width * PanelSlideFraction).toInt(), 0)
+internal val offPanelLeft: (IntSize) -> IntOffset = { page ->
+    IntOffset(libraryPageSlideOffset(page.width), 0)
 }
 
 /** The way out, run before the host is asked to remove the sheet. */
 private suspend fun animateOut(progress: Animatable<Float, *>, onDismiss: () -> Unit) {
-    progress.animateTo(0f, tween(ExitMillis, easing = ExitCurve))
+    progress.animateTo(0f, tween(LIBRARY_DISMISS_MILLIS, easing = LibraryDismissCurve))
     onDismiss()
 }
 
-/** `transitionDuration` — 420 ms in, on the same curve as the theme crossfade. */
-private const val EnterMillis = 420
-
-/** `reverseTransitionDuration`. */
-private const val ExitMillis = 300
-
-/** `Offset(-.12, 0)` — how far to the left of where it ends up the sheet starts. */
-private const val PanelSlideFraction = 0.12f
-
 /** `Colors.black.withValues(alpha: .62)`. */
-private val ScrimColor = Color(0f, 0f, 0f, 0.62f)
-
-/** `Curves.easeInOutCubic`, the sheet's reverse curve. */
-private val ExitCurve = CubicBezierEasing(0.645f, 0.045f, 0.355f, 1f)
+private val ScrimColor = Color(0f, 0f, 0f, LIBRARY_SCRIM_ALPHA)
