@@ -45,8 +45,7 @@ private val CorruptSettingsHandler = ReplaceFileCorruptionHandler { Settings.get
 object SettingsDataStoreModule {
     @Provides
     @Singleton
-    fun provideSettingsDataStore(@ApplicationContext context: Context): DataStore<Settings> =
-        DataStoreFactory.create(
+    fun provideSettingsDataStore(@ApplicationContext context: Context): DataStore<Settings> = DataStoreFactory.create(
             // 1.2.x dropped the `create(context = …, fileName = …)` overload from
             // `datastore-core` (the `androidx.datastore:datastore` artifact is now an empty
             // relocation), so the path is spelled out here. `filesDir/datastore` is the same
@@ -58,8 +57,7 @@ object SettingsDataStoreModule {
 
     @Provides
     @Singleton
-    fun provideSettingsRepository(dataStore: DataStore<Settings>): SettingsRepository =
-        SettingsRepository(dataStore)
+    fun provideSettingsRepository(dataStore: DataStore<Settings>): SettingsRepository = SettingsRepository(dataStore)
 }
 
 /**
