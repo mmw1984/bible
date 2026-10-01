@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Phase 0 only ships the static shell. The ~120 user facing strings are generated
+        from lib/l10n/*.arb by tool/arb_to_strings.mjs in Phase 1 (NATIVE_PLAN.md §3.4).
+    -->
+    <string name="app_name">Bible</string>
+</resources>

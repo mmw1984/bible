@@ -41,9 +41,20 @@ app.*.symbols
 app.*.map.json
 
 # Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+/legacy/flutter/android/app/debug
+/legacy/flutter/android/app/profile
+/legacy/flutter/android/app/release
+
+# Native Android build (repo root is the Gradle root)
+.gradle/
+**/build/
+local.properties
+*.apk
+*.aab
+*.jks
+*.keystore
+.cxx/
+
 .vercel
 .env*
 

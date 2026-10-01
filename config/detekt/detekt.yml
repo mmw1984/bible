@@ -1,0 +1,53 @@
+# Detekt configuration for the native Android app (NATIVE_PLAN.md §2.3 / §5).
+# `buildUponDefaultConfig = true` in build.gradle.kts, so this file only carries
+# the deliberate deviations from the detekt defaults.
+build:
+  maxIssues: 0
+
+config:
+  validation: true
+  warningsAsErrors: false
+
+complexity:
+  # Room / Hilt / Compose code regularly needs long bodies and wide constructors.
+  LongMethod:
+    active: false
+  CyclomaticComplexMethod:
+    active: false
+  LongParameterList:
+    active: true
+    functionThreshold: 8
+    constructorThreshold: 10
+  TooManyFunctions:
+    active: false
+
+empty-blocks:
+  # `class BibleApplication : Application()` is intentionally empty until the first
+  # WorkManager/analytics wiring lands; the same applies to Phase 0 marker types.
+  EmptyClassBlock:
+    active: false
+
+naming:
+  # Compose convention: @Composable functions and top level design tokens are PascalCase,
+  # which the default `[a-z][a-zA-Z0-9]*` function pattern rejects.
+  FunctionNaming:
+    active: false
+  TopLevelPropertyNaming:
+    active: false
+
+style:
+  # Layout constants (nav bar height, insets) legitimately use literals.
+  MagicNumber:
+    active: false
+  MaxLineLength:
+    active: true
+    maxLineLength: 120
+  ReturnCount:
+    active: true
+    max: 4
+  ForbiddenComment:
+    active: false
+  WildcardImport:
+    active: true
+  UnusedPrivateMember:
+    active: true
