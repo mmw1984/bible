@@ -47,7 +47,9 @@ import javax.inject.Inject
 class ReaderViewModel @Inject constructor(
     private val bibleRepository: BibleRepository,
     private val settingsRepository: SettingsRepository,
-) : ViewModel(), ReaderNavigator, ReaderScrollSink {
+) : ViewModel(),
+    ReaderNavigator,
+    ReaderScrollSink {
     /** Canon order, loaded once: the reader navigates by index and every direction depends on it. */
     private val books = mutableListOf<BibleBook>()
     private val writes = Channel<ReaderPosition>(Channel.UNLIMITED)
