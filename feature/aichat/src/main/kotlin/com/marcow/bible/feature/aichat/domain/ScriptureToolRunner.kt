@@ -70,25 +70,37 @@ internal data class ScriptureToolRequest(
 )
 
 /**
- * `_jsonObject(answer)?['tool'] == 'get_scripture'`, and nothing else.
+ * `_jsonObject` in `legacy/flutter/lib/ai_service.dart`: the answer's first `{` to its last `}`,
+ * decoded — or nothing.
  *
- * Two Dart behaviours are load-bearing here:
+ * Two Dart behaviours are load-bearing, and the answering loop depends on both of them, which is why
+ * this is its own function rather than a private detail of [scriptureToolRequest]:
  *
- *  - The JSON is cut from the answer's *first* `{` to its *last* `}`, so a model that wrapped its
- *    request in prose still resolves. Anything outside the braces is discarded, which is also why a
- *    plain sentence comes back as no request at all rather than as a parse failure.
+ *  - The JSON is cut from the *first* `{` to the *last* `}`, so a model that wrapped its request in
+ *    prose still resolves. Anything outside the braces is discarded, which is also why a plain
+ *    sentence comes back as no request at all rather than as a parse failure.
  *  - A frame that is not an object, or does not decode, is skipped rather than thrown, so a malformed
  *    answer ends the tool loop and the model is asked to answer from what it already has.
+ *
+ * The loop also asks it a question of its own — is this answer a JSON object at all? — which is what
+ * keeps a tool request from being continued as if it were prose and from being marked incomplete.
+ */
+internal fun answerJsonOrNull(answer: String): JsonObject? {
+    val start = answer.indexOf('{')
+    val end = answer.lastIndexOf('}')
+    if (start < 0 || end <= start) return null
+    val element = runCatching { Json.parseToJsonElement(answer.substring(start, end + 1)) }.getOrNull()
+    return element as? JsonObject
+}
+
+/**
+ * `_jsonObject(answer)?['tool'] == 'get_scripture'`, and nothing else.
  *
  * `bookId` is upper-cased because that is what the canon ids are, and the prompt's own example sends
  * `"JHN"` — a model answering `"jhn"` still resolves, exactly as in Dart.
  */
 internal fun scriptureToolRequest(answer: String): ScriptureToolRequest? {
-    val start = answer.indexOf('{')
-    val end = answer.lastIndexOf('}')
-    if (start < 0 || end <= start) return null
-    val element = runCatching { Json.parseToJsonElement(answer.substring(start, end + 1)) }.getOrNull()
-    val payload = element as? JsonObject ?: return null
+    val payload = answerJsonOrNull(answer) ?: return null
     if (payload["tool"]?.contentOrNull != TOOL_NAME) return null
     return ScriptureToolRequest(
         bookId = payload.stringOrEmpty("bookId").uppercase(),
