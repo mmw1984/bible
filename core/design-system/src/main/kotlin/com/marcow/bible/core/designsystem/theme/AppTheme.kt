@@ -9,7 +9,6 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -41,7 +40,6 @@ object AppTheme {
     val dark: ColorScheme = AppColors.Dark.toColorScheme()
 
     @Composable
-    @Immutable
     private fun rememberTextColors(ink: Color): Typography = remember(ink) {
         val base = appTypography()
         // `theme.textTheme.apply(bodyColor: …, displayColor: …)`: every style in the scale takes the
