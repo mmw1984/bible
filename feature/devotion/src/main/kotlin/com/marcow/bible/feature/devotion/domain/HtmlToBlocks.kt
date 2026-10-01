@@ -365,7 +365,13 @@ private fun addVideo(frame: HtmlElement, blocks: MutableList<DevotionBlock>) {
 /**
  * Flattens the deeply nested WordPress wrappers so logical sections come out as siblings: 安靜 →
  * 經文… → 觀畫. Left nested, 觀畫靈修 renders three levels deep and reads as broken.
+ *
+ * The loop keeps both of its jumps because both mean the block is already settled: a block that is
+ * not a section is emitted untouched, and a container that did split is emitted as its prose plus its
+ * own children. Only the section that is neither is rebuilt below, so the jump is what stops a block
+ * being written twice.
  */
+@Suppress("LoopWithTooManyJumpStatements")
 private fun flattenSections(blocks: List<DevotionBlock>): List<DevotionBlock> {
     val result = mutableListOf<DevotionBlock>()
     for (block in blocks) {
