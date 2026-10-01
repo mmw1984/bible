@@ -74,4 +74,7 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.kotlinx.coroutines.test)
+    // `ScriptureToolRunner` reads through `BibleRepository`, which wraps Room `@Dao` interfaces too
+    // wide to hand-roll a fake of, so the app's `mockk` is the same shortcut here.
+    testImplementation(libs.mockk)
 }
