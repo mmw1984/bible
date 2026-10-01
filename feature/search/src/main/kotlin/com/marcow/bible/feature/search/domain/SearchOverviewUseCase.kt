@@ -19,9 +19,12 @@ import javax.inject.Singleton
  * nowhere to hide a blank — so the Flutter build threw rather than publishing `''`, and the sheet
  * draws `overview_failed` instead. A model that answers with nothing but stripped metadata hits
  * exactly this path, which is the reason the clean-up strips as much as it does.
+ *
+ * Public because it is a constructor parameter of the public `AiSearchUseCase`; see
+ * [AiScriptureReference] for why that chain has to be public rather than module-visible.
  */
 @Singleton
-internal class SearchOverviewUseCase @Inject constructor(
+class SearchOverviewUseCase @Inject constructor(
     private val chatClient: OpenRouterChatClient,
     private val modelId: OpenRouterModelId,
 ) {

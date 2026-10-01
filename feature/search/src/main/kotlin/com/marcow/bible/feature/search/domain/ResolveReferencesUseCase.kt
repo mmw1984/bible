@@ -22,9 +22,12 @@ import javax.inject.Singleton
  * happen is a range that runs past the end of a chapter (`JHN 3:16-400`): the reference is valid, the
  * verses are not, and the answer is the verses that exist inside the range, because that is what the
  * Flutter build showed.
+ *
+ * Public because it is a constructor parameter of the public `AiSearchUseCase`, which cannot name an
+ * internal type; see [AiScriptureReference] for why that chain has to be public.
  */
 @Singleton
-internal class ResolveReferencesUseCase @Inject constructor(private val bibleRepository: BibleRepository) {
+class ResolveReferencesUseCase @Inject constructor(private val bibleRepository: BibleRepository) {
     /**
      * One [AiSearchHit] per verse each reference covers, references in the order the model gave them.
      *

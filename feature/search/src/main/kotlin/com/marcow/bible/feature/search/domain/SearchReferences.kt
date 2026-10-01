@@ -14,8 +14,11 @@ import kotlinx.serialization.json.JsonPrimitive
  * Only the [scriptures] reach the sheet; [suggestedQuestions] came back in the same payload because
  * the schema asks for it, and dropping it here would be the one place the two builds disagree about
  * what the model was asked for.
+ *
+ * Public because it is [SearchReferencesUseCase]'s return type, and that use case is a constructor
+ * parameter of the public `AiSearchUseCase` — see [AiScriptureReference] for why the chain is public.
  */
-internal data class AiSearchReferences(
+data class AiSearchReferences(
     val scriptures: List<AiScriptureReference>,
     val suggestedQuestions: List<String>,
 )

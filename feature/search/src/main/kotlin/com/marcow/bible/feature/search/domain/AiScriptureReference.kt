@@ -12,8 +12,13 @@ import kotlinx.serialization.json.JsonPrimitive
  * reference is only a pointer. [bookId] is canonicalised to upper case by [fromJson] because
  * `_searchReferences` compares it against `bibleBooks`, whose ids are already upper case; a model
  * answering `"jhn"` therefore still resolves, exactly as it did in Dart.
+ *
+ * Public rather than `internal` because [SearchReferencesUseCase] hands these out and [AiSearchUseCase]
+ * takes that use case as a constructor parameter: Kotlin will not let a public signature name an
+ * internal type, so the chain from the sheet's one public entry point down to a parsed reference has
+ * to be public all the way. The rest of the domain stays module-visible — see [SearchReferences].
  */
-internal data class AiScriptureReference(
+data class AiScriptureReference(
     val bookId: String,
     val chapter: Int,
     val verseStart: Int,

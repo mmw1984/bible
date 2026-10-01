@@ -18,9 +18,12 @@ import javax.inject.Singleton
  * numbers against, which in Dart was the top-level `bibleBooks` list. Reading it from the database
  * rather than a hardcoded table is what lets the parser drop `PTT 5:99` for the same reason Flutter
  * did — that chapter does not exist — without the search feature carrying its own copy of the canon.
+ *
+ * Public because it is a constructor parameter of the public `AiSearchUseCase`, and its own return
+ * type is [AiSearchReferences], which has to be public for the same reason. See [AiScriptureReference].
  */
 @Singleton
-internal class SearchReferencesUseCase @Inject constructor(
+class SearchReferencesUseCase @Inject constructor(
     private val chatClient: OpenRouterChatClient,
     private val modelId: OpenRouterModelId,
     private val bibleRepository: BibleRepository,
