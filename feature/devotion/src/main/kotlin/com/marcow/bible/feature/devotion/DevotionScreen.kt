@@ -22,7 +22,11 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.selection.SelectionContainer
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,6 +66,9 @@ import java.time.LocalDate
  * screen in the middle of the space the article would have taken, which is what Flutter's
  * `SliverFillRemaining(hasScrollBody: false)` was for.
  *
+ * The whole list sits inside a [PullToRefreshBox], where Flutter had a `RefreshIndicator` wrapped
+ * around it at `legacy/flutter/lib/devotion_page.dart:209`.
+ *
  * Every input is a callback: the screen holds no view model and no clock. `DevotionRoute` is what
  * turns a tap into a fetch, a post into the clipboard and a link into a browser.
  *
@@ -70,6 +77,7 @@ import java.time.LocalDate
  * (`NATIVE_PLAN.md` §2.2).
  */
 @Suppress("LongParameterList")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DevotionScreen(
     state: DevotionUiState,
@@ -91,46 +99,67 @@ fun DevotionScreen(
     )
 
     Box(modifier = modifier.fillMaxSize().background(colors.canvas)) {
-        // Flutter's `SelectionArea`, which made every article text selectable: long-press for the
-        // system copy menu. Devotion content has no long-press gestures of its own, so nothing on the
-        // page competes with the selection.
-        SelectionContainer {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                item(key = MASTHEAD_KEY) {
-                    DevotionMasthead(
-                        state = state,
-                        layout = layout,
-                        locale = locale,
-                        onRefresh = onRefresh,
-                        onSelectDate = onSelectDate,
-                        onCopyArticle = onCopyArticle,
-                        onOpenWebReader = onOpenWebReader,
-                    )
-                }
-                when {
-                    state.loading -> item(key = BODY_KEY) {
-                        CentredBody {
-                            DevotionSpinner(color = colors.muted)
-                            Spacer(Modifier.height(DevotionChrome.LOADING_GAP))
-                            Text(
-                                text = stringResource(R.string.devotion_loading),
-                                color = colors.muted,
-                                fontSize = DevotionChrome.LOADING_SIZE,
-                            )
-                        }
+        val pullState = rememberPullToRefreshState()
+        PullToRefreshBox(
+            isRefreshing = state.loading,
+            onRefresh = onRefresh,
+            state = pullState,
+            modifier = Modifier.fillMaxSize(),
+            indicator = {
+                // `color: colors.ink, backgroundColor: colors.surface` on the Flutter indicator. The
+                // arc that fills as the page is pulled and the spinner that replaces it once the
+                // gesture crosses the threshold are the same two states Flutter drew itself, so only
+                // the palette and the offset are named here.
+                Indicator(
+                    state = pullState,
+                    isRefreshing = state.loading,
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    containerColor = colors.surface,
+                    color = colors.ink,
+                )
+            },
+        ) {
+            // Flutter's `SelectionArea`, which made every article text selectable: long-press for the
+            // system copy menu. Devotion content has no long-press gestures of its own, so nothing on the
+            // page competes with the selection.
+            SelectionContainer {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    item(key = MASTHEAD_KEY) {
+                        DevotionMasthead(
+                            state = state,
+                            layout = layout,
+                            locale = locale,
+                            onRefresh = onRefresh,
+                            onSelectDate = onSelectDate,
+                            onCopyArticle = onCopyArticle,
+                            onOpenWebReader = onOpenWebReader,
+                        )
                     }
-
-                    state.failed || post == null -> item(key = BODY_KEY) {
-                        CentredBody {
-                            DevotionFailure(
-                                detail = state.failureDetail,
-                                onRetry = onRefresh,
-                                onWebReader = onOpenWebReader,
-                            )
+                    when {
+                        state.loading -> item(key = BODY_KEY) {
+                            CentredBody {
+                                DevotionSpinner(color = colors.muted)
+                                Spacer(Modifier.height(DevotionChrome.LOADING_GAP))
+                                Text(
+                                    text = stringResource(R.string.devotion_loading),
+                                    color = colors.muted,
+                                    fontSize = DevotionChrome.LOADING_SIZE,
+                                )
+                            }
                         }
-                    }
 
-                    else -> articleItems(post, layout, locale, onOpenUrl)
+                        state.failed || post == null -> item(key = BODY_KEY) {
+                            CentredBody {
+                                DevotionFailure(
+                                    detail = state.failureDetail,
+                                    onRetry = onRefresh,
+                                    onWebReader = onOpenWebReader,
+                                )
+                            }
+                        }
+
+                        else -> articleItems(post, layout, locale, onOpenUrl)
+                    }
                 }
             }
         }
