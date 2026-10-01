@@ -34,9 +34,7 @@ interface TraditionalSearch {
  * on an empty box), so the distinction only matters to the tests.
  */
 @Singleton
-class TraditionalSearchUseCase @Inject constructor(
-    private val bibleDao: BibleDao,
-) : TraditionalSearch {
+class TraditionalSearchUseCase @Inject constructor(private val bibleDao: BibleDao) : TraditionalSearch {
     /** At most [SEARCH_RESULT_LIMIT] hits in canon order. */
     override suspend operator fun invoke(query: String): List<ScriptureHit> {
         val pattern = searchPattern(query) ?: return emptyList()

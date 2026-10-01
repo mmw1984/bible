@@ -29,11 +29,7 @@ import com.marcow.bible.core.designsystem.theme.appRadii
  * all a title, a fill and a border rather than drawing the AI half to its own rules.
  */
 @Composable
-internal fun SearchSection(
-    title: String,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
+internal fun SearchSection(title: String, modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val colors = appColors
     val shape = RoundedCornerShape(appRadii.surface)
     Column(

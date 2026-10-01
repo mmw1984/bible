@@ -102,11 +102,7 @@ internal fun referencesFailureMessage(failure: ReferenceFailure): String = strin
  * state. The manager that owns it arrives with Phase 4, so it is passed in rather than held here.
  */
 @Composable
-internal fun SignInPanel(
-    onSignIn: () -> Unit,
-    modifier: Modifier = Modifier,
-    authError: String? = null,
-) {
+internal fun SignInPanel(onSignIn: () -> Unit, modifier: Modifier = Modifier, authError: String? = null) {
     val colors = appColors
     SearchSection(title = stringResource(R.string.ai_overview), modifier = modifier) {
         Column {

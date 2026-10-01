@@ -350,12 +350,7 @@ private fun SearchRowContent(
 
 /** One bordered box. */
 @Composable
-private fun SearchPanelContent(
-    panel: SearchPanel,
-    state: SearchSheetState,
-    onSignIn: () -> Unit,
-    authError: String?,
-) {
+private fun SearchPanelContent(panel: SearchPanel, state: SearchSheetState, onSignIn: () -> Unit, authError: String?) {
     when (panel) {
         SearchPanel.SearchStatus -> SearchStatusPanel()
         SearchPanel.SignIn -> SignInPanel(onSignIn = onSignIn, authError = authError)

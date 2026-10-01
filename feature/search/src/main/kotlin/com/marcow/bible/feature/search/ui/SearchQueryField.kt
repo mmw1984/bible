@@ -144,7 +144,12 @@ private fun QueryText(
             cursorBrush = SolidColor(colors.ink),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             // Flutter's `onSubmitted`, which the sheet also wired to its forward button.
-            keyboardActions = KeyboardActions(onSearch = { onSearch(); focusManager.clearFocus() }),
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    onSearch()
+                    focusManager.clearFocus()
+                },
+            ),
         )
     }
 }

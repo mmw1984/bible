@@ -41,11 +41,7 @@ import kotlin.math.sin
  * widget rather than a second implementation.
  */
 @Composable
-internal fun SearchSpinner(
-    color: Color,
-    modifier: Modifier = Modifier,
-    diameter: Dp = 20.dp,
-) {
+internal fun SearchSpinner(color: Color, modifier: Modifier = Modifier, diameter: Dp = 20.dp) {
     val turn by spinnerTurn()
     Canvas(modifier = modifier.size(diameter).rotate(turn)) {
         val stroke = max(MIN_SPINNER_STROKE_DP, size.minDimension * SPINNER_STROKE_RATIO)

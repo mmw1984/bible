@@ -24,9 +24,7 @@ import javax.inject.Singleton
  * Flutter build showed.
  */
 @Singleton
-internal class ResolveReferencesUseCase @Inject constructor(
-    private val bibleRepository: BibleRepository,
-) {
+internal class ResolveReferencesUseCase @Inject constructor(private val bibleRepository: BibleRepository) {
     /**
      * One [AiSearchHit] per verse each reference covers, references in the order the model gave them.
      *
