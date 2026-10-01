@@ -108,4 +108,4 @@ class LibraryRouteTest {
  * A hundredth of a pixel: far below anything that could be seen, and far above the float error in
  * `width * .12`. The same tolerance [LibraryLayoutTest] uses for dp, for the same reason.
  */
-private val Tolerance = 0.01f
+private const val Tolerance = 0.01f
