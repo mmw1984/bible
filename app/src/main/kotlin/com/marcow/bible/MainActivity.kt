@@ -13,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -46,13 +45,5 @@ private fun BibleShell() {
     ) {
         Text(text = "Bible", style = MaterialTheme.typography.headlineMedium)
         Text(text = "2.0.0-beta", style = MaterialTheme.typography.bodyMedium)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun BibleShellPreview() {
-    MaterialTheme {
-        BibleShell()
     }
 }
