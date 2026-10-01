@@ -148,19 +148,14 @@ class ResolveReferencesUseCaseTest {
     private suspend fun resolve(vararg references: AiScriptureReference): List<AiSearchHit> =
         ResolveReferencesUseCase(repository).invoke(references.toList())
 
-    private fun reference(
-        bookId: String,
-        chapter: Int,
-        verseStart: Int,
-        verseEnd: Int,
-        reason: String = "",
-    ) = AiScriptureReference(
-        bookId = bookId,
-        chapter = chapter,
-        verseStart = verseStart,
-        verseEnd = verseEnd,
-        reason = reason,
-    )
+    private fun reference(bookId: String, chapter: Int, verseStart: Int, verseEnd: Int, reason: String = "") =
+        AiScriptureReference(
+            bookId = bookId,
+            chapter = chapter,
+            verseStart = verseStart,
+            verseEnd = verseEnd,
+            reason = reason,
+        )
 }
 
 private val GENESIS = BookEntity("GEN", 1, "創世記", "Genesis", 50, 0)
@@ -209,8 +204,7 @@ private class FakeBibleDao(private val chapterFailure: Throwable? = null) : Bibl
     override suspend fun versesByTestament(testament: Int): List<VerseEntity> =
         rows.filter { verse -> canon.any { it.id == verse.bookId && it.testament == testament } }
 
-    override suspend fun booksByTestament(testament: Int): List<BookEntity> =
-        canon.filter { it.testament == testament }
+    override suspend fun booksByTestament(testament: Int): List<BookEntity> = canon.filter { it.testament == testament }
 
     override suspend fun searchContains(pattern: String, limit: Int): List<ScriptureSearchRow> = emptyList()
 }
