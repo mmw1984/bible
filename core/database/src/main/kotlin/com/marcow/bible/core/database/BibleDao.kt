@@ -31,6 +31,33 @@ interface BibleDao {
 
     @Query("SELECT * FROM books WHERE testament = :testament ORDER BY ordinal")
     suspend fun booksByTestament(testament: Int): List<BookEntity>
+
+    /**
+     * Verses whose Chinese or English text contains [pattern], in canon order, capped at [limit].
+     *
+     * `BibleRepository.search` in `legacy/flutter/lib/bible_data.dart` walked the books in canon
+     * order and stopped as soon as it had `limit` hits, so the same `ORDER BY` and `LIMIT` return
+     * the same first rows. SQLite's `LIKE` is already case-insensitive for ASCII, which is what the
+     * Flutter build's `toLowerCase().contains` achieved; CJK has no case, so it matches as-is.
+     *
+     * [pattern] comes from [searchPattern], which escapes the wildcards `LIKE` would otherwise read.
+     */
+    @Query(
+        """
+        SELECT v.book_id AS book_id, v.chapter AS chapter, v.verse AS verse,
+               v.text_cuv AS text_cuv, v.text_web AS text_web,
+               b.ordinal AS book_ordinal, b.name_zh AS book_name_zh,
+               b.name_en AS book_name_en, b.chapters AS book_chapters,
+               b.testament AS book_testament
+        FROM verses v
+        JOIN books b ON b.id = v.book_id
+        WHERE v.text_cuv LIKE :pattern ESCAPE '\'
+           OR v.text_web LIKE :pattern ESCAPE '\'
+        ORDER BY b.ordinal, v.chapter, v.verse
+        LIMIT :limit
+        """,
+    )
+    suspend fun searchContains(pattern: String, limit: Int): List<ScriptureSearchRow>
 }
 
 /** Reading position. One row per book, written by the reader from Phase 2 on. */
