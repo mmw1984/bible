@@ -7,7 +7,7 @@ import javax.inject.Singleton
  * Where the OpenRouter API key comes from.
  *
  * The search use cases never see a key: they ask for one, and [OpenRouterChatClient] turns "no key"
- * into [OpenRouterLoginRequiredException]. Phase 4 replaces the implementation with the PKCE
+ * into [OpenRouterException.LoginRequired]. Phase 4 replaces the implementation with the PKCE
  * sign-in in `OpenRouterAuthManager` (`NATIVE_PLAN.md` §5 Phase 4 item 1); the seam is here now so
  * the search feature does not have to move when that arrives.
  */
@@ -27,7 +27,7 @@ interface OpenRouterSession {
 
 /**
  * The session before Phase 4: no key, so every AI request fails with
- * [OpenRouterLoginRequiredException] and the sheet shows its sign-in panel.
+ * [OpenRouterException.LoginRequired] and the sheet shows its sign-in panel.
  *
  * Text search is unaffected — it never asks for a key — which is the same split the Flutter build
  * had, where `login_to_search` promises that "Text search works without signing in".
