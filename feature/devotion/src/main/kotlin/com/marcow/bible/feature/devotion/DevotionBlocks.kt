@@ -72,11 +72,7 @@ fun DevotionBlocks(
 }
 
 @Composable
-private fun DevotionBlockRow(
-    block: DevotionBlock,
-    indent: Dp,
-    onOpenUrl: (String) -> Unit,
-) {
+private fun DevotionBlockRow(block: DevotionBlock, indent: Dp, onOpenUrl: (String) -> Unit) {
     val colors = appColors
     val inset = Modifier.padding(horizontal = indent)
     when (block) {
@@ -300,11 +296,7 @@ private fun devotionImageLoader(): ImageLoader {
  * without the block's contract changing.
  */
 @Composable
-private fun DevotionVideoCard(
-    thumbnailUrl: String,
-    onOpen: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun DevotionVideoCard(thumbnailUrl: String, onOpen: () -> Unit, modifier: Modifier = Modifier) {
     val colors = appColors
     val label = stringResource(R.string.devotion_watch_video)
     val openLabel = stringResource(R.string.devotion_open_in_browser)
@@ -416,11 +408,7 @@ private fun DevotionVideoBackdrop() {
  * there is one destination per block.
  */
 @Composable
-private fun DevotionEmbedCard(
-    url: String,
-    onOpen: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun DevotionEmbedCard(url: String, onOpen: () -> Unit, modifier: Modifier = Modifier) {
     val colors = appColors
     val radii = appRadii
     val shape = RoundedCornerShape(radii.surface)
@@ -491,8 +479,7 @@ private fun DevotionEmbedCard(
  * The label names the service rather than the `w.soundcloud.com/player/?url=…` query that follows it,
  * which would otherwise take the width of the card and ellipsise away the host.
  */
-private fun String.host(): String =
-    runCatching { URI(this).host }.getOrNull()?.takeIf { it.isNotEmpty() } ?: this
+private fun String.host(): String = runCatching { URI(this).host }.getOrNull()?.takeIf { it.isNotEmpty() } ?: this
 
 /**
  * A UI label in the app's own typeface.
