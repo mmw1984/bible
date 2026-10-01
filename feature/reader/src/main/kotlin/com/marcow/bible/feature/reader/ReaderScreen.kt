@@ -200,6 +200,7 @@ fun ReaderScreen(
  * loading chapter is a tall header with a pulsing placeholder under the rule rather than a bare
  * spinner.
  */
+@Suppress("LongParameterList")
 @Composable
 private fun ReaderHeader(
     state: ReaderUiState,
@@ -403,6 +404,7 @@ private fun VerseSkeleton(modifier: Modifier = Modifier) {
 
 /** The previous and next chapter links, the third sliver in `legacy/flutter/lib/main.dart:1288`. */
 @Composable
+@Suppress("LongParameterList")
 private fun ChapterLinks(
     previous: String,
     next: String,
