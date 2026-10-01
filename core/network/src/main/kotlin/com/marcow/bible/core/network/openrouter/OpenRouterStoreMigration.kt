@@ -5,12 +5,12 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * An attempt to read one key out of the file `flutter_secure_storage` left behind, which
@@ -48,9 +48,8 @@ interface FlutterSecureStorageReader {
  * file was opened, and building a new one under this alias cannot decrypt what the old one encrypted.
  */
 @Singleton
-class EncryptedFlutterSecureStorageReader @Inject constructor(
-    @ApplicationContext private val context: Context,
-) : FlutterSecureStorageReader {
+class EncryptedFlutterSecureStorageReader @Inject constructor(@ApplicationContext private val context: Context) :
+    FlutterSecureStorageReader {
     @Suppress("TooGenericExceptionCaught")
     override suspend fun read(key: String): String? = withContext(Dispatchers.IO) {
         try {
