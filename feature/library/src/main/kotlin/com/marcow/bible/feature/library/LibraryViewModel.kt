@@ -50,17 +50,21 @@ class LibraryViewModel @Inject constructor(
      */
     private fun loadBooks() {
         viewModelScope.launch {
-            val books = try {
-                bibleRepository.books()
+            try {
+                val books = bibleRepository.books()
+                _state.update { it.copy(books = books, loading = false) }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
                 // Flutter's panel could not fail, because its list was a constant in the binary. A
                 // panel with nothing in it is still a panel the reader can close, so the failure is
                 // a state rather than a crash: an empty list under the title, not a blank screen.
-                return@launch
+                //
+                // Clearing `loading` here is the whole of that claim. It is only set by the success
+                // above, so returning without it left the panel waiting for a list that was never
+                // going to arrive — which is what the reader's own `failed` flag exists to avoid.
+                _state.update { it.copy(loading = false) }
             }
-            _state.update { it.copy(books = books, loading = false) }
         }
     }
 
