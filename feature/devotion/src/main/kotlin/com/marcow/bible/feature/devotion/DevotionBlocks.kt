@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -242,7 +243,17 @@ private fun DevotionImage(url: String, modifier: Modifier = Modifier) {
         model = url,
         contentDescription = null,
         contentScale = ContentScale.Crop,
-        modifier = modifier.clip(RoundedCornerShape(appRadii.surface)),
+        // Flutter's `ClipRRect(AspectRatio(3 / 2, ColoredBox(…)))`, and the nesting is the whole
+        // point: `loadingBuilder`'s return value *replaces* the `Image` in the tree, so the ratio it
+        // builds stays the parent of the decoded child rather than being swapped out for it. Applied
+        // here, on the frame, every state of the image is 3:2 — spinner, painting or the failure glyph
+        // — which is what keeps a gallery of portrait canvases as one uniform strip.
+        modifier = modifier
+            .clip(RoundedCornerShape(appRadii.surface))
+            .aspectRatio(DevotionChrome.IMAGE_ASPECT_RATIO)
+            // The `ColoredBox` is inside the ratio rather than only under the placeholder, because in
+            // Flutter it wraps the loaded child too. Under an opaque painting it never shows.
+            .background(appColors.surfaceRaised.copy(alpha = DevotionChrome.IMAGE_PANEL_ALPHA)),
         loading = { DevotionImagePlaceholder(loading = true) },
         error = { DevotionImagePlaceholder(loading = false) },
     )
@@ -251,18 +262,13 @@ private fun DevotionImage(url: String, modifier: Modifier = Modifier) {
 /**
  * The 3:2 panel `buildDevotionImage` stood in while the bytes arrived, and again when they never did.
  *
- * Only the placeholder is 3:2: `Image.network`'s `loadingBuilder` handed the decoded child back as
- * soon as it had one, so a loaded painting was measured by its own pixels and this box never sized it.
+ * It fills the frame [DevotionImage] already reserved rather than asking for one of its own: Flutter's
+ * two panels were `AspectRatio`s in their own right only because neither had a ratio above them, and
+ * they sat inside the loading builder's and the error builder's boxes — which is 3:2 either way.
  */
 @Composable
 private fun DevotionImagePlaceholder(loading: Boolean) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(DevotionChrome.IMAGE_ASPECT_RATIO)
-            .background(appColors.surfaceRaised.copy(alpha = DevotionChrome.IMAGE_PANEL_ALPHA)),
-        contentAlignment = Alignment.Center,
-    ) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         if (loading) {
             DevotionSpinner(color = appColors.muted)
         } else {

@@ -101,13 +101,34 @@ class DevotionLayoutTest {
     }
 
     @Test
+    fun `an article image keeps its 3 by 2 frame once the bytes have arrived`() {
+        // `AspectRatio(aspectRatio: 3 / 2)` in `buildDevotionImage` sat *outside* the `Image`: a
+        // `loadingBuilder`'s return value replaces the `Image` in the tree, so the ratio held the
+        // decoded child as well as the spinner. This blog's articles are galleries of portrait
+        // canvases, and a frame that only the placeholder honoured would draw each one at its true
+        // shape — a page a third longer than the Flutter build, and never the same twice.
+        assertEquals(1.5f, DevotionChrome.IMAGE_ASPECT_RATIO, "the frame is 3 / 2, not a placeholder's size")
+        // The panel behind the picture is Flutter's `ColoredBox`, which wrapped the loaded child too.
+        assertEquals(0.4f, DevotionChrome.IMAGE_PANEL_ALPHA)
+        // And it is a whole-column frame: 20 dp of article padding on each side of a 411 dp window.
+        val layout = devotionLayout(screenWidth = PhoneWidth, topInset = 0.dp, bottomClearance = 0.dp)
+        assertEquals(20.dp, layout.articleHorizontal)
+    }
+
+    @Test
     fun `the failure detail is bounded so a long error cannot push the buttons off`() {
         assertEquals(5, DevotionChrome.FAILURE_DETAIL_LINES)
         assertTrue(DevotionChrome.FAILURE_DETAIL_SIZE < DevotionChrome.FAILURE_SIZE)
     }
 
     private companion object {
-        /** The width the Flutter widget tests drove the devotion page at. */
+        /**
+         * The width of a phone window in the Flutter build's own tests.
+         *
+         * Nothing in `legacy/flutter/test/` drove the devotion page in a widget test, so this is a
+         * plain phone width rather than one read out of the Dart suite — it is here to keep the layout
+         * assertions above on the narrow side of Flutter's 920 dp threshold.
+         */
         val PhoneWidth = 411.dp
     }
 }

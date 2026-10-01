@@ -260,8 +260,10 @@ object DevotionChrome {
      * A network image's own placeholder, from `buildDevotionImage` in
      * `legacy/flutter/lib/devotion_image_io.dart`.
      *
-     * The blog's paintings are 3:2, and both the loading and the failed state reserved that shape
-     * rather than collapsing — so the column does not jump once the bytes arrive.
+     * The blog's paintings are 3:2, and Flutter reserved that shape in all three states rather than
+     * only while the bytes were in flight — the column does not jump once they arrive. It is therefore
+     * the *frame's* ratio and not the placeholder's: see `DevotionImage` for why the difference is
+     * invisible in the Dart and load-bearing here.
      */
     const val IMAGE_ASPECT_RATIO: Float = 3f / 2f
     val IMAGE_GLYPH_SIZE: Dp = 20.dp
