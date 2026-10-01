@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)
@@ -66,10 +67,14 @@ dependencies {
     api(project(":core:model"))
     api(project(":core:common"))
     implementation(project(":core:database"))
+    implementation(project(":core:datastore"))
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.kotlinx.coroutines.test)
+    // The same in-memory DataStore `core/datastore` tests with, so the interface language the panel
+    // names books in can be changed from a test rather than only from Settings.
+    testImplementation(testFixtures(project(":core:datastore")))
 }
