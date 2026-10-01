@@ -37,6 +37,15 @@ internal enum class DevotionGlyph {
     /** `Icons.play_arrow`, Material's filled triangle rather than Lucide's — the video's play mark. */
     PLAY,
 
+    /**
+     * `Icons.fast_rewind` and `Icons.fast_forward`, on the seek flash.
+     *
+     * Material's filled double triangles rather than Lucide's stroked ones, like [PLAY], because they
+     * sit in white on a 55%-black disc — a stroked mark at that size reads as a smudge.
+     */
+    REWIND,
+    FORWARD,
+
     /** `LucideIcons.imageOff` — the 20 px mark on an article image that would not load. */
     IMAGE_OFF,
 }
@@ -88,10 +97,20 @@ private fun DevotionGlyph.imageVector(): ImageVector = ImageVector.Builder(
             "M22 10v3",
         )
 
-        // Material's `Icons.play_arrow` on the 24 grid Flutter drew it on: a filled triangle, and so
+// `Icons.play_arrow` on the 24 grid Flutter drew it on: a filled triangle, and so
         // the one shape here that paints rather than strokes.
-        DevotionGlyph.PLAY -> lucidePath(
-            "M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z",
+        DevotionGlyph.PLAY -> materialFilled(
+            "M8 5v14l11-7z",
+        )
+
+        // `Icons.fast_rewind`: two filled left-pointing triangles, meeting at x≈11.
+        DevotionGlyph.REWIND -> materialFilled(
+            "M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z",
+        )
+
+        // `Icons.fast_forward`: the same two triangles mirrored about x=12.
+        DevotionGlyph.FORWARD -> materialFilled(
+            "M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z",
         )
 
         DevotionGlyph.IMAGE_OFF -> lucidePath(
@@ -122,6 +141,32 @@ private fun ImageVector.Builder.lucidePath(vararg paths: String) {
             strokeLineWidth = LucideStrokeWidth,
             strokeLineCap = StrokeCap.Round,
             strokeLineJoin = StrokeJoin.Round,
+        )
+    }
+}
+
+/**
+ * Material's filled icons, which are the opposite of [lucidePath]: paint with no stroke.
+ *
+ * [PLAY], [REWIND] and [FORWARD] are `Icons.*` rather than `LucideIcons.*`, so Flutter drew them as
+ * solid shapes. Reusing the Lucide helper for them would have left the play triangle hollow and the
+ * transport marks as outlines — visible at 22 dp on a black disc, which is the one place these three
+ * are drawn.
+ *
+ * The path data is Material's own rather than something drawn to match, because these three are the
+ * glyphs a reader has seen in YouTube itself and the eye is very good at them. They are kept as paths
+ * instead of pulled in as `material-icons-extended`, which no module here depends on and which would
+ * add a library for three marks.
+ *
+ * The black brush is what [DevotionGlyphView]'s `Icon(tint = …)` re-tints, the same arrangement the
+ * Lucide paths use for their stroke.
+ */
+private fun ImageVector.Builder.materialFilled(vararg paths: String) {
+    paths.forEach { pathData ->
+        addPathNodes(
+            pathData = pathData,
+            fill = SolidColor(Color.Black),
+            stroke = null,
         )
     }
 }

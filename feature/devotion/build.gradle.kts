@@ -76,8 +76,10 @@ dependencies {
     implementation(libs.jsoup)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
-    implementation(libs.androidx.webkit)
-    implementation(libs.androidx.media3.exoplayer)
+    // No media dependency: the SoundCloud embed is a page in a `<iframe>`, so it plays in a WebView
+    // exactly as it did in Dart. `media3-exoplayer` would only reach it through its HLS manifest,
+    // which drops the track artwork and the share sheet the widget is built around. The YouTube
+    // player is the same story — a WebView, because its controls are the point.
 
     testImplementation(platform(libs.junit.bom))
 

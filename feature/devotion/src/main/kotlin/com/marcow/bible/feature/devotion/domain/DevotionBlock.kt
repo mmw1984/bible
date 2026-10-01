@@ -24,15 +24,25 @@ data class DevotionQuote(val text: String) : DevotionBlock
 /** An `<img>`, with [url] already percent-encoded and lazy-load placeholders resolved. */
 data class DevotionImage(val url: String) : DevotionBlock
 
-/** A YouTube embed (`<iframe src="…youtube.com/embed/…">`). */
+/**
+ * A YouTube embed (`<iframe src="…youtube.com/embed/…">`).
+ *
+ * [videoId] is the `v=` the embed route carried. [watchUrl] and [thumbnailUrl] are derived rather than
+ * parsed, because the Dart build derived them too: the watch URL is what a double-tap's "open in
+ * browser" row targets, and the thumbnail is only reached when the inline player fails.
+ */
 data class DevotionVideo(val videoId: String) : DevotionBlock {
     val watchUrl: String get() = "https://www.youtube.com/watch?v=$videoId"
     val thumbnailUrl: String get() = "https://img.youtube.com/vi/$videoId/hqdefault.jpg"
 }
 
 /**
- * Any other `<iframe>` embed — the SoundCloud player that opens several 靈修默想 posts. The native
- * reader cannot render it inline, so it surfaces as a tappable card; the web reader opens it.
+ * Any other `<iframe>` embed — the SoundCloud player that opens several 靈修默想 posts.
+ *
+ * [url] is played inline, by a `WebView` loading SoundCloud's own player widget, with links out of
+ * that frame escalated to the browser so a tap cannot take the reader off the article. If the frame
+ * reports a main-frame error the block falls back to a card carrying the host and an open button,
+ * which is the same branch the Dart reader took on the web.
  */
 data class DevotionEmbed(val url: String) : DevotionBlock
 

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -141,18 +142,20 @@ private fun DevotionBlockRow(block: DevotionBlock, indent: Dp, onOpenUrl: (Strin
             }
         }
 
-        is DevotionBlock.Video -> DevotionVideoCard(
+        is DevotionBlock.Video -> DevotionVideoPlayer(
+            videoId = block.videoId,
+            watchUrl = block.watchUrl,
             thumbnailUrl = block.thumbnailUrl,
-            onOpen = { onOpenUrl(block.watchUrl) },
+            onOpenUrl = onOpenUrl,
             modifier = inset.padding(
                 top = DevotionChrome.MEDIA_ABOVE,
                 bottom = DevotionChrome.MEDIA_BELOW,
             ),
         )
 
-        is DevotionBlock.Embed -> DevotionEmbedCard(
+        is DevotionBlock.Embed -> DevotionEmbedPlayer(
             url = block.url,
-            onOpen = { onOpenUrl(block.url) },
+            onOpenUrl = onOpenUrl,
             modifier = inset.padding(
                 top = DevotionChrome.MEDIA_ABOVE,
                 bottom = DevotionChrome.MEDIA_BELOW,
@@ -287,23 +290,25 @@ private fun devotionImageLoader(): ImageLoader {
 }
 
 /**
- * A YouTube embed, as `_ThumbnailFallback` drew it.
+ * A YouTube embed Flutter could not play in place, as `_ThumbnailFallback` drew it.
  *
- * Flutter only reached for this card when it had no player — on the web, and whenever building one
- * failed — and there is no `youtube_player_flutter` here, so it is the rendering of this block that
- * exists. It is Flutter's own fallback rather than an approximation of the player, and the thumbnail
- * and the watch URL are the two the block already carries, so an inline player can replace this
- * without the block's contract changing.
+ * This is a fallback, not the rendering: [DevotionVideoPlayer] shows a real player, and stands this
+ * card in only once its frame reports a main-frame error — which is the same branch Flutter took on the
+ * web and whenever building its player failed. The open-in-browser row under the thumbnail is the
+ * shared [DevotionOpenInBrowserRow], because Flutter drew that row under both renderings.
  */
 @Composable
-private fun DevotionVideoCard(thumbnailUrl: String, onOpen: () -> Unit, modifier: Modifier = Modifier) {
-    val colors = appColors
+internal fun DevotionVideoCard(
+    watchUrl: String,
+    thumbnailUrl: String,
+    onOpenUrl: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val label = stringResource(R.string.devotion_watch_video)
-    val openLabel = stringResource(R.string.devotion_open_in_browser)
     val picture = Modifier.fillMaxWidth().aspectRatio(DevotionChrome.VIDEO_ASPECT_RATIO)
     Column(modifier = modifier) {
         AppTap(
-            onClick = onOpen,
+            onClick = { onOpenUrl(watchUrl) },
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(appRadii.surface))
@@ -353,34 +358,47 @@ private fun DevotionVideoCard(thumbnailUrl: String, onOpen: () -> Unit, modifier
         }
         // The open-in-browser row sits under the picture rather than as a chip over its corner: there
         // it covered the painting, ate touches and read as a fourth control on a card with three.
-        AppTap(
-            onClick = onOpen,
-            modifier = Modifier
-                .align(Alignment.End)
-                .padding(top = DevotionChrome.VIDEO_OPEN_ABOVE),
+        DevotionOpenInBrowserRow(url = watchUrl, onOpenUrl = onOpenUrl)
+    }
+}
+
+/**
+ * The "open in browser" row under a video, from `DevotionYoutubePlayer.build`.
+ *
+ * One implementation for both renderings of a video block, because Flutter had one: whether the frame
+ * played or the thumbnail card was standing in, the row under it was the same control with the same
+ * measurements. It is a `ColumnScope` member because both of its homes align it to the end edge of
+ * the column it sits in, and both of them are that column.
+ */
+@Composable
+internal fun ColumnScope.DevotionOpenInBrowserRow(url: String, onOpenUrl: (String) -> Unit) {
+    AppTap(
+        onClick = { onOpenUrl(url) },
+        modifier = Modifier
+            .align(Alignment.End)
+            .padding(top = DevotionChrome.VIDEO_OPEN_ABOVE),
+    ) {
+        Row(
+            modifier = Modifier.padding(
+                horizontal = DevotionChrome.VIDEO_OPEN_HORIZONTAL,
+                vertical = DevotionChrome.VIDEO_OPEN_VERTICAL,
+            ),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                modifier = Modifier.padding(
-                    horizontal = DevotionChrome.VIDEO_OPEN_HORIZONTAL,
-                    vertical = DevotionChrome.VIDEO_OPEN_VERTICAL,
+            DevotionGlyphView(
+                glyph = DevotionGlyph.EXTERNAL_LINK,
+                size = DevotionChrome.VIDEO_OPEN_GLYPH,
+                color = appColors.faint,
+            )
+            Spacer(Modifier.width(DevotionChrome.VIDEO_OPEN_GAP))
+            Text(
+                text = stringResource(R.string.devotion_open_in_browser),
+                style = openRundeStyle(
+                    size = DevotionChrome.VIDEO_OPEN_SIZE,
+                    weight = FontWeight.Normal,
+                    color = appColors.faint,
                 ),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                DevotionGlyphView(
-                    glyph = DevotionGlyph.EXTERNAL_LINK,
-                    size = DevotionChrome.VIDEO_OPEN_GLYPH,
-                    color = colors.faint,
-                )
-                Spacer(Modifier.width(DevotionChrome.VIDEO_OPEN_GAP))
-                Text(
-                    text = openLabel,
-                    style = openRundeStyle(
-                        size = DevotionChrome.VIDEO_OPEN_SIZE,
-                        weight = FontWeight.Normal,
-                        color = colors.faint,
-                    ),
-                )
-            }
+            )
         }
     }
 }
@@ -400,15 +418,15 @@ private fun DevotionVideoBackdrop() {
 }
 
 /**
- * An embed Flutter could not play in place, as `_ExternalFallback` drew it.
+ * An embed whose frame failed, as `_ExternalFallback` drew it.
  *
- * The SoundCloud player is a web page in an `<iframe>`, so this is what a reader with no WebView
- * shows — which is the branch Flutter itself took when its WebView errored, down to the host printed
- * under the label. The button repeats the card's own action rather than opening anything else, so
- * there is one destination per block.
+ * A fallback for [DevotionEmbedPlayer], shown once that frame reports a main-frame error — which is
+ * the branch Flutter itself took when its WebView errored, down to the host printed under the label.
+ * The button repeats the block's own action rather than opening anything else, so there is one
+ * destination per block.
  */
 @Composable
-private fun DevotionEmbedCard(url: String, onOpen: () -> Unit, modifier: Modifier = Modifier) {
+internal fun DevotionEmbedCard(url: String, onOpenUrl: (String) -> Unit, modifier: Modifier = Modifier) {
     val colors = appColors
     val radii = appRadii
     val shape = RoundedCornerShape(radii.surface)
@@ -453,7 +471,7 @@ private fun DevotionEmbedCard(url: String, onOpen: () -> Unit, modifier: Modifie
         }
         Spacer(Modifier.width(DevotionChrome.EMBED_BUTTON_GAP))
         AppTap(
-            onClick = onOpen,
+            onClick = { onOpenUrl(url) },
             modifier = Modifier
                 .clip(RoundedCornerShape(radii.compact))
                 .background(colors.surface.copy(alpha = EmbedButtonFillAlpha))

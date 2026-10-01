@@ -163,6 +163,18 @@ object DevotionChrome {
     const val VIDEO_PLAY_ALPHA: Float = 0.55f
     const val VIDEO_SCRIM_ALPHA: Float = 0.45f
 
+    /**
+     * The double-tap seek flash, from `_SeekFlash` in `devotion_youtube_player.dart`.
+     *
+     * A 64 dp translucent disc carrying the transport glyph and the stacked seconds, set in the
+     * opposite corner to the tap that asked for it — the same shape YouTube uses for this, and the same
+     * numbers, so a reader who has used the app proper sees the same gesture here.
+     */
+    val SEEK_FLASH_SIZE: Dp = 64.dp
+    val SEEK_FLASH_GLYPH: Dp = 22.dp
+    val SEEK_FLASH_GAP: Dp = 2.dp
+    val SEEK_FLASH_TEXT_SIZE: TextUnit = 12.sp
+
     /** The "open in browser" row under the video: 6 above it, 12 px glyph, 5 beside it, 11 px label. */
     val VIDEO_OPEN_ABOVE: Dp = 6.dp
     val VIDEO_OPEN_HORIZONTAL: Dp = 6.dp
@@ -190,6 +202,16 @@ object DevotionChrome {
     val EMBED_BUTTON_HORIZONTAL: Dp = 10.dp
     val EMBED_BUTTON_VERTICAL: Dp = 6.dp
     val EMBED_BUTTON_GLYPH: Dp = 14.dp
+
+    /**
+     * `_ExternalChip`, the black pill in the top-right corner of the SoundCloud frame.
+     *
+     * A chip of the embed's own rather than the app's: it has to read against whatever the artwork
+     * underneath is, so it carries its own fill instead of borrowing `surfaceRaised`.
+     */
+    val EMBED_CHIP_HORIZONTAL: Dp = 8.dp
+    val EMBED_CHIP_VERTICAL: Dp = 4.dp
+    val EMBED_CHIP_SIZE: TextUnit = 11.sp
 
     /** `surfaceRaised` at these alphas: the quote and the embed cards, and the failed image's panel. */
     const val RAISED_FILL_ALPHA: Float = 0.5f
