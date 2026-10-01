@@ -1,12 +1,18 @@
 [versions]
-# Toolchain. Kotlin 2.3.20 ships the Compose compiler plugin, so the Compose and
-# Kotlin versions can never drift apart.
+# Toolchain. AGP 9 has built-in Kotlin support and rejects applying
+# `org.jetbrains.kotlin.android` explicitly, so Android modules take Kotlin from AGP itself and
+# only the non-Android Kotlin plugins (jvm/compose/serialization) are declared here.
+# Those plugins must stay on exactly the KGP that AGP ships, otherwise the Compose compiler
+# plugin and the Kotlin compiler drift apart and the build stops compiling.
+# AGP 9.1.0 has a runtime dependency on kotlin-gradle-plugin 2.2.10 and pairs it with KSP
+# 2.2.10-2.0.2; AGP silently raises any lower KSP to that pair. `kotlin` and `ksp` below are
+# therefore pinned to AGP's own pair rather than to the newest release on Maven.
 # AGP 9.1.0 is the floor for compileSdk 37: Compose 1.12.1 and androidx.hilt 1.4.0 both
 # declare minCompileSdk=37 in their AAR metadata, so the whole toolchain moves up together.
 # AGP 9.1.0 declares GRADLE_MIN_VERSION 9.3.1 (see gradle/wrapper/gradle-wrapper.properties).
 agp = "9.1.0"
-kotlin = "2.3.20"
-ksp = "2.3.12" # built against kotlin-stdlib 2.3.20
+kotlin = "2.2.10" # KGP built into AGP 9.1.0
+ksp = "2.2.10-2.0.2" # the KSP release AGP pairs with KGP 2.2.10
 jdk = "17"
 
 # DI. 2.59 was pinned only because 2.59.1+ requires AGP 9; now that we are on AGP 9.1.0
@@ -104,7 +110,6 @@ turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
