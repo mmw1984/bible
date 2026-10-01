@@ -121,7 +121,9 @@ internal fun parseDevotionTitleDate(title: String): LocalDate? {
     val year = numbers[0]
     val month = numbers[1]
     val day = numbers[2]
-    if (month < 1 || month > 12 || day < 1 || day > 31) return null
+    val monthOutOfRange = month < 1 || month > 12
+    val dayOutOfRange = day < 1 || day > 31
+    if (monthOutOfRange || dayOutOfRange) return null
     // Dart's `DateTime(y, m, d)` rolled an out-of-range day into the next month; `LocalDate.of` throws.
     return LocalDate.of(year, month, 1).plusDays((day - 1).toLong())
 }
