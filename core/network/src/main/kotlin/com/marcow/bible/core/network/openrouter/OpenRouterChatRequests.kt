@@ -117,16 +117,27 @@ internal object OpenRouterChatRequests {
      * reasoning off sent no `reasoning` key at all, which is a different request from one that sends
      * a key disabling it. The two search kinds always send a key, because their overrides were not
      * conditional.
+     *
+     * A chat reaches null two ways, and both are Dart's `options.reasoning: false` arriving by a
+     * different route. [AiRequest.Chat.reasoning] is the per-call-site flag — `_answerExistingMessage`
+     * streams with it on and `_searchOverview` with it off. [AiRequestOptions.reasoning] is the
+     * caller's own statement, and [ReasoningBudget.Off] is how `research()` says the same thing; a
+     * chat that states it therefore also sends no key, rather than sending `{enabled: false}` where
+     * Dart sent nothing. A chat that states no budget at all gets Dart's `reasoning: true` default,
+     * which is the visible 8192-token block.
      */
     private fun reasoningOf(request: AiRequest, options: AiRequestOptions): JsonObject? = when (request) {
         is AiRequest.SearchReferences -> reasoningBlock(ReasoningBudget.Excluded())
         is AiRequest.SearchOverview -> reasoningBlock(ReasoningBudget.Off)
-        is AiRequest.Chat ->
-            if (request.reasoning) {
-                reasoningBlock(options.reasoning ?: ReasoningBudget.Visible())
-            } else {
-                null
+        is AiRequest.Chat -> {
+            val budget = options.reasoning
+            when {
+                !request.reasoning -> null
+                budget == null -> reasoningBlock(ReasoningBudget.Visible())
+                budget == ReasoningBudget.Off -> null
+                else -> reasoningBlock(budget)
             }
+        }
     }
 
     /** The three `reasoning` bodies, one per [ReasoningBudget] case. */

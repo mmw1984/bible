@@ -100,7 +100,15 @@ sealed interface ReasoningBudget {
      */
     data class Excluded(val maxTokens: Int = 32) : ReasoningBudget
 
-    /** `{'enabled': false, 'exclude': true}` — the `shortSearchOverview` branch, off rather than small. */
+    /**
+     * Off rather than small, which is the two ways Dart asked for no thinking.
+     *
+     * As the `shortSearchOverview` branch's own override it is `{'enabled': false, 'exclude': true}`:
+     * the provider is told to stop. Stated instead by a caller on [AiRequestOptions] it is
+     * `options.reasoning: false`, which Dart's conditional turned into *no* `reasoning` key — so the
+     * mapping leaves the key off for a chat and the two arrive at the provider as the different
+     * requests they were.
+     */
     data object Off : ReasoningBudget
 
     companion object {
@@ -164,13 +172,27 @@ data class AiRequestOptions(
         val ChatWithoutWebSearch = AiRequestOptions(webSearch = WebSearchMode.Disabled)
 
         /**
-         * `research()` of `legacy/flutter/lib/openrouter_service.dart:229`: forced, one tool call,
-         * a low context size and a long ceiling.
+         * `research()` of `legacy/flutter/lib/openrouter_service.dart:229`: forced, one tool call, a
+         * low context size and a long ceiling.
+         *
+         * The three per-search ceilings are stated even though [DEFAULT_WEB_SEARCH_CEILING] is what
+         * an unstated one becomes, because `research()` was the one path that did not take the `0`:
+         * Dart passed one web use, six results per use and six in total, so a research call left to
+         * the default would have asked OpenRouter for *no* web results at all — a forced tool with an
+         * empty budget, which is not the request the Flutter build made.
+         *
+         * [reasoning] is [ReasoningBudget.Off] for `reasoning: false`, and that one is not a default
+         * either: Dart's `if (… && options.reasoning)` left the `reasoning` key off the body
+         * entirely, whereas a caller that stated nothing would get the visible 8192-token default.
          */
         val Research = AiRequestOptions(
             webSearch = WebSearchMode.Forced,
             maxToolCalls = 1,
+            maxWebSearchUses = 1,
+            maxWebResults = 6,
+            maxTotalWebResults = 6,
             webSearchContextSize = "low",
+            reasoning = ReasoningBudget.Off,
             maxTokens = RESEARCH_MAX_TOKENS,
         )
 

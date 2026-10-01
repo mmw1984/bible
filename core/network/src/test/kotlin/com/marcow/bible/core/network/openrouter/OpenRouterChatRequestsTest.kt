@@ -172,6 +172,63 @@ class OpenRouterChatRequestsTest {
     }
 
     @Test
+    fun `a research call asks for the web results the Flutter build asked for`() {
+        // `research()` of `legacy/flutter/lib/openrouter_service.dart:243` was the one path that did
+        // not take `OpenRouterRequestOptions`' default `0` for the three per-search ceilings, so
+        // leaving them unstated is not the same request: a forced tool with a budget of zero web uses
+        // and zero results returns nothing at all, whatever the model is willing to search for.
+        val parameters = OpenRouterChatRequests
+            .build(AiRequest.Chat("q"), MODEL, AiRequestOptions.Research)
+            .body
+            .arrayAt("tools").single().jsonObject.objectAt("parameters")
+
+        assertEquals(1, parameters.int("max_uses"))
+        assertEquals(6, parameters.int("max_results"))
+        assertEquals(6, parameters.int("max_total_results"))
+        assertEquals("low", parameters.string("search_context_size"))
+    }
+
+    @Test
+    fun `a research call states no reasoning key at all`() {
+        // `reasoning: false` in Dart, which `if (!structuredSearch && !shortSearchOverview &&
+        // options.reasoning)` turned into the key being left off the body. Both of the alternatives
+        // are different requests: sending `{enabled: false, exclude: true}` is the overview's own
+        // override, and saying nothing at all would take the visible 8192-token default, which is
+        // what a research answer never had.
+        val body = OpenRouterChatRequests
+            .build(AiRequest.Chat("q"), MODEL, AiRequestOptions.Research)
+            .body
+
+        assertFalse(body.containsKey("reasoning"), "Dart's reasoning: false wrote no reasoning key")
+    }
+
+    @Test
+    fun `the overview's own off is still a key that tells the provider to stop`() {
+        // The other way to ask for no thinking, and the reason `Off` cannot mean one thing: the
+        // overview overrides `options.reasoning` unconditionally in Dart, so it is stated as a key
+        // rather than as an absence even though a caller stating `Off` on a chat produces the absence.
+        val overview = OpenRouterChatRequests
+            .build(AiRequest.SearchOverview, MODEL, AiRequestOptions.Research).body
+        val reasoning = overview.objectAt("reasoning")
+
+        assertFalse(reasoning.boolean("enabled"))
+        assertTrue(reasoning.boolean("exclude"))
+    }
+
+    @Test
+    fun `a chat that states no budget still takes Dart's visible default`() {
+        // `OpenRouterRequestOptions` declared `reasoning: true` and `reasoningMaxTokens: 8192`, so an
+        // unstated budget is those two values rather than no key at all.
+        val reasoning = OpenRouterChatRequests
+            .build(AiRequest.Chat("q"), MODEL, AiRequestOptions(webSearch = WebSearchMode.Automatic))
+            .body
+            .objectAt("reasoning")
+
+        assertEquals(8192, reasoning.int("max_tokens"))
+        assertFalse(reasoning.boolean("exclude"))
+    }
+
+    @Test
     fun `unstated web search ceilings fall back to the Flutter defaults`() {
         // `OpenRouterRequestOptions` defaulted every ceiling to 0 and the context size to 'low', so a
         // web search that stated none still bounded itself. Omitting them would be an unbounded
