@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName")
+
 package com.marcow.bible.feature.devotion.domain
 
 import com.marcow.bible.core.network.devotion.DEVOTION_ORIGIN
@@ -19,7 +21,6 @@ import java.time.LocalDateTime
  * The file is named for the tier it implements, the site-page fallback, rather than for this record:
  * the permalink is one value that tier carries, and renaming the file to it would lose the subject.
  */
-@Suppress("MatchingDeclarationName")
 internal data class ScrapedPostLink(val url: String, val title: String)
 
 /** `https://devotion.wkphc.org/25436` — a numeric permalink, the blog's only post URL shape. */
