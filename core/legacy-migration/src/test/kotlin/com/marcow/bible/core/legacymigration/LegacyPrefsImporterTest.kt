@@ -8,6 +8,7 @@ import com.marcow.bible.core.database.DevotionCacheDao
 import com.marcow.bible.core.database.DevotionCacheEntity
 import com.marcow.bible.core.database.ReadingProgressDao
 import com.marcow.bible.core.database.ReadingProgressEntity
+import com.marcow.bible.core.database.ScriptureSearchRow
 import com.marcow.bible.core.database.VerseEntity
 import com.marcow.bible.core.datastore.SettingsRepository
 import com.marcow.bible.core.datastore.proto.Settings
@@ -266,6 +267,8 @@ private object FakeBibleDao : BibleDao {
     override suspend fun versesByTestament(testament: Int): List<VerseEntity> = emptyList()
 
     override suspend fun booksByTestament(testament: Int): List<BookEntity> = books.filter { it.testament == testament }
+
+    override suspend fun searchContains(pattern: String, limit: Int): List<ScriptureSearchRow> = emptyList()
 }
 
 private class FakeReadingProgressDao : ReadingProgressDao {

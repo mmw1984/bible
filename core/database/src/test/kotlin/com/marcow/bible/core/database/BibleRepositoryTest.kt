@@ -152,6 +152,10 @@ class BibleRepositoryTest {
 
         override suspend fun booksByTestament(testament: Int): List<BookEntity> =
             bookRows.filter { it.testament == testament }.sortedBy { it.ordinal }
+
+        // The search SQL is [BibleSearchTest]'s, against the shipped asset; this fake is here for
+        // the repository's own reads.
+        override suspend fun searchContains(pattern: String, limit: Int): List<ScriptureSearchRow> = emptyList()
     }
 
     private class FakeReadingProgressDao : ReadingProgressDao {
