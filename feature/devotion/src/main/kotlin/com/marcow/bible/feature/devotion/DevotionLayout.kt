@@ -262,7 +262,7 @@ object DevotionChrome {
      *
      * The blog's paintings are 3:2, and Flutter reserved that shape in all three states rather than
      * only while the bytes were in flight — the column does not jump once they arrive. It is therefore
-     * the *frame's* ratio and not the placeholder's: see `DevotionImage` for why the difference is
+     * the *frame's* ratio and not the placeholder's: see `DevotionImageFrame` for why the difference is
      * invisible in the Dart and load-bearing here.
      */
     const val IMAGE_ASPECT_RATIO: Float = 3f / 2f

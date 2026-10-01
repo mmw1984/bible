@@ -48,6 +48,13 @@ import com.marcow.bible.core.designsystem.theme.appColors
 import com.marcow.bible.core.designsystem.theme.appRadii
 import com.marcow.bible.core.designsystem.theme.scriptureStyle
 import com.marcow.bible.feature.devotion.domain.DevotionBlock
+import com.marcow.bible.feature.devotion.domain.DevotionEmbed
+import com.marcow.bible.feature.devotion.domain.DevotionHeading
+import com.marcow.bible.feature.devotion.domain.DevotionImage
+import com.marcow.bible.feature.devotion.domain.DevotionParagraph
+import com.marcow.bible.feature.devotion.domain.DevotionQuote
+import com.marcow.bible.feature.devotion.domain.DevotionSection
+import com.marcow.bible.feature.devotion.domain.DevotionVideo
 import java.net.URI
 
 /**
@@ -78,7 +85,7 @@ private fun DevotionBlockRow(block: DevotionBlock, indent: Dp, onOpenUrl: (Strin
     val colors = appColors
     val inset = Modifier.padding(horizontal = indent)
     when (block) {
-        is DevotionBlock.Paragraph -> Text(
+        is DevotionParagraph -> Text(
             text = block.text,
             style = scriptureStyle(
                 size = DevotionChrome.PARAGRAPH_SIZE,
@@ -88,7 +95,7 @@ private fun DevotionBlockRow(block: DevotionBlock, indent: Dp, onOpenUrl: (Strin
             modifier = inset.padding(bottom = DevotionChrome.PARAGRAPH_BELOW),
         )
 
-        is DevotionBlock.Heading -> Text(
+        is DevotionHeading -> Text(
             text = block.text,
             style = scriptureStyle(
                 size = DevotionChrome.HEADING_SIZE,
@@ -102,7 +109,7 @@ private fun DevotionBlockRow(block: DevotionBlock, indent: Dp, onOpenUrl: (Strin
             ),
         )
 
-        is DevotionBlock.Quote -> DevotionQuote(
+        is DevotionQuote -> DevotionQuotePanel(
             text = block.text,
             modifier = inset.padding(
                 top = DevotionChrome.QUOTE_ABOVE,
@@ -110,7 +117,7 @@ private fun DevotionBlockRow(block: DevotionBlock, indent: Dp, onOpenUrl: (Strin
             ),
         )
 
-        is DevotionBlock.Image -> DevotionImage(
+        is DevotionImage -> DevotionImageFrame(
             url = block.url,
             modifier = inset.padding(
                 top = DevotionChrome.IMAGE_ABOVE,
@@ -118,7 +125,7 @@ private fun DevotionBlockRow(block: DevotionBlock, indent: Dp, onOpenUrl: (Strin
             ),
         )
 
-        is DevotionBlock.Section -> Column(
+        is DevotionSection -> Column(
             modifier = inset.padding(
                 top = DevotionChrome.SECTION_ABOVE,
                 bottom = DevotionChrome.SECTION_BELOW,
@@ -143,7 +150,7 @@ private fun DevotionBlockRow(block: DevotionBlock, indent: Dp, onOpenUrl: (Strin
             }
         }
 
-        is DevotionBlock.Video -> DevotionVideoPlayer(
+        is DevotionVideo -> DevotionVideoPlayer(
             videoId = block.videoId,
             watchUrl = block.watchUrl,
             thumbnailUrl = block.thumbnailUrl,
@@ -154,7 +161,7 @@ private fun DevotionBlockRow(block: DevotionBlock, indent: Dp, onOpenUrl: (Strin
             ),
         )
 
-        is DevotionBlock.Embed -> DevotionEmbedPlayer(
+        is DevotionEmbed -> DevotionEmbedPlayer(
             url = block.url,
             onOpenUrl = onOpenUrl,
             modifier = inset.padding(
@@ -172,9 +179,12 @@ private fun DevotionBlockRow(block: DevotionBlock, indent: Dp, onOpenUrl: (Strin
  * was a `Border(left: …)` — a bar down the very edge, square at the corners, not a four-sided frame
  * and not a rounded one. So the fill, the bar and the text are three siblings: inside the clipped
  * shape the bar would be tapered away at its ends, and in the flow it would push the text along.
+ *
+ * Named for the panel rather than for the block: [DevotionQuote] is the block it draws, and a
+ * composable cannot share that name.
  */
 @Composable
-private fun DevotionQuote(text: String, modifier: Modifier = Modifier) {
+private fun DevotionQuotePanel(text: String, modifier: Modifier = Modifier) {
     val colors = appColors
     val shape = RoundedCornerShape(appRadii.compact)
     Box(modifier = modifier) {
@@ -235,9 +245,12 @@ private fun sectionTitleStyle(ink: Color) = scriptureStyle(
  * `/wp-content/uploads` answers `okhttp/4.12.0`, and answers a request with no `User-Agent` at all,
  * with 200 either way — so the image goes out on Coil's client as it is rather than through a loader
  * configured for a header nothing checks.
+ *
+ * Named for the frame rather than for the block: [DevotionImage] is the block it draws, and a
+ * composable cannot share that name.
  */
 @Composable
-private fun DevotionImage(url: String, modifier: Modifier = Modifier) {
+private fun DevotionImageFrame(url: String, modifier: Modifier = Modifier) {
     SubcomposeAsyncImage(
         imageLoader = devotionImageLoader(),
         model = url,
@@ -262,7 +275,7 @@ private fun DevotionImage(url: String, modifier: Modifier = Modifier) {
 /**
  * The 3:2 panel `buildDevotionImage` stood in while the bytes arrived, and again when they never did.
  *
- * It fills the frame [DevotionImage] already reserved rather than asking for one of its own: Flutter's
+ * It fills the frame [DevotionImageFrame] already reserved rather than asking for one of its own: Flutter's
  * two panels were `AspectRatio`s in their own right only because neither had a ratio above them, and
  * they sat inside the loading builder's and the error builder's boxes — which is 3:2 either way.
  */
