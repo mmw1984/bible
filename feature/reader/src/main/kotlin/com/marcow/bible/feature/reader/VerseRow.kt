@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextUnit
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
 import com.marcow.bible.core.designsystem.theme.AppFonts
 import com.marcow.bible.core.designsystem.theme.appColors
 import com.marcow.bible.core.model.ReadingMode
