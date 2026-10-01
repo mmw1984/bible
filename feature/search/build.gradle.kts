@@ -68,6 +68,9 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:network"))
     implementation(libs.kotlinx.coroutines.android)
+    // `jsonObjectOrNull` decodes the references answer directly, rather than through a serializer
+    // that would have to survive the model's prose around the JSON.
+    implementation(libs.kotlinx.serialization.json)
 
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
