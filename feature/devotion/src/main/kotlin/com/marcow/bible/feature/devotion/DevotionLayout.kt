@@ -138,9 +138,65 @@ object DevotionChrome {
     val IMAGE_ABOVE: Dp = 10.dp
     val IMAGE_BELOW: Dp = 10.dp
 
+    /**
+     * The two `<iframe>` blocks, YouTube and SoundCloud, which Flutter padded alike at 10 above and
+     * 14 below and drew through its own two players.
+     *
+     * [MEDIA_HEIGHT] is the SoundCloud frame's: `SizedBox(height: 166)`, written once for the WebView
+     * and again for the spinner Flutter drew over it. YouTube is 16:9 of the width instead, so it has
+     * no height of its own.
+     */
     val MEDIA_ABOVE: Dp = 10.dp
     val MEDIA_BELOW: Dp = 14.dp
-    val MEDIA_HEIGHT: Dp = 176.dp
+    val MEDIA_HEIGHT: Dp = 166.dp
+
+    /**
+     * YouTube's thumbnail card, from `_ThumbnailFallback` in `devotion_youtube_player.dart`.
+     *
+     * The 52 dp circle is Material's play button sitting on a 55%-black disc ringed in white, under
+     * a scrim that fades from clear to 45% black so the mark reads over any painting.
+     */
+    const val VIDEO_ASPECT_RATIO: Float = 16f / 9f
+    val VIDEO_PLAY_SIZE: Dp = 52.dp
+    val VIDEO_PLAY_GLYPH: Dp = 24.dp
+    val VIDEO_PLAY_RING: Dp = 1.6.dp
+    const val VIDEO_PLAY_ALPHA: Float = 0.55f
+    const val VIDEO_SCRIM_ALPHA: Float = 0.45f
+
+    /** The "open in browser" row under the video: 6 above it, 12 px glyph, 5 beside it, 11 px label. */
+    val VIDEO_OPEN_ABOVE: Dp = 6.dp
+    val VIDEO_OPEN_HORIZONTAL: Dp = 6.dp
+    val VIDEO_OPEN_VERTICAL: Dp = 4.dp
+    val VIDEO_OPEN_GLYPH: Dp = 12.dp
+    val VIDEO_OPEN_GAP: Dp = 5.dp
+    val VIDEO_OPEN_SIZE: TextUnit = 11.sp
+
+    /**
+     * The card an embed falls back to, from `_ExternalFallback` in `devotion_soundcloud_player.dart`.
+     *
+     * A bordered panel with the audio-lines mark, the label, the host, and a bordered button. It is
+     * what Flutter showed when its WebView could not run — which is every native reader today, since
+     * the inline SoundCloud widget is a web page.
+     */
+    val EMBED_PADDING: Dp = 13.dp
+    val EMBED_PADDING_VERTICAL: Dp = 12.dp
+    val EMBED_BORDER: Dp = 1.dp
+    val EMBED_GLYPH: Dp = 18.dp
+    val EMBED_GLYPH_GAP: Dp = 10.dp
+    val EMBED_LABEL_SIZE: TextUnit = 13.sp
+    val EMBED_HOST_ABOVE: Dp = 2.dp
+    val EMBED_HOST_SIZE: TextUnit = 11.sp
+    val EMBED_BUTTON_GAP: Dp = 8.dp
+    val EMBED_BUTTON_HORIZONTAL: Dp = 10.dp
+    val EMBED_BUTTON_VERTICAL: Dp = 6.dp
+    val EMBED_BUTTON_GLYPH: Dp = 14.dp
+
+    /** `surfaceRaised` at these alphas: the quote and the embed cards, and the failed image's panel. */
+    const val RAISED_FILL_ALPHA: Float = 0.5f
+    const val IMAGE_PANEL_ALPHA: Float = 0.4f
+
+    /** The quote's 2 dp bar, drawn in `ink` at half the weight. */
+    const val QUOTE_BAR_ALPHA: Float = 0.5f
 
     val SECTION_ABOVE: Dp = 8.dp
     val SECTION_BELOW: Dp = 4.dp
