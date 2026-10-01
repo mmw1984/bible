@@ -175,7 +175,7 @@ fun LibraryRoute(
         }
     }
 
-    LaunchedEffect(progress) { progress.animateTo(1f, tween(EnterMillis, easing = SpringCurve)) }
+    LaunchedEffect(progress) { progress.animateTo(1f, tween(LIBRARY_ARRIVE_MILLIS, easing = SpringCurve)) }
     BackHandler(onBack = dismiss)
 
     LibrarySheet(
