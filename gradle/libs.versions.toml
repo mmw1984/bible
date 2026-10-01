@@ -34,7 +34,8 @@ serialization = "1.11.0"
 javaxInject = "1"
 
 # Network / parsing
-okhttp = "5.5.0"
+# okhttp-android 5.5.0 also declares minCompileSdk 37.
+okhttp = "5.4.0"
 retrofit = "3.0.0"
 coil = "3.5.0"
 jsoup = "1.23.2"

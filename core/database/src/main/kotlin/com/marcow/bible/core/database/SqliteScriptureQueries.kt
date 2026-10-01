@@ -31,7 +31,7 @@ class SqliteScriptureQueries @Inject constructor(
 
     override fun booksByTestament(testament: Testament): List<BibleBook> =
         connection.read { db ->
-            db.query(BOOKS_BY_TESTAMENT_SQL, arrayOf(testament.ordinal.toString()))
+            db.query(BOOKS_BY_TESTAMENT_SQL, arrayOf(testament.storageValue.toString()))
                 .use(::readBooks)
         }
 
@@ -132,7 +132,7 @@ class SqliteScriptureQueries @Inject constructor(
         nameZh = cursor.getString(2),
         nameEn = cursor.getString(3),
         chapters = cursor.getInt(4),
-        testament = Testament.fromOrdinal(cursor.getInt(5)),
+        testament = Testament.fromStorageValue(cursor.getInt(5)),
     )
 
     private fun readVerse(cursor: Cursor, firstIndex: Int) = VersePair(
