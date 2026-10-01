@@ -56,6 +56,7 @@ dependencies {
     api(libs.okhttp)
     api(libs.okhttp.sse)
     implementation(libs.androidx.browser)
+    implementation(libs.androidx.security.crypto)
     implementation(libs.jsoup)
 
     testImplementation(platform(libs.junit.bom))
