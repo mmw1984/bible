@@ -63,4 +63,7 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.kotlinx.coroutines.test)
+    // Opens the committed pre-packaged asset straight from disk in a JVM test, which is what
+    // lets the 66-book / 1189-chapter guarantee run in CI without an emulator.
+    testImplementation(libs.sqlite.jdbc)
 }

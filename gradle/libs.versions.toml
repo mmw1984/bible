@@ -44,6 +44,7 @@ javaxInject = "1"
 
 # Network / parsing
 okhttp = "5.5.0"
+sqliteJdbc = "3.53.4.0"
 retrofit = "3.0.0"
 coil = "3.6.3"
 jsoup = "1.23.2"
@@ -98,6 +99,7 @@ javax-inject = { module = "javax.inject:javax.inject", version.ref = "javaxInjec
 
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp-sse = { module = "com.squareup.okhttp3:okhttp-sse", version.ref = "okhttp" }
+sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqliteJdbc" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit-kotlinx-serialization = { module = "com.squareup.retrofit2:converter-kotlinx-serialization", version.ref = "retrofit" }
 
