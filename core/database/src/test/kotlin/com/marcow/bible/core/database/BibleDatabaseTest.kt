@@ -101,10 +101,22 @@ class BibleDatabaseTest {
     @Test
     fun `web translation keeps the trailing newline the json has`() {
         // Not a bug: Flutter read the same strings and rendered them as-is, so
-        // trimming here would be a behaviour change rather than a fix.
+        // trimming here would be a behaviour change rather than a fix. Three WEB
+        // verses are stored without one, which is why this checks the count
+        // rather than assuming every row ends in a newline.
         val withNewline = queryInt("SELECT COUNT(*) FROM verses WHERE text_web LIKE '%' || char(10)")
-        val total = queryInt("SELECT COUNT(*) FROM verses WHERE text_web IS NOT NULL")
-        assertEquals(total, withNewline)
+        val present = queryInt("SELECT COUNT(*) FROM verses WHERE text_web IS NOT NULL")
+        assertEquals(WEB_VERSES_WITHOUT_NEWLINE, present - withNewline)
+
+        val exceptions = query(
+            "SELECT book_id, chapter, verse FROM verses " +
+                "WHERE text_web IS NOT NULL AND text_web NOT LIKE '%' || char(10) ORDER BY book_id, chapter, verse",
+        )
+        assertEquals(
+            listOf("2KI" to 3 to 2, "2KI" to 3 to 3, "2KI" to 7 to 5),
+            exceptions.map { Triple(it["book_id"] as String, it["chapter"] as Int, it["verse"] as Int) },
+        )
+
         val chineseWithNewline = queryInt("SELECT COUNT(*) FROM verses WHERE text_cuv LIKE '%' || char(10)")
         assertEquals(0, chineseWithNewline)
     }
@@ -257,5 +269,6 @@ class BibleDatabaseTest {
         const val EXPECTED_CHAPTERS = 1189
         const val EXPECTED_OLD_TESTAMENT_BOOKS = 39
         const val EXPECTED_NEW_TESTAMENT_BOOKS = 27
+        const val WEB_VERSES_WITHOUT_NEWLINE = 3
     }
 }
