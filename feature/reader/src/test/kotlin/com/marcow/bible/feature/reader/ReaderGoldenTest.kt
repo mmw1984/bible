@@ -226,8 +226,10 @@ class ReaderGoldenTest {
             ReaderGoldenHarness {
                 val configuration = LocalConfiguration.current
                 val windowWidth = configuration.screenWidthDp.dp
+
                 // A top of zero leaves the cap itself — `min(400, height - top - bottom - 16)` — which
-                // is the largest the bubble is ever handed, and the widest a 393 dp window gets.
+                // is the largest the bubble is ever handed, and the width below is the one a 393 dp
+                // window gets, `min(330, width - 32)`: the two numbers the bubble is really given.
                 val maxHeight = chapterPickerMaxHeight(
                     top = 0.dp,
                     windowHeight = configuration.screenHeightDp.dp,
