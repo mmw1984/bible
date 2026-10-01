@@ -2,6 +2,7 @@ package com.marcow.bible.feature.reader
 
 import androidx.compose.ui.unit.dp
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -69,6 +70,59 @@ class ChapterPickerTest {
                 assertTrue(left >= 0.dp, "left edge $left on a $windowWidth window with the anchor at $anchorRight")
             }
         }
+    }
+
+    /**
+     * The chapter number the anchor reads after a chapter is chosen from the picker.
+     *
+     * `widget_test.dart`'s "mobile chapter number opens picker and changes chapter" drove the whole
+     * path — tap `chapter-anchor`, tap `chapter-picker-2` — and then asserted the one thing worth
+     * asserting, `02` inside the anchor. Padded, so the button does not change width while the reader
+     * steps through a chapter; two digits is the most it ever needs, Psalms' 119 is the widest.
+     */
+    @Test
+    fun `the anchor pads the chapter to two digits`() {
+        assertEquals("02", chapterControlLabel(2))
+        assertEquals("01", chapterControlLabel(1))
+        assertEquals("09", chapterControlLabel(9))
+        assertEquals("10", chapterControlLabel(10))
+        assertEquals("119", chapterControlLabel(119))
+    }
+
+    /**
+     * The picker cells are not padded, which is the other half of the anchor being padded.
+     *
+     * Flutter drew `'$value'` in `chapter-picker-N`, unpadded, because fifty `02`-wide cells in five
+     * columns will not fit the bubble's 330 px. The two labels disagreeing is the original behaviour,
+     * not a transcription slip.
+     */
+    @Test
+    fun `the picker cells leave the chapter number unpadded`() {
+        assertEquals("1", chapterCellLabel(1))
+        assertEquals("2", chapterCellLabel(2))
+        assertEquals("9", chapterCellLabel(9))
+        assertEquals("10", chapterCellLabel(10))
+        assertEquals("119", chapterCellLabel(119))
+    }
+
+    /**
+     * Thirty chapters fill the bubble and the rest scroll.
+     *
+     * Flutter's grid was `shrinkWrap`ed and worked this out from the height the header left it. The
+     * native grid has to be told, because an overfull grid with scrolling switched off swallows the
+     * touch gestures of the verses behind the bubble.
+     */
+    @Test
+    fun `the grid scrolls only past thirty chapters`() {
+        assertFalse(chapterPickerScrolls(1))
+        assertFalse(chapterPickerScrolls(21))
+        assertFalse(chapterPickerScrolls(30))
+
+        // The real ends of the canon, from the book list Flutter built its picker from.
+        assertTrue(chapterPickerScrolls(31))
+        assertTrue(chapterPickerScrolls(50)) // Genesis, the first book
+        assertTrue(chapterPickerScrolls(150)) // Psalms, the longest in the Bible
+        assertFalse(chapterPickerScrolls(3)) // Ruth
     }
 
     @Test

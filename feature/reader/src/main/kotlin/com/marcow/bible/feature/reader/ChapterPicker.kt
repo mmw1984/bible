@@ -91,6 +91,32 @@ fun chapterPickerMaxHeight(top: Dp, windowHeight: Dp, bottomInset: Dp): Dp =
     minOf(PickerHeightCap, windowHeight - top - bottomInset - PickerHeightMargin)
 
 /**
+ * The chapter number the button draws: `chapter.toString().padLeft(2, '0')`, so it reads `02`.
+ *
+ * Flutter's `chapter-anchor` and its chapter grid pad differently, and the reader can see it. The
+ * anchor is a single number in 23 px italic, so it is padded to keep the button from resizing as the
+ * reader steps through a chapter — the test pinned it, asserting `02` inside the anchor after
+ * choosing chapter two. The grid cells are `'$value'` with no padding, because fifty `02`-wide cells
+ * in five columns would not fit the bubble's 330 px.
+ */
+fun chapterControlLabel(chapter: Int): String = chapter.toString().padStart(2, '0')
+
+/** `'$value'`, unpadded — the picker cell at `legacy/flutter/lib/main.dart:1492`. */
+fun chapterCellLabel(chapter: Int): String = chapter.toString()
+
+/**
+ * Whether the grid needs to scroll, from Flutter's `shrinkWrap` inside a `Flexible`.
+ *
+ * Flutter's grid took whatever height the header left it and scrolled only on overflow, which the
+ * native grid has to be told instead: `userScrollEnabled = false` on an overfull grid swallows the
+ * touch gestures of the verses behind it. Six rows of five is what fills [PickerHeightCap], so the
+ * thirty chapters that fit scroll not at all and the longer books — most of the Pentateuch, the
+ * Prophets, Psalms at 150 — do.
+ */
+fun chapterPickerScrolls(chapterCount: Int): Boolean =
+    chapterCount > ChapterRowsInView * ChapterColumns
+
+/**
  * The chapter picker, replacing `_ChapterPickerBubble` and the `showGeneralDialog` that opened it
  * (`legacy/flutter/lib/main.dart:1385`).
  *
@@ -228,7 +254,7 @@ private fun ChapterPickerContent(
             contentPadding = PaddingValues(0.dp),
             horizontalArrangement = Arrangement.spacedBy(ChapterCellGap),
             verticalArrangement = Arrangement.spacedBy(ChapterCellGap),
-            userScrollEnabled = chapterCount > ChapterRowsInView * ChapterColumns,
+            userScrollEnabled = chapterPickerScrolls(chapterCount),
         ) {
             items(count = chapterCount.coerceAtLeast(0), key = { index -> index }) { index ->
                 ChapterPickerCell(
@@ -284,6 +310,7 @@ private fun ChapterPickerCell(chapter: Int, active: Boolean, onClick: () -> Unit
     val colors = appColors
     val shape = RoundedCornerShape(ChapterCellRadius)
     val label = stringResource(R.string.chapter_number, chapter)
+    val number = chapterCellLabel(chapter)
     AppTap(
         onClick = onClick,
         selected = active,
@@ -299,7 +326,7 @@ private fun ChapterPickerCell(chapter: Int, active: Boolean, onClick: () -> Unit
     ) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(
-                text = chapter.toString(),
+                text = number,
                 textAlign = TextAlign.Center,
                 color = if (active) colors.canvas else colors.ink,
                 fontSize = ChapterLabelSize,
@@ -338,7 +365,7 @@ fun ChapterControl(
             modifier = Modifier.semantics { contentDescription = label },
         ) {
             Text(
-                text = chapter.toString().padStart(2, '0'),
+                text = chapterControlLabel(chapter),
                 textAlign = TextAlign.Center,
                 color = colors.faint,
                 fontFamily = AppFonts.Exposure,
