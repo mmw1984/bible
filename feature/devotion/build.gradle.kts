@@ -67,6 +67,8 @@ dependencies {
     api(project(":core:common"))
     implementation(project(":core:network"))
     implementation(project(":core:database"))
+    // The interface language, so a date and a copied article change with the rest of the screen.
+    implementation(project(":core:datastore"))
     implementation(libs.kotlinx.coroutines.android)
     // The cache stores raw WordPress post JSON, the same shape the Flutter cache stored in
     // SharedPreferences; reading it back is the tree API, not a serializer per projection.
@@ -77,8 +79,9 @@ dependencies {
     implementation(libs.androidx.webkit)
     implementation(libs.androidx.media3.exoplayer)
 
-    testImplementation(platform(libs.junit.bom))
+testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
-    testRuntimeOnly(libs.junit.platform.launcher)
+
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(testFixtures(project(":core:datastore")))
 }
