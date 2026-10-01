@@ -1,5 +1,6 @@
 package com.marcow.bible.core.designsystem.theme
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 
 /**
