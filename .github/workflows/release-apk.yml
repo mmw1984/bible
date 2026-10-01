@@ -1,5 +1,9 @@
 name: Release APK
 
+# Ships the frozen Flutter app while the native rewrite is still in progress.
+# On the android-2.0 branch the Flutter project lives in legacy/flutter/, so
+# every shell step needs that as its working directory. Phase 6 replaces this
+# workflow with the Gradle build (NATIVE_PLAN.md §5 Phase 6).
 on:
   push:
     tags:
@@ -7,6 +11,10 @@ on:
 
 permissions:
   contents: write
+
+defaults:
+  run:
+    working-directory: legacy/flutter
 
 jobs:
   release:

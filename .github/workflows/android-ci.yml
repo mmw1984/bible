@@ -1,17 +1,19 @@
 name: Android CI
 
-# Native (Kotlin/Compose) build checks for NATIVE_PLAN.md §5 Phase 0.
-# The Flutter app keeps building from `legacy/flutter/` through release-apk.yml,
-# which stays untouched until Phase 6.
+# Build checks for the rebuilt native app (NATIVE_PLAN.md §5).
+# There is no local Android SDK: this workflow is the authoritative build.
+# `legacy/flutter/**` is excluded because the Flutter tree is frozen and keeps
+# building through release-apk.yml.
 on:
   push:
     branches:
-      - main
-      - native-android
+      - android-2.0
     paths-ignore:
       - 'legacy/flutter/**'
       - 'docs/**'
   pull_request:
+    branches:
+      - android-2.0
     paths-ignore:
       - 'legacy/flutter/**'
       - 'docs/**'
@@ -24,11 +26,19 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # The release variant signs with the same keystore as the Flutter build, which
+  # is what makes the in-place upgrade possible (NATIVE_PLAN.md §6 R2).
+  ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+  ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+  ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+  ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
 jobs:
-  verify:
-    name: ktlint + detekt + unitTest + lintDebug + assembleDebug
+  fast:
+    name: ktlint + detekt + unitTest
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -51,15 +61,72 @@ jobs:
       - name: Unit tests
         run: ./gradlew test --stacktrace
 
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: '**/build/reports/tests/**'
+          retention-days: 7
+          if-no-files-found: ignore
+
+  build:
+    name: lintDebug + assembleDebug + assembleRelease
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Android lint
         run: ./gradlew lintDebug --stacktrace
 
-      - name: Assemble debug APK
-        run: ./gradlew assembleDebug --stacktrace
+      - name: Assemble debug and release APKs
+        run: ./gradlew assembleDebug assembleRelease --stacktrace
 
-      - name: Upload debug APK
+      # Asset weight is the real risk in this migration: 18 MB of fonts and
+      # 7.4 MB of scripture ship inside the APK (NATIVE_PLAN.md §6 R10). The
+      # release variant is not gated until R8 lands in Phase 6, because
+      # isMinifyEnabled is still false and the unminified release APK is
+      # expected to be larger than the budget.
+      - name: Check APK size
+        run: |
+          set -euo pipefail
+          apk=$(ls app/build/outputs/apk/debug/*.apk)
+          size=$(du -m "$apk" | cut -f1)
+          echo "debug APK: ${size} MB (${apk})"
+          if [ "$size" -gt 40 ]; then
+            echo "::error::debug APK is ${size} MB, over the 40 MB budget"
+            exit 1
+          fi
+          if [ "$size" -gt 25 ]; then
+            echo "::warning::debug APK is ${size} MB, over the 25 MB target"
+          fi
+
+      - name: Report release APK size
+        if: always()
+        run: |
+          for apk in app/build/outputs/apk/release/*.apk; do
+            [ -e "$apk" ] || continue
+            echo "release APK: $(du -m "$apk" | cut -f1) MB (${apk})"
+            sha256sum "$apk"
+          done
+
+      - name: Upload APKs
         uses: actions/upload-artifact@v4
         with:
-          name: bible-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: bible-apks
+          path: |
+            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/release/*.apk
+          retention-days: 14
           if-no-files-found: error
