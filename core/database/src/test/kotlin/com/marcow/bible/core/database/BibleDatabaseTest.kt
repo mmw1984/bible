@@ -79,23 +79,34 @@ class BibleDatabaseTest {
 
     @Test
     fun `known verses match the bundled json verbatim`() {
+        // Taken straight from legacy/flutter/assets/bible, not retyped from
+        // memory: the WEB translation keeps its trailing newline.
+        assertEquals("起初神創造天地。", verseText("GEN", 1, 1, "text_cuv"))
         assertEquals(
-            "起初神創造天地。",
-            verseText("GEN", 1, 1, "text_cuv"),
-        )
-        assertEquals(
-            "In the beginning, God created the heavens and the earth.",
+            "In the beginning, God created the heavens and the earth.\n",
             verseText("GEN", 1, 1, "text_web"),
         )
-        assertEquals("神說", verseText("GEN", 1, 3, "text_cuv"))
+        assertEquals("神說：「要有光」，就有了光。", verseText("GEN", 1, 3, "text_cuv"))
         assertEquals(
-            "For the Lord your God is a consuming fire.",
+            "For Yahweh your God is a devouring fire, a jealous God.\n",
             verseText("DEU", 4, 24, "text_web"),
         )
         assertEquals(
-            "In the beginning was the Word, and the Word was with God, and the Word was God.",
+            "In the beginning was the Word, and the Word was with God, and the Word was God.\n",
             verseText("JHN", 1, 1, "text_web"),
         )
+        assertEquals(null, verseText("GEN", 1, 999, "text_cuv"))
+    }
+
+    @Test
+    fun `web translation keeps the trailing newline the json has`() {
+        // Not a bug: Flutter read the same strings and rendered them as-is, so
+        // trimming here would be a behaviour change rather than a fix.
+        val withNewline = queryInt("SELECT COUNT(*) FROM verses WHERE text_web LIKE '%' || char(10)")
+        val total = queryInt("SELECT COUNT(*) FROM verses WHERE text_web IS NOT NULL")
+        assertEquals(total, withNewline)
+        val chineseWithNewline = queryInt("SELECT COUNT(*) FROM verses WHERE text_cuv LIKE '%' || char(10)")
+        assertEquals(0, chineseWithNewline)
     }
 
     @Test
@@ -136,11 +147,14 @@ class BibleDatabaseTest {
 
     @Test
     fun `like metacharacters in a query are not treated as wildcards`() {
-        // '%' in the needle must stay a literal percent sign.
-        val wildcard = queryInt(
-            "SELECT COUNT(*) FROM verses WHERE text_cuv LIKE '%100%' ESCAPE '\\'",
-        )
-        assertTrue(wildcard > 0)
+        // No verse contains a literal percent sign, so the escaped form matches
+        // nothing while the same text without escaping matches every verse that
+        // merely starts with 起初. That gap is why escapeLike() exists.
+        val literal = queryInt("SELECT COUNT(*) FROM verses WHERE text_cuv LIKE '%起初\\%%' ESCAPE '\\'")
+        assertEquals(0, literal)
+
+        val wildcard = queryInt("SELECT COUNT(*) FROM verses WHERE text_cuv LIKE '%起初%'")
+        assertEquals(37, wildcard)
     }
 
     @Test
