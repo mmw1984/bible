@@ -14,9 +14,8 @@ plugins {
 // applicationId (`com.marcow.bible`) plus the same keystore means the same signature
 // (NATIVE_PLAN.md §6 R2). CI supplies the keystore through ANDROID_KEYSTORE_* secrets.
 val keystoreEnv: Map<String, String> = System.getenv()
-fun envSigningAvailable(): Boolean =
-    !keystoreEnv["ANDROID_KEYSTORE_BASE64"].isNullOrBlank() &&
-        !keystoreEnv["ANDROID_KEYSTORE_PASSWORD"].isNullOrBlank()
+fun envSigningAvailable(): Boolean = !keystoreEnv["ANDROID_KEYSTORE_BASE64"].isNullOrBlank() &&
+    !keystoreEnv["ANDROID_KEYSTORE_PASSWORD"].isNullOrBlank()
 
 android {
     namespace = "com.marcow.bible"
