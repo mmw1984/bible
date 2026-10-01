@@ -23,7 +23,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
@@ -45,7 +44,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.math.abs
-
 import android.graphics.Color as AndroidColor
 
 /**
@@ -174,7 +172,9 @@ internal fun DevotionVideoPlayer(
                                 playerHtml,
                                 "text/html",
                                 "utf-8",
-                                /* historyUrl = */ null,
+                                // `historyUrl` is null: the frame loads a page of our own and has no
+                                // history to seed.
+                                null,
                             )
                         }
                     },
@@ -207,14 +207,13 @@ internal fun DevotionVideoPlayer(
                 }
                 // Both zones ask the player where it is *now*, which is what makes the taps stack:
                 // the second tap's clock already includes the first tap's seek.
-                fun tap(delta: Double) =
-                    seekPlayer(
-                        // Read at callback time, not at tap time: this is what tells a late answer
-                        // apart from a frame that is still the one on screen.
-                        webView = frame,
-                        isStillMounted = { mounted -> mounted === frame },
-                        delta = delta,
-                    ) { applied -> shownDelta += applied }
+                fun tap(delta: Double) = seekPlayer(
+                    // Read at callback time, not at tap time: this is what tells a late answer
+                    // apart from a frame that is still the one on screen.
+                    webView = frame,
+                    isStillMounted = { mounted -> mounted === frame },
+                    delta = delta,
+                ) { applied -> shownDelta += applied }
                 SeekZone(alignment = Alignment.CenterStart, onTap = { tap(SeekBackward) })
                 SeekZone(alignment = Alignment.CenterEnd, onTap = { tap(SeekForward) })
                 if (shownDelta != 0.0) {
@@ -436,10 +435,9 @@ private fun rememberFrameReady(webView: WebView?, isStillMounted: (WebView?) -> 
 }
 
 /** [WebView.evaluateJavascript] as a suspension point; its callback is not one. */
-private suspend fun awaitJs(webView: WebView, script: String): String? =
-    suspendCancellableCoroutine { continuation ->
-        webView.evaluateJavascript(script) { answer -> continuation.resume(answer) }
-    }
+private suspend fun awaitJs(webView: WebView, script: String): String? = suspendCancellableCoroutine { continuation ->
+    webView.evaluateJavascript(script) { answer -> continuation.resume(answer) }
+}
 
 /**
  * Whether an `evaluateJavascript` answer was the boolean `true`.
