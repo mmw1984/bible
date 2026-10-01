@@ -16,7 +16,8 @@ import kotlinx.serialization.json.JsonPrimitive
  * Public rather than `internal` because [SearchReferencesUseCase] hands these out and [AiSearchUseCase]
  * takes that use case as a constructor parameter: Kotlin will not let a public signature name an
  * internal type, so the chain from the sheet's one public entry point down to a parsed reference has
- * to be public all the way. The rest of the domain stays module-visible — see [SearchReferences].
+ * to be public all the way. The parser and the prompts stay module-visible: they are reached only
+ * from inside a body.
  */
 data class AiScriptureReference(
     val bookId: String,
