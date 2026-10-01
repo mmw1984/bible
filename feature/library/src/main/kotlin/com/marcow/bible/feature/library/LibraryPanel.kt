@@ -115,7 +115,7 @@ fun LibraryPanel(
         ) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = stringResource(R.string.select_book),
+                    text = stringResource(libraryPanelLabel(LibraryPanelLabel.TITLE)),
                     color = colors.ink,
                     fontFamily = AppFonts.Exposure,
                     fontSize = PanelChrome.titleSize,
@@ -123,7 +123,7 @@ fun LibraryPanel(
                 )
                 AppGlyphButton(
                     glyph = AppGlyph.CLOSE,
-                    label = stringResource(R.string.close),
+                    label = stringResource(libraryPanelLabel(LibraryPanelLabel.CLOSE)),
                     onClick = onDismiss,
                     size = PanelChrome.closeSize,
                     glyphSize = PanelChrome.closeGlyphSize,
@@ -134,7 +134,7 @@ fun LibraryPanel(
                 choices = testamentChoices(),
                 selected = testament,
                 onChanged = { chosen -> testament = chosen },
-                accessibilityLabel = stringResource(R.string.select_book),
+                accessibilityLabel = stringResource(libraryPanelLabel(LibraryPanelLabel.TESTAMENT_SWITCHER)),
             )
             Spacer(Modifier.height(PanelChrome.belowSegmented))
             TestamentList(
@@ -302,7 +302,60 @@ private fun BookRule() {
 
 /** `Old Testament · 39` and `New Testament · 27`, with the counts baked into the labels. */
 @Composable
-private fun testamentChoices(): List<AppChoice<Testament>> = listOf(
-    AppChoice(Testament.OLD, stringResource(R.string.old_testament_count)),
-    AppChoice(Testament.NEW, stringResource(R.string.new_testament_count)),
+private fun testamentChoices(): List<AppChoice<Testament>> =
+    testamentLabels().map { (testament, label) -> AppChoice(testament, stringResource(label)) }
+
+/**
+ * The two halves of the canon and the string each is named by, with the resources left in them.
+ *
+ * Old before New, which is `[true, false]` in Flutter's `_TestamentSegmented`
+ * (`legacy/flutter/lib/main.dart:2100`) and canon order here. The order is not free: the switcher
+ * opens on whichever half the reader's book is in — [openingTestament] — so the two are told apart by
+ * position as often as by name, and a New Testament reader arriving at 舊約 has to read the other one
+ * to know where they are.
+ *
+ * The counts are *inside* the translations rather than computed, and that is Flutter's arrangement
+ * too: `舊約 · 39` and `新約 · 27` are two whole strings in `app_zh.arb:96` and `:97`. 39 and 27 are
+ * the size of the canon and not a property of a build, so a build shipping a different bible would
+ * carry them in its own translations rather than have them formatted in here from a list that might
+ * not be the same list.
+ */
+fun testamentLabels(): List<Pair<Testament, Int>> = listOf(
+    Testament.OLD to R.string.old_testament_count,
+    Testament.NEW to R.string.new_testament_count,
 )
+
+/** The three strings the panel's own chrome is written in. */
+enum class LibraryPanelLabel {
+    /** The 34 dp heading at the top of the sheet. */
+    TITLE,
+
+    /**
+     * What the testament switcher announces itself as.
+     *
+     * Flutter's `_TestamentSegmented` said nothing here — its `AppSegmented` has no label of its own
+     * and there is no `Semantics` around it, unlike the reader's `_Segmented`, which wraps itself in
+     * `Semantics(label: readingLanguage)` at `:1659`. Two cells reading 舊約 · 39 and 新約 · 27 are
+     * enough for a reader who can see them and nothing at all for one who cannot, so the name is
+     * added here — and it is the sheet's own name rather than a fourth thing to learn, because the
+     * heading two rows above is already saying it.
+     */
+    TESTAMENT_SWITCHER,
+
+    /** The button that dismisses the sheet. */
+    CLOSE,
+}
+
+/**
+ * The string each piece of the panel's chrome is named by.
+ *
+ * The title and the switcher are one string on purpose: both are the sheet's own name, one where a
+ * reader reads it and one where a screen reader announces it, and two different words for the two
+ * would be one sheet with two names. `select_book` is Flutter's `context.l10n.selectBook` at
+ * `legacy/flutter/lib/main.dart:1985`, and `close` its `context.l10n.close` at `:1995`.
+ */
+fun libraryPanelLabel(label: LibraryPanelLabel): Int = when (label) {
+    LibraryPanelLabel.TITLE -> R.string.select_book
+    LibraryPanelLabel.TESTAMENT_SWITCHER -> R.string.select_book
+    LibraryPanelLabel.CLOSE -> R.string.close
+}
