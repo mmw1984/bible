@@ -1,5 +1,6 @@
 package com.marcow.bible.feature.search.ui
 
+import com.marcow.bible.core.designsystem.R
 import com.marcow.bible.core.model.ScriptureHit
 import com.marcow.bible.feature.search.SearchMode
 import com.marcow.bible.feature.search.SearchSheetState
@@ -30,8 +31,22 @@ internal sealed interface SearchPanel {
     /** `mode == ai && requiresLogin`: the `login_to_search` box with its sign-in button. */
     data object SignIn : SearchPanel
 
-    /** `mode == ai && overviewSearching`: the overview half is still out. */
-    data object OverviewLoading : SearchPanel
+    /**
+     * `mode == ai && overviewSearching`: the overview half is still out.
+     *
+     * This panel and [ScriptureLoading] are drawn by one widget — a single `_AiSearchLoading` with a
+     * label — and the label is the only thing that tells the two rows apart on screen. So the words
+     * travel with the panel rather than being written at the call site: `searching_scripture` drawn
+     * under the overview section compiles, passes every row test, and puts a row in front of the user
+     * that reports on the wrong half and never stops on its own.
+     */
+    data object OverviewLoading : SearchPanel {
+        /** `_SearchSection(title: context.l10n.aiOverview)`. */
+        val title = R.string.ai_overview
+
+        /** `context.l10n.searchingOverview`, the label `_AiSearchLoading` was handed. */
+        val label = R.string.searching_overview
+    }
 
     /** `mode == ai && overviewFailed`: the overview half gave up. */
     data object OverviewFailed : SearchPanel
@@ -40,7 +55,13 @@ internal sealed interface SearchPanel {
     data object Overview : SearchPanel
 
     /** `mode == ai && referencesSearching`: the references half is still out. */
-    data object ScriptureLoading : SearchPanel
+    data object ScriptureLoading : SearchPanel {
+        /** `_SearchSection(title: context.l10n.aiScriptureResults)`. */
+        val title = R.string.ai_scripture_results
+
+        /** `context.l10n.searchingScripture`, the other of the two labels. */
+        val label = R.string.searching_scripture
+    }
 
     /** `mode == ai && referencesFailure != null`: the references half gave up. */
     data class ScriptureFailed(val failure: ReferenceFailure) : SearchPanel

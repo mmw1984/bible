@@ -1,5 +1,6 @@
 package com.marcow.bible.feature.search
 
+import com.marcow.bible.core.designsystem.R
 import com.marcow.bible.core.model.BibleBook
 import com.marcow.bible.core.model.ScriptureHit
 import com.marcow.bible.core.model.Testament
@@ -12,6 +13,7 @@ import com.marcow.bible.feature.search.ui.SearchRow
 import com.marcow.bible.feature.search.ui.searchRows
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -212,6 +214,37 @@ class SearchRowsTest {
         )
 
         assertFalse(SearchRow.NoResults in rows)
+    }
+
+    @Test
+    fun `each loading row says which half it is, under the section that half belongs to`() {
+        // The two rows are one widget with a different label, and the labels are the only thing that
+        // separates them: the overview search reporting "Searching scripture results…" while the
+        // references row reports on the overview changes nothing else on screen, so this pairing is
+        // what makes the rows mean anything.
+        assertEquals(R.string.ai_overview, SearchPanel.OverviewLoading.title)
+        assertEquals(R.string.searching_overview, SearchPanel.OverviewLoading.label)
+        assertEquals(R.string.ai_scripture_results, SearchPanel.ScriptureLoading.title)
+        assertEquals(R.string.searching_scripture, SearchPanel.ScriptureLoading.label)
+    }
+
+    @Test
+    fun `the two loading rows never wear each other's words`() {
+        // The halves a swap would break: same widget, same section treatment, one pair of strings
+        // transposed. Both rows would still spin and both would still stop on their own callback.
+        assertNotEquals(SearchPanel.OverviewLoading.label, SearchPanel.ScriptureLoading.label)
+        assertNotEquals(SearchPanel.OverviewLoading.title, SearchPanel.ScriptureLoading.title)
+    }
+
+    @Test
+    fun `every loading row has a section and a label of its own`() {
+        // Exhaustiveness is the compiler's job, but a resource that no longer resolves is the one
+        // outcome nothing in this module can rule out, and it would draw a bare spinner with nothing
+        // in its section to say what is out.
+        listOf(SearchPanel.OverviewLoading, SearchPanel.ScriptureLoading).forEach { panel ->
+            assertNotEquals(0, panel.title, "$panel has no section title")
+            assertNotEquals(0, panel.label, "$panel has no label")
+        }
     }
 }
 

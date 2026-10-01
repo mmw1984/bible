@@ -74,8 +74,9 @@ private fun spinnerTurn(): State<Float> = rememberInfiniteTransition(label = "se
  * `AppProgressLine` in `legacy/flutter/lib/app_ui.dart`.
  *
  * One line rather than two because this is the sheet's single "a search is running" signal — the two
- * independent per-request rows are [AiSearchLoading], which is what says *which* half is still out.
- * The two travelling segments, their widths, opacities and 1450 ms cycle are `_IndeterminateLine`'s.
+ * independent per-request rows are `AiSearchLoading` in `SearchSections.kt`, which is what says
+ * *which* half is still out. The two travelling segments, their widths, opacities and 1450 ms cycle
+ * are `_IndeterminateLine`'s.
  */
 @Composable
 internal fun SearchProgressLine(color: Color, modifier: Modifier = Modifier) {

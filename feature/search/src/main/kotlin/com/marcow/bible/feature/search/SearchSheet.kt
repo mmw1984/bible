@@ -361,13 +361,13 @@ private fun SearchPanelContent(panel: SearchPanel, state: SearchSheetState, onSi
             Text(text = state.overview.orEmpty(), color = appColors.ink)
         }
 
-        SearchPanel.OverviewLoading -> SearchSection(stringResource(R.string.ai_overview)) {
-            AiSearchLoading(stringResource(R.string.searching_overview))
+        is SearchPanel.OverviewLoading -> SearchSection(stringResource(panel.title)) {
+            AiSearchLoading(stringResource(panel.label))
         }
 
         SearchPanel.OverviewFailed -> OverviewFailedPanel()
-        SearchPanel.ScriptureLoading -> SearchSection(stringResource(R.string.ai_scripture_results)) {
-            AiSearchLoading(stringResource(R.string.searching_scripture))
+        is SearchPanel.ScriptureLoading -> SearchSection(stringResource(panel.title)) {
+            AiSearchLoading(stringResource(panel.label))
         }
 
         is SearchPanel.ScriptureFailed -> ReferencesFailedPanel(failure = panel.failure)
