@@ -1,7 +1,6 @@
 package com.marcow.bible.feature.devotion
 
 import android.annotation.SuppressLint
-import android.graphics.Color as AndroidColor
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -51,6 +50,7 @@ import com.marcow.bible.core.designsystem.components.AppTap
 import com.marcow.bible.core.designsystem.icons.AppGlyph
 import com.marcow.bible.core.designsystem.theme.appColors
 import java.net.URI
+import android.graphics.Color as AndroidColor
 
 /**
  * The fallback reader, replacing `DevotionWebReaderPage` in
