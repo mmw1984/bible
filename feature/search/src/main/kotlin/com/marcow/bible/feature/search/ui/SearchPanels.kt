@@ -83,11 +83,20 @@ internal fun ReferencesFailedPanel(failure: ReferenceFailure, modifier: Modifier
 /** Which of the two `ai_scripture_results` failure messages [failure] is. */
 @Composable
 internal fun referencesFailureMessage(failure: ReferenceFailure): String = stringResource(
-    when (failure) {
-        ReferenceFailure.VERSES -> R.string.verse_results_failed
-        ReferenceFailure.REQUEST -> R.string.references_failed
-    },
+    referencesFailureString(failure),
 )
+
+/**
+ * The copy [failure] is drawn with, as a resource id rather than as a `String`.
+ *
+ * Split out from [referencesFailureMessage] so that which failure gets which message can be pinned
+ * without a `Composition`: the pairing is the whole point of having two, and reading it off a
+ * `@Composable` is the one way to be sure of it.
+ */
+internal fun referencesFailureString(failure: ReferenceFailure): Int = when (failure) {
+    ReferenceFailure.VERSES -> R.string.verse_results_failed
+    ReferenceFailure.REQUEST -> R.string.references_failed
+}
 
 /**
  * The `login_to_search` panel: why there are no results, and the button that fixes it.
