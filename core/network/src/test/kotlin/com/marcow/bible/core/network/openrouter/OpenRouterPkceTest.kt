@@ -1,12 +1,12 @@
 package com.marcow.bible.core.network.openrouter
 
-import java.security.SecureRandom
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.security.SecureRandom
 
 /**
  * `openrouter_oauth.dart` in `legacy/flutter/lib`, which is the piece of the sign-in that can be
