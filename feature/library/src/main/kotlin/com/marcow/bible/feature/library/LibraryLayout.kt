@@ -107,7 +107,17 @@ object SidebarChrome {
 
     /** The "Currently reading" label, and the gap under it before the book row. */
     val readingLabelSize = 9.sp
-    val readingLabelSpacing = 2.sp
+
+    /**
+     * The tracking on that label, Flutter's `letterSpacing: 2`.
+     *
+     * A dp rather than an sp, because Flutter's `letterSpacing` is absolute logical pixels that do
+     * not move with the system font scale, and an `sp` would track it: at a 1.3 scale the native
+     * label would open up by 2.6 px while the Flutter one stayed at 2. The label is a 9 px caption
+     * and its tracking is part of how tightly it is set, so it is a measurement, not a type scale.
+     */
+    val readingLabelSpacing = 2.dp
+
     val belowReadingLabel: Dp = 15.dp
 
     /** The book row: its own padding, the name beside the chevron, and the space under it. */
