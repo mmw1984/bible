@@ -16,8 +16,29 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Posts one chat completion to OpenRouter and hands back the text, replacing `OpenRouterClient` +
- * `generate()` in `legacy/flutter/lib/openrouter_service.dart`.
+ * Where a chat completion is asked for, replacing `OpenRouterClient` in
+ * `legacy/flutter/lib/openrouter_service.dart`.
+ *
+ * The search feature asks for the text of a completion and nothing else: what the body says is
+ * [ChatCompletionRequest]'s business, what a status code means is the transport's, and the key is
+ * nobody's but [OpenRouterSession]'s. Keeping that behind a port is what lets the use cases be
+ * exercised without a socket, and it is the same reason [OpenRouterSession] and [OpenRouterModelId]
+ * are ports rather than classes.
+ */
+interface OpenRouterChatClient {
+    /**
+     * The text of one completion.
+     *
+     * @throws OpenRouterException.LoginRequired when there is no key, or the provider rejected it.
+     * @throws OpenRouterException.RequestFailed for any other non-2xx answer.
+     * @throws OpenRouterException.EmptyResponse when the answer carried no content.
+     */
+    suspend fun complete(request: ChatCompletionRequest): String
+}
+
+/**
+ * The HTTP client behind [OpenRouterChatClient], replacing `generate()` in
+ * `legacy/flutter/lib/openrouter_service.dart`.
  *
  * The body is already the exact object for the wire (see [ChatCompletionRequest]), so this class
  * only does what `_send` did around it: read the key, attach the three headers, decide what a
@@ -32,18 +53,11 @@ import javax.inject.Singleton
  * is asked the same question either way.
  */
 @Singleton
-class OpenRouterChatClient @Inject constructor(
+class HttpOpenRouterChatClient @Inject constructor(
     private val httpClient: OkHttpClient,
     private val session: OpenRouterSession,
-) {
-    /**
-     * The text of one completion.
-     *
-     * @throws OpenRouterException.LoginRequired when there is no key, or the provider rejected it.
-     * @throws OpenRouterException.RequestFailed for any other non-2xx answer.
-     * @throws OpenRouterException.EmptyResponse when the answer carried no content.
-     */
-    suspend fun complete(request: ChatCompletionRequest): String {
+) : OpenRouterChatClient {
+    override suspend fun complete(request: ChatCompletionRequest): String {
         val key = session.apiKey()
         if (key.isNullOrEmpty()) throw OpenRouterException.LoginRequired()
 

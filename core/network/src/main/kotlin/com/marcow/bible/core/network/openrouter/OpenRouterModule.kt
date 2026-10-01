@@ -25,6 +25,10 @@ object OpenRouterModule {
     @Singleton
     fun provideOpenRouterModelId(modelId: DefaultOpenRouterModelId): OpenRouterModelId = modelId
 
+    @Provides
+    @Singleton
+    fun provideOpenRouterChatClient(client: HttpOpenRouterChatClient): OpenRouterChatClient = client
+
     /**
      * One shared client for the whole app.
      *
