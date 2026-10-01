@@ -259,27 +259,44 @@ class ReaderGoldenTest {
      * actually sees, and drawing it directly pins this sheet's pixels rather than the harness's
      * ability to composite a popup — see `VerseActionSheetContent`'s own note.
      *
-     * `progress` is 1 and `onAction` is a sink, so all three rows are drawn: Ask and Explain appear
-     * only when the caller can service them, and a sheet captured with the dead rows hidden would be
-     * a golden of the wrong sheet.
+     * `progress` is 1 and `onAction` is a sink, so all three rows are drawn: this is the sheet as
+     * Phase 3 will show it, with something to send the two question rows to. The sheet as this build
+     * shows it is the golden below, and it is one row rather than a mistake in this one.
      */
     @Test
     fun `the action sheet on a verse`() {
         paparazzi.snapshot(name = "VerseActionSheet") {
             ReaderGoldenHarness {
-                val reference = "約翰福音 1:1"
                 VerseActionSheetContent(
-                    request = scriptureRequest(
-                        action = VerseAction.ASK_AI,
-                        reference = reference,
-                        verse = JOHN_ONE_VERSE_1,
-                        chapterContext = JOHN_CONTEXT,
-                        // The composable asks for the localised frame around the reference itself,
-                        // so what is handed here is what Ask sends: the request with no question.
-                        explainQuestion = "",
-                    ),
+                    request = verseRequest(),
                     progress = 1f,
                     onAction = { _, _ -> },
+                    onDismiss = {},
+                )
+            }
+        }
+    }
+
+    /**
+     * The same sheet with nothing to send a question to, which is what a long press opens today.
+     *
+     * `onAction` is null, so [verseActionRows] gives the sheet the one row that needs no host and
+     * [VerseActionSheetTest] holds that decision; this is what the decision *looks* like. The sheet is
+     * under half the height it will be in Phase 3 — one tile under a grabber — and the reader is
+     * visible through the scrim above it instead of behind two more rows, which is the one thing about
+     * this state no assertion can say and the thing a reader long-pressing a verse sees.
+     *
+     * A sheet with two dead rows in it was the alternative and is worse: it offers a question the app
+     * cannot answer, in a tile the reader has already learned to tap.
+     */
+    @Test
+    fun `the action sheet with nothing to send a question to`() {
+        paparazzi.snapshot(name = "VerseActionSheet_copyOnly") {
+            ReaderGoldenHarness {
+                VerseActionSheetContent(
+                    request = verseRequest(),
+                    progress = 1f,
+                    onAction = null,
                     onDismiss = {},
                 )
             }
@@ -302,6 +319,22 @@ private fun ReaderGoldenHarness(content: @Composable () -> Unit) {
         }
     }
 }
+
+/**
+ * John 1:1 as a long press hands it over: the reference, the verse, and the chapter behind it.
+ *
+ * Both action-sheet goldens draw the same verse, because the sheet is a function of what was pressed
+ * and not of which of its rows are on screen — so one request, named once, and the two goldens differ
+ * only in the `onAction` they are given. The composable asks for the localised frame around the
+ * reference itself, so what is handed here is what Ask sends: the request with no question.
+ */
+private fun verseRequest(): ScriptureRequest = scriptureRequest(
+    action = VerseAction.ASK_AI,
+    reference = "約翰福音 1:1",
+    verse = JOHN_ONE_VERSE_1,
+    chapterContext = JOHN_CONTEXT,
+    explainQuestion = "",
+)
 
 /** Nobody is pressing anything in a snapshot, and nothing here has to assert that they did not. */
 private object SilentNavigator : ReaderNavigator {
