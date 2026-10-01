@@ -51,6 +51,11 @@ interface OpenRouterChatClient {
  * (it publishes one overview and one reference set) and what the Phase 4 SSE client replaces. The
  * prompt, the token ceiling, the temperature and the excluded reasoning are unchanged, so the model
  * is asked the same question either way.
+ *
+ * Everything except the socket is [readOpenRouterExchange] and [openRouterBearer], so the decisions
+ * `_send` made about an answer — which statuses sign you out, which text an error carries, what a
+ * completion's content may be — are exercised without a network, the way `core/network`'s devotion
+ * decoders are.
  */
 @Singleton
 class HttpOpenRouterChatClient @Inject constructor(
@@ -58,33 +63,78 @@ class HttpOpenRouterChatClient @Inject constructor(
     private val session: OpenRouterSession,
 ) : OpenRouterChatClient {
     override suspend fun complete(request: ChatCompletionRequest): String {
-        val key = session.apiKey()
-        if (key.isNullOrEmpty()) throw OpenRouterException.LoginRequired()
+        val bearer = openRouterBearer(session.apiKey()) ?: throw OpenRouterException.LoginRequired()
 
         val httpRequest = Request.Builder()
             .url(OPENROUTER_CHAT_COMPLETIONS)
-            .header("Authorization", "Bearer $key")
+            .header("Authorization", "Bearer $bearer")
             .header("Content-Type", "application/json")
             .header("X-OpenRouter-Title", TITLE)
             .post(request.body.toRequestBody(JSON_MEDIA_TYPE))
             .build()
 
         val response = withContext(Dispatchers.IO) { httpClient.newCall(httpRequest).execute() }
-        response.use {
-            if (it.code == 401 || it.code == 403) {
-                // Drain before signing out, exactly as `_send` did, so the connection is released
-                // rather than left half-read when the socket is closed.
-                it.body?.bytes()
-                session.signOut()
-                throw OpenRouterException.LoginRequired()
+        return response.use {
+            // Read before branching rather than only on the failure path: every branch below consumes
+            // the body, so the connection is released rather than left half-read when the window is
+            // closed, which is what `_send` did by draining the 401 before signing out.
+            when (val exchange = readOpenRouterExchange(it.code, it.body?.string().orEmpty())) {
+                is OpenRouterExchange.Answered -> exchange.text
+                is OpenRouterExchange.KeyRejected -> {
+                    session.signOut()
+                    throw OpenRouterException.LoginRequired()
+                }
+
+                is OpenRouterExchange.Refused -> throw OpenRouterException.RequestFailed(exchange.message)
+                is OpenRouterExchange.Empty -> throw OpenRouterException.EmptyResponse()
             }
-            val raw = it.body?.string().orEmpty()
-            if (!it.isSuccessful) throw OpenRouterException.RequestFailed(failureMessage(it.code, raw))
-            val content = contentText(raw)
-            if (content.isEmpty()) throw OpenRouterException.EmptyResponse()
-            return content
         }
     }
+}
+
+/**
+ * What one exchange of `_send` amounted to, given everything except the socket.
+ *
+ * The two sign-in cases are kept apart from the ordinary failure because they are the two the sheet
+ * answers differently: [KeyRejected] drops the stored key before the refusal is reported, so a
+ * revoked key cannot wedge the app in a state where every retry fails the same way, and it is not a
+ * message the user is asked to read.
+ */
+internal sealed interface OpenRouterExchange {
+    /** The 401 / 403 pair: the key is gone, not the request. */
+    data object KeyRejected : OpenRouterExchange
+
+    /** A non-2xx answer, carrying `'OpenRouter request failed (<status>): <message>'`. */
+    data class Refused(val message: String) : OpenRouterExchange
+
+    /** A 2xx answer whose content was empty, the `OpenRouter returned no response.` of `_send`. */
+    data object Empty : OpenRouterExchange
+
+    /** The one completed answer's text. */
+    data class Answered(val text: String) : OpenRouterExchange
+}
+
+/**
+ * `'Bearer $key'`, or nothing at all when there is no key.
+ *
+ * Dart's `_send` took the key from secure storage, threw `StateError(OPENROUTER_LOGIN_REQUIRED)`
+ * when it came back empty, and only then built the request. An empty string counts as no key here
+ * because a blank bearer is what a wiped store hands back, and asking the provider with it would
+ * turn a sign-in prompt into a 401.
+ */
+internal fun openRouterBearer(key: String?): String? = key?.takeIf { it.isNotEmpty() }
+
+/**
+ * What a completed HTTP exchange amounts to, which is the branch of `_send` after the answer is in.
+ *
+ * The order is Dart's: the two statuses that mean the key is wrong come before the general non-2xx
+ * case, so a revoked key signs out instead of reporting a message that would not fix anything.
+ */
+internal fun readOpenRouterExchange(code: Int, raw: String): OpenRouterExchange {
+    if (code == HTTP_UNAUTHORIZED || code == HTTP_FORBIDDEN) return OpenRouterExchange.KeyRejected
+    if (code !in HTTP_SUCCESS_RANGE) return OpenRouterExchange.Refused(failureMessage(code, raw))
+    val content = contentText(raw)
+    return if (content.isEmpty()) OpenRouterExchange.Empty else OpenRouterExchange.Answered(content)
 }
 
 /** `'OpenRouter request failed (${response.statusCode}): ${_errorMessage(payload)}'`. */
@@ -155,6 +205,13 @@ private fun messageText(raw: JsonElement?): String? = (raw as? JsonPrimitive)
 
 /** `Uri.parse('https://openrouter.ai/api/v1/chat/completions')` of `_send`. */
 private const val OPENROUTER_CHAT_COMPLETIONS = "https://openrouter.ai/api/v1/chat/completions"
+
+/** `Response.isSuccessful`, which OkHttp defines as this range rather than as `code < 400`. */
+private val HTTP_SUCCESS_RANGE = 200..299
+
+/** The two statuses `_send` answered by signing out rather than by reporting a message. */
+private const val HTTP_UNAUTHORIZED = 401
+private const val HTTP_FORBIDDEN = 403
 
 /** `'X-OpenRouter-Title': 'Bible'`, so the provider attributes the traffic to this app. */
 private const val TITLE = "Bible"
