@@ -49,12 +49,7 @@ internal enum class DevotionGlyph {
  * image is not actionable at all.
  */
 @Composable
-internal fun DevotionGlyphView(
-    glyph: DevotionGlyph,
-    color: Color,
-    modifier: Modifier = Modifier,
-    size: Dp = 20.dp,
-) {
+internal fun DevotionGlyphView(glyph: DevotionGlyph, color: Color, modifier: Modifier = Modifier, size: Dp = 20.dp) {
     Icon(
         imageVector = remember(glyph) { glyph.imageVector() },
         contentDescription = null,
