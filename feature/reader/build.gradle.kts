@@ -67,6 +67,9 @@ dependencies {
     api(project(":core:model"))
     api(project(":core:common"))
     implementation(project(":core:database"))
+    // The interface language the book title and the stored verses are read in: `ReaderViewModel`
+    // watches `SettingsRepository` so a language changed in Settings repaints the title in place.
+    implementation(project(":core:datastore"))
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(platform(libs.junit.bom))
