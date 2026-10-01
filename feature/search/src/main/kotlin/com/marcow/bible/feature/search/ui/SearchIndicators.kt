@@ -39,21 +39,65 @@ import kotlin.math.sin
  * `1.35 * PI`), the same square cap, the same `max(1.6, shortestSide * .12)` stroke, and the same
  * 820 ms constant rotation. When the design-system module is next in scope this should become that
  * widget rather than a second implementation.
+ *
+ * The first three of those are [SpinnerArc], which is where a JVM test can reach them.
  */
 @Composable
 internal fun SearchSpinner(color: Color, modifier: Modifier = Modifier, diameter: Dp = 20.dp) {
     val turn by spinnerTurn()
     Canvas(modifier = modifier.size(diameter).rotate(turn)) {
-        val stroke = max(MIN_SPINNER_STROKE_DP, size.minDimension * SPINNER_STROKE_RATIO)
+        val arc = SpinnerArc.forSide(size.minDimension)
         drawArc(
             color = color,
-            startAngle = SPINNER_START_RADIANS,
-            sweepAngle = SPINNER_SWEEP_RADIANS,
+            startAngle = arc.startRadians,
+            sweepAngle = arc.sweepRadians,
             useCenter = false,
-            topLeft = Offset(stroke / 2f, stroke / 2f),
-            size = Size(size.width - stroke, size.height - stroke),
-            style = Stroke(width = stroke, cap = StrokeCap.Square),
+            topLeft = Offset(arc.inset, arc.inset),
+            size = Size(arc.boxWidth(size.width), arc.boxWidth(size.height)),
+            style = Stroke(width = arc.stroke, cap = StrokeCap.Square),
         )
+    }
+}
+
+/**
+ * The four numbers `_SpinnerPainter` draws its one arc from, for a spinner [side] dp across.
+ *
+ * As data for the same reason [ProgressSegment] is: a `Canvas` cannot be drawn on the JVM, and the
+ * arc is the whole of what a spinner is. Of the four, [stroke] is the one that decides whether the
+ * spinner still reads as a spinner — it is a share of the widget's side with a floor under it, so a
+ * spinner drawn below the floor keeps the same thickness as a much larger one and stops looking like
+ * it was drawn to fit the row it sits in.
+ *
+ * [inset] is `stroke / 2` because the cap is square, not round: `StrokeCap.Square` extends the arc
+ * by half a stroke past both ends of the chord, so the box is deflated to put the cap's outer corners
+ * exactly on the widget's own bounds. A round cap would need no inset at all, and one that inflated
+ * the arc by a whole stroke instead would push the corners outside — where a `Canvas` clips them
+ * silently, so the arc would simply come out a little shorter than it was asked for.
+ */
+internal data class SpinnerArc(
+    /** `math.max(1.6, size.shortestSide * .12)`: the `Paint.strokeWidth` of the Flutter arc. */
+    val stroke: Float,
+    /** `-.9`: where the arc starts, in radians, before the rotation transition turns it. */
+    val startRadians: Float,
+    /** `math.pi * 1.35`: how far round the arc sweeps, which is a little under half a turn. */
+    val sweepRadians: Float,
+    /** `(Offset.zero & size).deflate(stroke / 2)`: how far in from each edge the arc's box sits. */
+    val inset: Float,
+) {
+    /** The width the arc is drawn across inside a box [side] wide: the side less both insets. */
+    fun boxWidth(side: Float): Float = side - 2f * inset
+
+    companion object {
+        /** `_SpinnerPainter.paint`, for a spinner [side] dp across — square caps, `useCenter` false. */
+        fun forSide(side: Float): SpinnerArc {
+            val stroke = max(MIN_SPINNER_STROKE_DP, side * SPINNER_STROKE_RATIO)
+            return SpinnerArc(
+                stroke = stroke,
+                startRadians = SPINNER_START_RADIANS,
+                sweepRadians = SPINNER_SWEEP_RADIANS,
+                inset = stroke / 2f,
+            )
+        }
     }
 }
 
