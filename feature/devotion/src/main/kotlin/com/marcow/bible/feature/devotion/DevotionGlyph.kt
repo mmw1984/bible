@@ -16,17 +16,26 @@ import androidx.compose.ui.unit.dp
 /**
  * The icons Flutter drew on this screen out of Lucide rather than out of `AppGlyph`.
  *
- * The refresh button, an image that failed to load, the SoundCloud fallback and the video thumbnail
- * each named a `LucideIcons.*`, and none of them has a shape in the shared `AppGlyph` language — the
- * closest is `AppGlyph.REFRESH`, which is the app's own arc-and-arrowhead, not Lucide's two-arrow
- * cycle. That set lives in `core/design-system`, outside this feature's scope, so these five are
- * vendored here instead: the same 24×24 grid, the same 2 px round-capped stroke Lucide draws with, at
- * the sizes the Flutter widgets asked for. [DevotionGlyphView] tints them the way `Icon` tints any
- * vector, so a caller only says which shape and which colour.
+ * The refresh button, the reader's reload, an image that failed to load, the SoundCloud fallback and
+ * the video thumbnail each named a `LucideIcons.*`, and none of them has a shape in the shared
+ * `AppGlyph` language — the closest is `AppGlyph.REFRESH`, which is the app's own arc-and-arrowhead,
+ * not Lucide's two-arrow cycle. That set lives in `core/design-system`, outside this feature's scope,
+ * so these are vendored here instead: the same 24×24 grid, the same 2 px round-capped stroke Lucide
+ * draws with, at the sizes the Flutter widgets asked for. [DevotionGlyphView] tints them the way
+ * `Icon` tints any vector, so a caller only says which shape and which colour.
  */
 internal enum class DevotionGlyph {
     /** `LucideIcons.refreshCw` — the masthead's refresh button. */
     REFRESH_CW,
+
+    /**
+     * `LucideIcons.rotateCw` — the web reader's reload button.
+     *
+     * A separate glyph from [REFRESH_CW] because Lucide draws the two differently: this is one arrow
+     * following a three-quarter arc, where `refreshCw` is two arrows following two halves in a closed
+     * cycle. The reader's button reloads one page, so it is the one Flutter drew there.
+     */
+    ROTATE_CW,
 
     /** `LucideIcons.externalLink` — the SoundCloud card's button and the video's open-in-browser row. */
     EXTERNAL_LINK,
@@ -80,6 +89,11 @@ private fun DevotionGlyph.imageVector(): ImageVector = ImageVector.Builder(
             "M21 3v5h-5",
             "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16",
             "M8 16H3v5",
+        )
+
+        DevotionGlyph.ROTATE_CW -> lucidePath(
+            "M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8",
+            "M21 3v5h-5",
         )
 
         DevotionGlyph.EXTERNAL_LINK -> lucidePath(

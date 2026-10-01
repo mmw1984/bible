@@ -95,6 +95,15 @@ object DevotionChrome {
     val RULE_THICKNESS: Dp = 1.dp
     val BELOW_RULE: Dp = 14.dp
 
+    /**
+     * `colors.surfaceRaised.withValues(alpha: .6)`, the idle fill of the masthead's refresh button, of
+     * a date chip, and of each of the web reader's three controls.
+     *
+     * One token for all three because it is one decision in `app_theme.dart` — how far a raised
+     * control is knocked back from the page — and a reader's title bar has no reason to restate it.
+     */
+    const val CONTROL_FILL_ALPHA: Float = 0.6f
+
     /** Today's date in the corner of the controls row, drawn only after a fetch has succeeded. */
     val TODAY_SIZE: TextUnit = 10.sp
 
@@ -270,4 +279,30 @@ object DevotionChrome {
 
     /** The copy confirmation, Flutter's `SnackBar(duration: Duration(seconds: 2))`. */
     const val COPY_FEEDBACK_MILLIS: Int = 2_000
+
+    /**
+     * The web reader's toolbar, from `legacy/flutter/lib/devotion_web_reader_io.dart`.
+     *
+     * Back, the title, reload and open-in-browser in one row over the frame. Its own numbers rather
+     * than the page masthead's, because the two rows are not the same row: the masthead is a headline
+     * over a scrolling article, and this is a title bar over a browser, so it is denser and it carries
+     * two controls the masthead has no use for. What they do share is [CONTROL_SIZE] and
+     * [CONTROL_GLYPH_SIZE] — same tap target, same glyph — and the 0.6 fill.
+     */
+    val WEB_TOOLBAR_HORIZONTAL: Dp = 10.dp
+    val WEB_TOOLBAR_VERTICAL: Dp = 6.dp
+
+    /** The gap either side of the title, and the smaller one between the two right-hand controls. */
+    val WEB_TITLE_GAP: Dp = 8.dp
+    val WEB_CONTROL_GAP: Dp = 6.dp
+    val WEB_TITLE_SIZE: TextUnit = 14.sp
+
+    /**
+     * The 2 dp progress line under the toolbar, `LinearProgressIndicator(minHeight: 2)`.
+     *
+     * Drawn in `ink` over a 40%-alpha `line`, and gone entirely once the page has finished rather than
+     * left at zero — see `DevotionWebReader`.
+     */
+    val WEB_PROGRESS_THICKNESS: Dp = 2.dp
+    const val WEB_PROGRESS_TRACK_ALPHA: Float = 0.4f
 }

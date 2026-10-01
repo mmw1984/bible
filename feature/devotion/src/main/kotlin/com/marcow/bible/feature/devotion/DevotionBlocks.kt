@@ -510,13 +510,14 @@ internal fun DevotionEmbedCard(url: String, onOpenUrl: (String) -> Unit, modifie
 }
 
 /**
- * The embedded SoundCloud widget's own host, or the whole URL when it has none — Flutter's
- * `Uri.tryParse(url)?.host ?? url`.
+ * A URL's host, or the whole URL when it has none — Flutter's `Uri.tryParse(url)?.host ?? url`.
  *
- * The label names the service rather than the `w.soundcloud.com/player/?url=…` query that follows it,
- * which would otherwise take the width of the card and ellipsise away the host.
+ * `internal` rather than private because the web reader's title bar wants the same fallback for the
+ * same reason, and two copies of this expression in one module is one copy too many: the SoundCloud
+ * card's label names the service rather than the `w.soundcloud.com/player/?url=…` query that follows
+ * it, and the reader's title bar would otherwise put a whole permalink into a one-line title.
  */
-private fun String.host(): String = runCatching { URI(this).host }.getOrNull()?.takeIf { it.isNotEmpty() } ?: this
+internal fun String.host(): String = runCatching { URI(this).host }.getOrNull()?.takeIf { it.isNotEmpty() } ?: this
 
 /**
  * A UI label in the app's own typeface.

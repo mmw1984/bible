@@ -335,7 +335,7 @@ private fun DevotionMasthead(
 private fun RefreshControl(loading: Boolean, onRefresh: () -> Unit, modifier: Modifier = Modifier) {
     val label = stringResource(R.string.devotion_refresh)
     AppControlSurface(
-        color = appColors.surfaceRaised.copy(alpha = CONTROL_FILL_ALPHA),
+        color = appColors.surfaceRaised.copy(alpha = DevotionChrome.CONTROL_FILL_ALPHA),
         borderColor = appColors.line,
         modifier = modifier,
     ) {
@@ -402,7 +402,11 @@ private fun DateChip(
 ) {
     val colors = appColors
     AppControlSurface(
-        color = if (active) colors.surfaceRaised else colors.surfaceRaised.copy(alpha = CONTROL_FILL_ALPHA),
+        color = if (active) {
+            colors.surfaceRaised
+        } else {
+            colors.surfaceRaised.copy(alpha = DevotionChrome.CONTROL_FILL_ALPHA)
+        },
         borderColor = if (active) colors.ink.copy(alpha = ACTIVE_CHIP_BORDER_ALPHA) else colors.line,
         selected = active,
         modifier = modifier.height(DevotionChrome.CHIP_HEIGHT),
@@ -478,9 +482,14 @@ private fun DevotionFailure(
     }
 }
 
-/** Flutter's two `AppButton`s: the retry is emphasised and its label set at 600, the web reader is not. */
+/**
+ * Flutter's two `AppButton`s: the retry is emphasised and its label set at 600, the web reader is not.
+ *
+ * `internal` because the reader's own failure screen is the same row of two buttons and draws them
+ * through here rather than repeating the weight distinction a second time.
+ */
 @Composable
-private fun FailureButton(label: String, onClick: () -> Unit, emphasized: Boolean = false) {
+internal fun FailureButton(label: String, onClick: () -> Unit, emphasized: Boolean = false) {
     AppButton(onClick = onClick, emphasized = emphasized) {
         Text(
             text = label,
@@ -504,9 +513,6 @@ private fun FailureButton(label: String, onClick: () -> Unit, emphasized: Boolea
  */
 private fun devotionTitleFamily(usesEnglishUi: Boolean): FontFamily =
     if (usesEnglishUi) AppFonts.Exposure else AppFonts.NotoSerifTC
-
-/** `colors.surfaceRaised.withValues(alpha: .6)`, the idle fill of both the refresh button and a chip. */
-private const val CONTROL_FILL_ALPHA = 0.6f
 
 /** `colors.ink.withValues(alpha: .55)`, the border of the chip in hand. */
 private const val ACTIVE_CHIP_BORDER_ALPHA = 0.55f
