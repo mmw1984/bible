@@ -91,7 +91,9 @@ class SearchViewModel @Inject constructor(
             if (_state.value.aiReady) runAiSearch(value)
             return
         }
-        _state.update { it.clearedForSearch(value).copy(traditionalSearching = true) }
+        // Flutter's text branch: `traditional = const []` sat in the same setState as the spinner, so
+        // the hits of the query before this one were gone before the first row of this one was drawn.
+        _state.update { it.clearedForSearch(value).copy(traditionalSearching = true, traditionalHits = emptyList()) }
         runTraditional(value)
     }
 
@@ -194,9 +196,13 @@ class SearchViewModel @Inject constructor(
 /**
  * The common `setState` at the top of both Flutter search paths.
  *
- * Every failure and every result is cleared here, which is what stops a text search from showing the
+ * Every failure and every AI result is cleared here, which is what stops a text search from showing the
  * AI panel that failed three queries ago, and an AI search from showing hits the user never asked
  * for. `query` is set from the submitted box because the results list is keyed on it.
+ *
+ * The text hits are the one list left out, because that is where Flutter's two branches differ: its AI
+ * branch said nothing about `traditional` and its text branch emptied it at
+ * `legacy/flutter/lib/main.dart:2183`, so a search drops what it is replacing.
  */
 private fun SearchSheetState.clearedForSearch(value: String): SearchSheetState = copy(
     query = value,

@@ -115,6 +115,30 @@ class SearchViewModelTest {
     }
 
     @Test
+    fun `a search that fails leaves none of the last query's hits`() = runTest(dispatcher) {
+        val traditional = FakeTraditionalSearch(hits = listOf(johnThreeSixteen()))
+        val viewModel = searchViewModel(traditional = traditional)
+
+        viewModel.onQueryChanged("love")
+        viewModel.search()
+        advanceUntilIdle()
+
+        traditional.failure = IllegalStateException("no such column")
+        viewModel.onQueryChanged("temptation")
+        viewModel.search()
+
+        // Flutter emptied `traditional` in the same setState that raised the spinner, so the list is
+        // already empty while the search is still out — read here because nothing has answered yet.
+        assertTrue(viewModel.state.value.traditionalSearching)
+        assertTrue(viewModel.state.value.traditionalHits.isEmpty())
+
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.traditionalFailed)
+        assertTrue(viewModel.state.value.traditionalHits.isEmpty())
+    }
+
+    @Test
     fun `both halves of an AI search spin until each of them lands`() = runTest(dispatcher) {
         val updates = MutableSharedFlow<AiSearchUpdate>(extraBufferCapacity = 8)
         val viewModel = searchViewModel(aiSearch = FakeAiSearch(updates))
@@ -376,7 +400,7 @@ class SearchViewModelTest {
 /** A text search that answers with a fixed list, or fails, and remembers what it was asked. */
 private class FakeTraditionalSearch(
     var hits: List<ScriptureHit> = emptyList(),
-    private val failure: Throwable? = null,
+    var failure: Throwable? = null,
 ) : TraditionalSearch {
     var lastQuery: String? = null
 
