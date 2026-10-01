@@ -272,6 +272,33 @@ class SearchViewModelTest {
     }
 
     @Test
+    fun `a sign-in retry lands its results and stops both rows`() = runTest(dispatcher) {
+        // `_searchAi` set `query = value` in its own setState, so the query `_aiChanged` re-read from
+        // the box became the query its callbacks were allowed to write for. Without that assignment
+        // every update was dropped by the `query != value` guard and neither row ever stopped.
+        val updates = MutableSharedFlow<AiSearchUpdate>(extraBufferCapacity = 8)
+        val aiSearch = FakeAiSearch(updates)
+        val session = FakeOpenRouterSession(initial = false)
+        val viewModel = searchViewModel(aiSearch = aiSearch, session = session)
+
+        searchAi(viewModel, query = "love")
+        viewModel.beginSignIn()
+        viewModel.onQueryChanged("hope")
+        session.signIn()
+        advanceUntilIdle()
+
+        updates.tryEmit(AiSearchUpdate.OverviewReady("An overview."))
+        updates.tryEmit(AiSearchUpdate.ReferencesReady(listOf(aiHit(johnThreeSixteen(), "God so loved"))))
+        advanceUntilIdle()
+
+        val state = viewModel.state.value
+        assertEquals("hope", state.query)
+        assertEquals("An overview.", state.overview)
+        assertEquals(1, state.aiHits.size)
+        assertFalse(state.searching)
+    }
+
+    @Test
     fun `a box emptied while the sign-in was in flight runs nothing`() = runTest(dispatcher) {
         val aiSearch = FakeAiSearch(MutableSharedFlow())
         val session = FakeOpenRouterSession(initial = false)

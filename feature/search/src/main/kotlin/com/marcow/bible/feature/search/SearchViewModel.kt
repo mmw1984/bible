@@ -169,6 +169,7 @@ class SearchViewModel @Inject constructor(
         if (value.isBlank() || _state.value.searching || !_state.value.aiReady) return
         _state.update {
             it.copy(
+                query = value,
                 overviewSearching = true,
                 referencesSearching = true,
                 traditionalFailed = false,
