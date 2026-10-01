@@ -23,9 +23,7 @@ import javax.inject.Singleton
  * decide what to say; throwing would fail the whole answer instead.
  */
 @Singleton
-internal class ScriptureToolRunner @Inject constructor(
-    private val bibleRepository: BibleRepository,
-) {
+internal class ScriptureToolRunner @Inject constructor(private val bibleRepository: BibleRepository) {
     /**
      * The verses of the requested range, or the `Tool error: …` line explaining why there are none.
      *
