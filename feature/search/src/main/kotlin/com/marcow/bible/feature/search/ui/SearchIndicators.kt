@@ -91,13 +91,11 @@ internal fun SearchProgressLine(color: Color, modifier: Modifier = Modifier) {
         drawRect(color = track)
         ProgressSegments.forEach { segment ->
             val phase = segment.phase(progress)
-            val eased = EaseInOutCubic.transform(phase)
-            val width = segment.baseWidth + sin(phase * PI).toFloat() * SEGMENT_BREATH
-            val left = (-width + eased * (1 + width)) * size.width
+            val placement = segment.placement(phase, EaseInOutCubic.transform(phase))
             drawRect(
                 color = color.copy(alpha = segment.opacity),
-                topLeft = Offset(left, 0f),
-                size = Size(width * size.width, size.height),
+                topLeft = Offset(placement.leftFraction * size.width, 0f),
+                size = Size(placement.widthFraction * size.width, size.height),
             )
         }
     }
@@ -119,12 +117,31 @@ private fun progressLine(): State<Float> = rememberInfiniteTransition(label = "s
  * One travelling segment of [SearchProgressLine], which is `_ProgressLinePainter`'s two `_drawSegment`
  * calls as data: a base width, an alpha, and how far into the cycle it starts.
  */
-private data class ProgressSegment(val baseWidth: Float, val opacity: Float, val offset: Float) {
+internal data class ProgressSegment(val baseWidth: Float, val opacity: Float, val offset: Float) {
     /** `(progress + .54) % 1` for the second segment; the first one wraps at the same place. */
     fun phase(progress: Float): Float = (progress + offset) % 1f
+
+    /**
+     * The rectangle this segment draws at [phase], as fractions of the line's width.
+     *
+     * `-widthFactor + eased * (1 + widthFactor)`, with the width breathing as
+     * `baseWidth + sin(phase * pi) * .16` — `_drawSegment`'s two lines, unchanged.
+     *
+     * [easedPhase] is that phase through `Curves.easeInOutCubic` and is a parameter rather than
+     * applied here, so this is the arithmetic and nothing else: the curve belongs to the draw pass,
+     * and what is worth knowing about two segments — that they are never at the same point in the
+     * cycle — is a property of the offsets alone, which is what lets it be checked without a Canvas.
+     */
+    fun placement(phase: Float, easedPhase: Float): ProgressSegmentPlacement {
+        val width = baseWidth + sin(phase * PI).toFloat() * SEGMENT_BREATH
+        return ProgressSegmentPlacement(leftFraction = -width + easedPhase * (1 + width), widthFraction = width)
+    }
 }
 
-private val ProgressSegments = listOf(
+/** One segment's box on [SearchProgressLine], in fractions of the line's width. */
+internal data class ProgressSegmentPlacement(val leftFraction: Float, val widthFraction: Float)
+
+internal val ProgressSegments = listOf(
     ProgressSegment(baseWidth = 0.38f, opacity = 1f, offset = 0f),
     ProgressSegment(baseWidth = 0.22f, opacity = 0.62f, offset = 0.54f),
 )
