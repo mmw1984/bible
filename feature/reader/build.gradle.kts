@@ -72,4 +72,7 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)
     testImplementation(libs.kotlinx.coroutines.test)
+    // The same in-memory DataStore `core/datastore` tests with, so the reader's writes and the
+    // legacy scroll offset it converts can be asserted without a file.
+    testImplementation(testFixtures(project(":core:datastore")))
 }
