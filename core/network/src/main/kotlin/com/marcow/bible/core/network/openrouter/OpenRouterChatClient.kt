@@ -65,13 +65,7 @@ class HttpOpenRouterChatClient @Inject constructor(
     override suspend fun complete(request: ChatCompletionRequest): String {
         val bearer = openRouterBearer(session.apiKey()) ?: throw OpenRouterException.LoginRequired()
 
-        val httpRequest = Request.Builder()
-            .url(OPENROUTER_CHAT_COMPLETIONS)
-            .header("Authorization", "Bearer $bearer")
-            .header("Content-Type", "application/json")
-            .header("X-OpenRouter-Title", TITLE)
-            .post(request.body.toRequestBody(JSON_MEDIA_TYPE))
-            .build()
+        val httpRequest = openRouterCompletionRequest(bearer, request.body)
 
         val response = withContext(Dispatchers.IO) { httpClient.newCall(httpRequest).execute() }
         return response.use {
@@ -137,6 +131,22 @@ internal fun readOpenRouterExchange(code: Int, raw: String): OpenRouterExchange 
     return if (content.isEmpty()) OpenRouterExchange.Empty else OpenRouterExchange.Answered(content)
 }
 
+/**
+ * The `Request` `_send` built: the URL, the three headers and the body.
+ *
+ * The endpoint, the `Bearer` header, `Content-Type` and `X-OpenRouter-Title: Bible` are the same
+ * whether the answer arrives all at once or a frame at a time, so the streamed client builds its
+ * request here rather than repeating the header set — a second copy is a second thing to get wrong
+ * when the provider adds a requirement.
+ */
+internal fun openRouterCompletionRequest(bearer: String, body: JsonObject): Request = Request.Builder()
+    .url(OPENROUTER_CHAT_COMPLETIONS)
+    .header("Authorization", "Bearer $bearer")
+    .header("Content-Type", "application/json")
+    .header("X-OpenRouter-Title", TITLE)
+    .post(body.toRequestBody(JSON_MEDIA_TYPE))
+    .build()
+
 /** `'OpenRouter request failed (${response.statusCode}): ${_errorMessage(payload)}'`. */
 private fun failureMessage(statusCode: Int, raw: String): String =
     "OpenRouter request failed ($statusCode): ${openRouterErrorMessage(payloadOrRaw(raw))}"
@@ -166,8 +176,12 @@ private fun contentText(raw: String): String {
 /**
  * `_contentText`: a string, or the `text` of every object part of a content-part list, which is the
  * shape several OpenRouter models answer in.
+ *
+ * Shared with the streamed path because a delta is the same decision on a smaller frame: the same
+ * models that answer a completed call in content parts stream them as parts too, and a parser that
+ * only read strings would answer those models with an empty screen.
  */
-private fun contentOf(raw: JsonElement?): String = when (raw) {
+internal fun contentOf(raw: JsonElement?): String = when (raw) {
     is JsonPrimitive -> if (raw.isString) raw.content else ""
     is JsonArray ->
         raw
