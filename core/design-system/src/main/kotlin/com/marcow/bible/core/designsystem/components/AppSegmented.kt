@@ -28,13 +28,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.marcow.bible.core.designsystem.icons.AppGlyph
 import com.marcow.bible.core.designsystem.theme.appColors
 import com.marcow.bible.core.designsystem.theme.appRadii
 import com.marcow.bible.core.designsystem.theme.segmentAnimationSpec
-
-/** One option in an [AppSegmented] control, mirroring `AppChoice`. */
-data class AppChoice<T>(val value: T, val label: String, val glyph: AppGlyph? = null)
 
 /**
  * The single-select control the settings screen is built from, mirroring `AppSegmented` in

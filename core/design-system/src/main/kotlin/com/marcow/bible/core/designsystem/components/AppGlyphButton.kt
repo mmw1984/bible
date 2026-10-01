@@ -44,6 +44,7 @@ fun AppGlyphView(
  * The glyph is tinted from [appColors] exactly as in Flutter: muted when there is nothing to tap,
  * canvas when the control is selected (it sits on an ink fill), ink otherwise.
  */
+@Suppress("LongParameterList")
 @Composable
 fun AppGlyphButton(
     glyph: AppGlyph,

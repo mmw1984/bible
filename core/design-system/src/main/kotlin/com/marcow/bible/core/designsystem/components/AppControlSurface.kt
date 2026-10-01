@@ -45,6 +45,7 @@ import com.marcow.bible.core.designsystem.theme.tapAnimationSpec
  * A selected control is always solid: the Flutter build skipped the blur for `selected` because a
  * selection has to read as a distinct chip against the track it sits in.
  */
+@Suppress("LongParameterList")
 @Composable
 fun AppControlSurface(
     modifier: Modifier = Modifier,
@@ -199,6 +200,7 @@ fun AppTap(
 }
 
 /** A tappable control on a frosted surface, mirroring `AppButton`. */
+@Suppress("LongParameterList")
 @Composable
 fun AppButton(
     onClick: (() -> Unit)?,
@@ -242,4 +244,4 @@ private const val PRESSED_ALPHA = 0.72f
 private const val DISABLED_ALPHA = 0.42f
 
 /** `ImageFilter.blur(sigmaX: 18, sigmaY: 18)` in the Flutter `AppControlSurface`. */
-private val FROST_SIGMA = 18f
+private const val FROST_SIGMA = 18f
