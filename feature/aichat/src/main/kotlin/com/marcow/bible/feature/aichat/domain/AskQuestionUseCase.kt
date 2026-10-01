@@ -365,19 +365,10 @@ internal data class AnswerProgress(val text: String, val reasoning: String)
  * reader of the flags to work out: an answer that was cut, stopped or left half-continued is
  * incomplete, and one that came back as a tool request is not, whatever the provider said.
  */
-internal data class ChatAnswer(
-    val text: String,
-    val reasoning: String,
-    val incomplete: Boolean,
-    val stopped: Boolean,
-)
+internal data class ChatAnswer(val text: String, val reasoning: String, val incomplete: Boolean, val stopped: Boolean)
 
 /** What one `_streamModelAnswer` call produced, the record Dart returned. */
-private data class Round(
-    val answer: String,
-    val complete: Boolean,
-    val stopped: Boolean,
-)
+private data class Round(val answer: String, val complete: Boolean, val stopped: Boolean)
 
 /** The round the tool loop ended on, and every result the app gave the model along the way. */
 private data class ToolRounds(val round: Round, val results: List<String>)
