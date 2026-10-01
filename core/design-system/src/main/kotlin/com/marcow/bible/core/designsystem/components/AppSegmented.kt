@@ -34,11 +34,7 @@ import com.marcow.bible.core.designsystem.theme.appRadii
 import com.marcow.bible.core.designsystem.theme.segmentAnimationSpec
 
 /** One option in an [AppSegmented] control, mirroring `AppChoice`. */
-data class AppChoice<T>(
-    val value: T,
-    val label: String,
-    val glyph: AppGlyph? = null,
-)
+data class AppChoice<T>(val value: T, val label: String, val glyph: AppGlyph? = null)
 
 /**
  * The single-select control the settings screen is built from, mirroring `AppSegmented` in

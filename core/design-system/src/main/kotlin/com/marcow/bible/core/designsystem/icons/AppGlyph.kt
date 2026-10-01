@@ -83,8 +83,7 @@ fun DrawScope.drawAppGlyph(glyph: AppGlyph, color: Color) {
         size = Size(w * rw, h * rh),
         style = paint,
     )
-    fun circle(x: Float, y: Float, r: Float) =
-        drawCircle(color, radius = w * r, center = point(x, y), style = paint)
+    fun circle(x: Float, y: Float, r: Float) = drawCircle(color, radius = w * r, center = point(x, y), style = paint)
     fun path(vararg points: Offset) {
         val value = Path().apply {
             moveTo(points.first().x, points.first().y)

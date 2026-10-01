@@ -2,6 +2,7 @@ package com.marcow.bible.core.designsystem.theme
 
 import android.os.Build
 import android.view.RoundedCorner
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.Dp
@@ -50,12 +51,7 @@ data class AppRadii(
          * gets [Fallback] rather than a zero radius, because a zero would make every control a sharp
          * rectangle instead of what the Flutter build fell back to.
          */
-        fun fromCornerRadii(
-            topLeftDp: Float,
-            topRightDp: Float,
-            bottomLeftDp: Float,
-            bottomRightDp: Float,
-        ): AppRadii {
+        fun fromCornerRadii(topLeftDp: Float, topRightDp: Float, bottomLeftDp: Float, bottomRightDp: Float): AppRadii {
             val radius = maxOf(topLeftDp, topRightDp, bottomLeftDp, bottomRightDp)
             if (radius <= 0f) return Fallback
             return AppRadii(

@@ -265,8 +265,7 @@ private object FakeBibleDao : BibleDao {
 
     override suspend fun versesByTestament(testament: Int): List<VerseEntity> = emptyList()
 
-    override suspend fun booksByTestament(testament: Int): List<BookEntity> =
-        books.filter { it.testament == testament }
+    override suspend fun booksByTestament(testament: Int): List<BookEntity> = books.filter { it.testament == testament }
 }
 
 private class FakeReadingProgressDao : ReadingProgressDao {

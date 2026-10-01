@@ -3,8 +3,8 @@ package com.marcow.bible.core.designsystem.theme
 import androidx.compose.animation.core.CubicEasing
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.tween
-import androidx.compose.material3.Shapes
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Shapes
 import androidx.compose.ui.unit.dp
 
 /**

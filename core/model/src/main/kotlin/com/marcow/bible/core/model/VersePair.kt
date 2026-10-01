@@ -9,18 +9,10 @@ package com.marcow.bible.core.model
  * code goes through [com.marcow.bible.core.database.VerseEntity.toDomain] so that behaviour is
  * applied once, in the database layer.
  */
-data class VersePair(
-    val number: Int,
-    val zh: String,
-    val en: String,
-)
+data class VersePair(val number: Int, val zh: String, val en: String)
 
 /** A single search result, mirroring `ScriptureHit` in the Flutter `bible_data.dart`. */
-data class ScriptureHit(
-    val book: BibleBook,
-    val chapter: Int,
-    val verse: VersePair,
-)
+data class ScriptureHit(val book: BibleBook, val chapter: Int, val verse: VersePair)
 
 /** Reading mode, mirroring `ReadingMode` in `legacy/flutter/lib/main.dart:33`. */
 enum class ReadingMode(val storageValue: String) {
@@ -39,7 +31,6 @@ enum class ReadingMode(val storageValue: String) {
 
     /** Matches the legacy preference read in `legacy/flutter/lib/main.dart:501`. */
     companion object {
-        fun fromStorage(value: String?): ReadingMode =
-            entries.firstOrNull { it.storageValue == value } ?: CHINESE
+        fun fromStorage(value: String?): ReadingMode = entries.firstOrNull { it.storageValue == value } ?: CHINESE
     }
 }

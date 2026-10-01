@@ -23,9 +23,7 @@ import javax.inject.Inject
  * locale and the navbar style — reads from.
  */
 @HiltViewModel
-class SettingsViewModel @Inject constructor(
-    private val settingsRepository: SettingsRepository,
-) : ViewModel() {
+class SettingsViewModel @Inject constructor(private val settingsRepository: SettingsRepository) : ViewModel() {
     val settings: StateFlow<AppSettings> =
         settingsRepository.settings.stateIn(
             viewModelScope,

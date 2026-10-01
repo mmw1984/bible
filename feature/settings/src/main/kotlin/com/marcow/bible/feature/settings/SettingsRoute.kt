@@ -12,11 +12,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
  * hands the screen nothing but state and callbacks, so the page stays testable without a Hilt graph.
  */
 @Composable
-fun SettingsRoute(
-    onBack: () -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: SettingsViewModel = hiltViewModel(),
-) {
+fun SettingsRoute(onBack: () -> Unit, modifier: Modifier = Modifier, viewModel: SettingsViewModel = hiltViewModel()) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     Box(modifier = modifier) {
         SettingsScreen(
