@@ -109,13 +109,3 @@ object ReaderChrome {
     /** How far Flutter laid a chapter out beyond the viewport before building the rest of it. */
     val scrollCacheExtent: Dp = 1_200.dp
 }
-
-/**
- * The name a book is read under, mirroring `_bookName` in `legacy/flutter/lib/main.dart:40`.
- *
- * Reading mode comes first: an English or bilingual reading shows English book names even in a
- * Chinese interface, which is how the Flutter build let a Chinese reader navigate an English Bible.
- * Only a Chinese reading follows the interface language.
- */
-fun readerBookName(book: BibleBook, mode: ReadingMode, usesEnglishUi: Boolean): String =
-    if (mode != ReadingMode.CHINESE || usesEnglishUi) book.nameEn else book.nameZh

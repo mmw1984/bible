@@ -102,7 +102,7 @@ fun ReaderScreen(
     val colors = appColors
     val book = state.book
     val verses = state.verses
-    val bookName = book?.let { readerBookName(it, state.mode, state.usesEnglishUi) }.orEmpty()
+    val bookName = book?.let { it.displayName(state.mode, state.usesEnglishUi) }.orEmpty()
     val hasPrevious = state.chapter > 1
     val hasNext = state.chapter < state.chapterCount
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp

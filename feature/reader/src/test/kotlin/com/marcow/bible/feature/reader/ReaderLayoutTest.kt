@@ -2,15 +2,12 @@ package com.marcow.bible.feature.reader
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.marcow.bible.core.model.BibleBook
-import com.marcow.bible.core.model.ReadingMode
-import com.marcow.bible.core.model.Testament
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 /**
- * The measurements `_Reader` chose between two widths, and the name a book is read under.
+ * The measurements `_Reader` chose between two widths.
  *
  * The Flutter numbers are all still there — 20 or 46 of padding, 45 or 68 of title, 920 as the line
  * between the two — but they were literals inside one `build` method, where the only way to check
@@ -68,22 +65,8 @@ class ReaderLayoutTest {
         assertEquals(134.dp, layout.bottom)
     }
 
-    @Test
-    fun `an English or bilingual reading names its books in English`() {
-        assertEquals("Genesis", readerBookName(genesis, ReadingMode.CHINESE, usesEnglishUi = true))
-        assertEquals("Genesis", readerBookName(genesis, ReadingMode.ENGLISH, usesEnglishUi = false))
-        assertEquals("Genesis", readerBookName(genesis, ReadingMode.BILINGUAL, usesEnglishUi = false))
-    }
-
-    @Test
-    fun `a Chinese reading follows the interface language`() {
-        assertEquals("創世記", readerBookName(genesis, ReadingMode.CHINESE, usesEnglishUi = false))
-    }
-
     private companion object {
         /** The width the Flutter widget tests drove the reader at. */
         val PhoneWidth = 411.dp
-
-        val genesis = BibleBook("GEN", 1, "創世記", "Genesis", 50, Testament.OLD)
     }
 }

@@ -13,7 +13,21 @@ data class BibleBook(
     val nameEn: String,
     val chapters: Int,
     val testament: Testament,
-)
+) {
+    /**
+     * The name to show this book under, replacing `_bookName` at `legacy/flutter/lib/main.dart:40`.
+     *
+     * The reading mode decides first: English or bilingual reading names its books in English even
+     * when the interface language is Chinese. Failing that, the interface language does, so a
+     * Chinese reader who set the app to English is not left with a list of names they cannot read.
+     *
+     * It lives here rather than in either feature that draws it, because the reader's title and the
+     * library's list are two surfaces of the same list of books and must not be able to disagree
+     * about what a book is called.
+     */
+    fun displayName(mode: ReadingMode, usesEnglishUi: Boolean): String =
+        if (mode != ReadingMode.CHINESE || usesEnglishUi) nameEn else nameZh
+}
 
 enum class Testament {
     OLD,

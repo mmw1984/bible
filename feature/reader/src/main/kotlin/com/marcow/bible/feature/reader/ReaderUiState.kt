@@ -24,7 +24,7 @@ data class ReaderUiState(
     val mode: ReadingMode = ReadingMode.CHINESE,
     /**
      * Whether the interface is in English, which is the second half of what names a book under a
-     * Chinese reading — see [readerBookName] and `_bookName` in `legacy/flutter/lib/main.dart:40`.
+     * Chinese reading — see [BibleBook.displayName] and `_bookName` in `legacy/flutter/lib/main.dart:40`.
      *
      * Flutter read the ambient settings on every build, so a language changed in Settings repainted
      * the title while the reader sat still. One boolean in the state carries the same signal; the
