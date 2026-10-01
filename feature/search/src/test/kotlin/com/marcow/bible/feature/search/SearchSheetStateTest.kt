@@ -6,7 +6,9 @@ import com.marcow.bible.core.model.Testament
 import com.marcow.bible.core.model.VersePair
 import com.marcow.bible.feature.search.domain.AiSearchHit
 import com.marcow.bible.feature.search.domain.ReferenceFailure
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -87,6 +89,35 @@ class SearchSheetStateTest {
     fun `an AI search that is ready is one with a session behind it`() {
         assertFalse(SearchSheetState(signedIn = true).requiresLogin)
         assertTrue(SearchSheetState(signedIn = true).aiReady)
+    }
+
+    @Test
+    fun `a new query is a new results list, so it opens at the top`() {
+        // The one thing `ValueKey('${mode.name}-$query')` did: a different key threw the old
+        // `ScrollController` away, so the list Flutter built next started at index 0 rather than
+        // wherever the previous one had been scrolled to.
+        val first = SearchSheetState(mode = SearchMode.AI, query = "love")
+        val second = first.copy(query = "joy")
+
+        assertNotEquals(first.resultsIdentity, second.resultsIdentity)
+    }
+
+    @Test
+    fun `a new mode is a new results list too`() {
+        val traditional = SearchSheetState(mode = SearchMode.TRADITIONAL, query = "love")
+        val ai = traditional.copy(mode = SearchMode.AI)
+
+        assertNotEquals(traditional.resultsIdentity, ai.resultsIdentity)
+    }
+
+    @Test
+    fun `the same query in the same mode is still the same results list`() {
+        // The other half of it: answering from the model replaces every tile, and the user has to stay
+        // where they were reading while it happens. Only the identity changing should reset.
+        val searching = SearchSheetState(mode = SearchMode.AI, query = "love", referencesSearching = true)
+        val answered = searching.copy(referencesSearching = false, aiHits = listOf(AiSearchHit(hit(), "why")))
+
+        assertEquals(searching.resultsIdentity, answered.resultsIdentity)
     }
 
     @Test

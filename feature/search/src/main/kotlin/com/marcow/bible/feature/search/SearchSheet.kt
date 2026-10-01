@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -237,9 +238,11 @@ private fun SearchProgressVisibility(searching: Boolean) {
 /**
  * The hint, or the rows, mirroring `_results` in `legacy/flutter/lib/main.dart:2420`.
  *
- * The crossfade is Flutter's `AnimatedSwitcher(duration: 220)`. It fires on the one transition where
- * the two look different enough to be worth one — the sheet crossing between "nothing submitted" and
- * "has results" — and on nothing else.
+ * The crossfade is Flutter's `AnimatedSwitcher(duration: 220)` over [SearchSheetState.resultsIdentity]
+ * — the same thing the `ValueKey` said, as an `AnimatedSwitcher` compares children by key. So it
+ * fires on both of the transitions Flutter animated: crossing between "nothing submitted" and "has
+ * results", and crossing to a different query or mode, which is a new key and so a new child. Before,
+ * targeting only [SearchSheetState.showsHint] dropped the second case.
  */
 @Composable
 private fun SearchResults(
@@ -252,15 +255,16 @@ private fun SearchResults(
     modifier: Modifier = Modifier,
 ) {
     Crossfade(
-        targetState = state.showsHint,
+        targetState = state.resultsIdentity,
         modifier = modifier,
         animationSpec = tween(RESULTS_MILLIS, easing = EaseOutCubic),
         label = "searchResults",
-    ) { hint ->
-        if (hint) {
+    ) { identity ->
+        if (state.showsHint) {
             SearchHint()
         } else {
             SearchResultList(
+                identity = identity,
                 state = state,
                 readingMode = readingMode,
                 locale = locale,
@@ -280,9 +284,14 @@ private fun SearchResults(
  * node. The rows are keyed by position rather than by content because Flutter gave its tiles no keys
  * at all and a model can legitimately propose the same verse twice — two overlapping ranges both
  * resolving to `JHN 3:16` — so a reference is not a unique key.
+ *
+ * [identity] is [SearchSheetState.resultsIdentity], the `ValueKey` Flutter gave the `ListView`, and it
+ * is what the scroll position is remembered against: a new query or a new mode means a new list that
+ * opens at the top, which is what the key did when it threw the old `ScrollController` away.
  */
 @Composable
 private fun SearchResultList(
+    identity: String,
     state: SearchSheetState,
     readingMode: ReadingMode,
     locale: AppLocale,
@@ -291,7 +300,9 @@ private fun SearchResultList(
     authError: String?,
 ) {
     val rows = searchRows(state)
+    val listState = remember(identity) { LazyListState() }
     LazyColumn(
+        state = listState,
         modifier = Modifier.fillMaxSize(),
         contentPadding = RESULTS_PADDING,
     ) {

@@ -78,6 +78,24 @@ data class SearchSheetState(
         get() = query.isEmpty()
 
     /**
+     * `ValueKey('${mode.name}-$query')`, the key `_results` gave its `ListView`.
+     *
+     * This is the whole of what the key was for. Flutter's key is not a cache key or an equality test
+     * — a widget key is an identity, so changing it throws the old element and its `ScrollController`
+     * away and builds a new list that starts at the top. Submitting a query while scrolled halfway
+     * down a long list therefore opened the new results at their beginning, and so did switching mode.
+     *
+     * Compose has no widget identity to key on, and a `LazyColumn` keeps its `LazyListState` across
+     * recomposition like any remembered value, so without this the second search of a session opened
+     * wherever the first one had been scrolled to — with nothing but the new tiles' tail on screen. It
+     * is kept as a value rather than being read off `mode` and `query` at the call site because both
+     * the crossfade and the scroll position have to key on the same thing, and one place that says so
+     * cannot be half-ported.
+     */
+    val resultsIdentity: String
+        get() = "${mode.name}-$query"
+
+    /**
      * The `no_results` paragraph, kept for Flutter's exact condition.
      *
      * Read it against `legacy/flutter/lib/main.dart:2556`: the sheet shows "no matching scripture"
