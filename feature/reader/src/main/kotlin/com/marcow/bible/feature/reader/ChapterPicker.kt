@@ -215,6 +215,7 @@ fun ChapterPickerBubble(
  * rather than a second public bubble. Where the bubble goes is the arithmetic of the four functions
  * above and [ChapterPickerTest] holds that down — this is here to pin the bubble's own pixels.
  */
+@Suppress("UnusedParameter")
 @Composable
 internal fun ChapterPickerContent(
     chapter: Int,
