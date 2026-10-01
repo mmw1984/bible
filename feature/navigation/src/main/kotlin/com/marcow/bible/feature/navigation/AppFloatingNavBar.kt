@@ -199,7 +199,15 @@ private fun NavBarContent(items: List<AppNavBarItem>, pillWidth: Dp, selectedInd
     ) {
         Box(
             modifier = Modifier
-                .padding(start = navBarIndicatorOffset(indicatorPosition, itemWidth.value).dp)
+                // `AnimatedPositioned` said `top: 4, bottom: 4`, so Flutter's pill floated a notch
+                // below the bar's top edge. A `Box` aligns to the top start unless it is told
+                // otherwise, and the width already spent `IndicatorInset` on both sides, so the
+                // inset was being paid horizontally and not vertically.
+                .align(Alignment.TopStart)
+                .padding(
+                    start = navBarIndicatorOffset(indicatorPosition, itemWidth.value).dp,
+                    top = IndicatorInset.dp,
+                )
                 .width(itemWidth - IndicatorInset.dp * 2)
                 .height(AppNavBarHeight - IndicatorInset.dp * 2)
                 .shadow(
