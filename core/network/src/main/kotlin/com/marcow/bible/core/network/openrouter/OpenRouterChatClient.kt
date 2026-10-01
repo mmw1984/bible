@@ -105,10 +105,11 @@ private fun contentText(raw: String): String {
  */
 private fun contentOf(raw: JsonElement?): String = when (raw) {
     is JsonPrimitive -> if (raw.isString) raw.content else ""
-    is JsonArray -> raw
-        .mapNotNull { part -> (part as? JsonObject)?.get("text") as? JsonPrimitive }
-        .filter { it.isString }
-        .joinToString(separator = "") { it.content }
+    is JsonArray ->
+        raw
+            .mapNotNull { part -> (part as? JsonObject)?.get("text") as? JsonPrimitive }
+            .filter { it.isString }
+            .joinToString(separator = "") { it.content }
     else -> ""
 }
 
@@ -132,12 +133,11 @@ internal fun openRouterErrorMessage(value: JsonElement?): String {
     return UNKNOWN_ERROR_MESSAGE
 }
 
-private fun messageText(raw: JsonElement?): String? =
-    (raw as? JsonPrimitive)
-        ?.takeIf { it.isString }
-        ?.content
-        ?.trim()
-        ?.takeIf { it.isNotEmpty() }
+private fun messageText(raw: JsonElement?): String? = (raw as? JsonPrimitive)
+    ?.takeIf { it.isString }
+    ?.content
+    ?.trim()
+    ?.takeIf { it.isNotEmpty() }
 
 /** `Uri.parse('https://openrouter.ai/api/v1/chat/completions')` of `_send`. */
 private const val OPENROUTER_CHAT_COMPLETIONS = "https://openrouter.ai/api/v1/chat/completions"

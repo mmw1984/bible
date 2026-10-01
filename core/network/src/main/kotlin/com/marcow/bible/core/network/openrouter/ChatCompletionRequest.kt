@@ -11,7 +11,4 @@ import kotlinx.serialization.json.JsonObject
  * chat path adds `tools` and streams. Building it by hand is what keeps those differences visible
  * instead of hidden behind nullable fields that are silently dropped.
  */
-data class ChatCompletionRequest(
-    val model: String,
-    val body: JsonObject,
-)
+data class ChatCompletionRequest(val model: String, val body: JsonObject)
