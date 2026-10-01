@@ -194,11 +194,8 @@ private const val THE_VERIFIER = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
 /** What the manager said most recently, which is what the chat's error panel would show. */
 private suspend fun SignIn.error(): String? = auth.lastError.first()
 
-private fun signIn(
-    verifier: String? = THE_VERIFIER,
-    key: String? = "the-key",
-    launchable: Boolean = true,
-): SignIn = SignIn(verifier = verifier, key = key, launchable = launchable)
+private fun signIn(verifier: String? = THE_VERIFIER, key: String? = "the-key", launchable: Boolean = true): SignIn =
+    SignIn(verifier = verifier, key = key, launchable = launchable)
 
 /**
  * The manager with all three collaborators hand-written, so a sign-in runs without a browser, a socket
@@ -207,11 +204,7 @@ private fun signIn(
  * The store is a map and the two ports are lists of what they were asked for, which is the whole
  * observable surface of a sign-in: nothing else about the manager is visible from outside it.
  */
-private class SignIn(
-    verifier: String?,
-    private val key: String?,
-    private val launchable: Boolean,
-) {
+private class SignIn(verifier: String?, private val key: String?, private val launchable: Boolean) {
     private val entries = mutableMapOf<String, String>()
 
     /** Every authorize URI a Custom Tab was asked for, in order. */
@@ -242,11 +235,7 @@ private class SignIn(
             }
         },
         exchange = object : OpenRouterTokenExchange {
-            override suspend fun exchange(
-                code: String,
-                codeVerifier: String,
-                codeChallengeMethod: String,
-            ): String {
+            override suspend fun exchange(code: String, codeVerifier: String, codeChallengeMethod: String): String {
                 exchanges += code to codeVerifier
                 return key ?: throw IllegalStateException("OpenRouter returned no API key.")
             }
