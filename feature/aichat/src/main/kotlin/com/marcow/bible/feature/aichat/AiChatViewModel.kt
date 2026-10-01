@@ -142,6 +142,7 @@ class AiChatViewModel @Inject constructor(
      * for — Dart did it in `_performInitialization` and every entry point checked it first, because an
      * answer written before the restore arrives is one the restore then overwrites.
      */
+    @Suppress("TooGenericExceptionCaught")
     fun initialize() {
         if (holder.current.initialized || initializing != null) return
         initializing = viewModelScope.launch {
@@ -251,6 +252,7 @@ class AiChatViewModel @Inject constructor(
     }
 
     /** `beginOpenRouterLogin()`: the sign-in panel's button. */
+    @Suppress("TooGenericExceptionCaught")
     fun beginSignIn() {
         viewModelScope.launch {
             try {
@@ -387,6 +389,7 @@ class AiChatViewModel @Inject constructor(
      * the removal of the failed attempt rather than a message with no text, which is why an empty
      * publication takes the provisional *away* instead of writing it.
      */
+    @Suppress("TooGenericExceptionCaught")
     private fun answer(
         question: String,
         kind: AiMessageKind,
