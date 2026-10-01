@@ -52,7 +52,9 @@ hilt {
 dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    implementation(project(":core:model"))
+    // `api` because BibleRepository hands out BibleBook / VersePair / ReadingProgress, so every
+    // consumer of this module compiles against core:model whether it declares it or not.
+    api(project(":core:model"))
     implementation(project(":core:common"))
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
