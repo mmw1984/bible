@@ -165,8 +165,22 @@ class SearchReferencesTest {
 }
 
 private val CANON = listOf(
-    BibleBook(id = "GEN", ordinal = 1, nameZh = "創世記", nameEn = "Genesis", chapters = 50, testament = Testament.OLD),
-    BibleBook(id = "JHN", ordinal = 43, nameZh = "約翰福音", nameEn = "John", chapters = 21, testament = Testament.NEW),
+    BibleBook(
+        id = "GEN",
+        ordinal = 1,
+        nameZh = "創世記",
+        nameEn = "Genesis",
+        chapters = 50,
+        testament = Testament.OLD,
+    ),
+    BibleBook(
+        id = "JHN",
+        ordinal = 43,
+        nameZh = "約翰福音",
+        nameEn = "John",
+        chapters = 21,
+        testament = Testament.NEW,
+    ),
 )
 
 private fun parse(raw: String): AiSearchReferences = parseSearchReferences(raw, CANON)
