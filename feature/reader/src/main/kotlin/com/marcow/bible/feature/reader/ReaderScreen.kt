@@ -5,7 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideIn
 import androidx.compose.animation.togetherWith
-import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -276,11 +275,11 @@ private fun BookTitle(
         modifier = modifier,
         contentAlignment = Alignment.BottomStart,
         transitionSpec = {
-            val enter = fadeIn(tween(TitleEnterMillis, easing = TitleEasing)) +
-                slideIn(tween(TitleEnterMillis, easing = TitleEasing)) {
+            val enter = fadeIn(tween(TitleEnterMillis, easing = EaseOutCubic)) +
+                slideIn(tween(TitleEnterMillis, easing = EaseOutCubic)) {
                     IntOffset(it.width / TitleSlideDivisor, 0)
                 }
-            enter togetherWith fadeOut(tween(TitleExitMillis, easing = TitleEasing))
+            enter togetherWith fadeOut(tween(TitleExitMillis, easing = EaseOutCubic))
         },
         label = "readerTitle",
     ) { text ->
@@ -546,7 +545,6 @@ private const val LINKS_ITEM_KEY = "readerChapterLinks"
 /** 240 ms in, 140 ms out, both on `Curves.easeOutCubic`, from the title's `AnimatedSwitcher`. */
 private const val TitleEnterMillis = 240
 private const val TitleExitMillis = 140
-private val TitleEasing = CubicBezierEasing(0.215f, 0.61f, 0.355f, 1f)
 
 /** `Offset(.025, 0)`, the slide as a fraction of the title's own width. */
 private const val TitleSlideDivisor = 40

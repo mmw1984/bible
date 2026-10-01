@@ -62,6 +62,11 @@ val WideThreshold: Dp = 920.dp
  * that do, and the two [verseSize] cases are the only per-width values below it, because the
  * Chinese and English verse sizes are the one pair Flutter resolved from the *window* width rather
  * than from the reader's own constraints.
+ *
+ * One number Flutter chose is deliberately absent: `CustomScrollView(scrollCacheExtent: 1200 px)`
+ * built a chapter a fixed 1200 pixels beyond the viewport. A `LazyColumn` has no pixel budget to set —
+ * it keeps whole items, and how many is `beyondBoundsPageCount` — so there is nothing to reproduce and
+ * carrying the figure over would be a claim the list could not keep.
  */
 object ReaderChrome {
     /** Below the header's rule, above the verses, for the reading-mode control. */
@@ -105,7 +110,4 @@ object ReaderChrome {
     val skeletonBottomPadding: Dp = 24.dp
     val skeletonBars: Int = 6
     val skeletonPulseMillis: Int = 1_100
-
-    /** How far Flutter laid a chapter out beyond the viewport before building the rest of it. */
-    val scrollCacheExtent: Dp = 1_200.dp
 }
