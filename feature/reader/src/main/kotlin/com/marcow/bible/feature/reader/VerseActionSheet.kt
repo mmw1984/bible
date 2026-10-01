@@ -148,7 +148,10 @@ fun VerseActionSheet(
                     ActionTile(
                         glyph = AppGlyph.CHAT,
                         label = stringResource(R.string.ask_ai),
-                        onClick = { onAction(VerseAction.ASK_AI, request); onDismiss() },
+                        onClick = {
+                            onAction(VerseAction.ASK_AI, request)
+                            onDismiss()
+                        },
                     )
                     ActionTile(
                         glyph = AppGlyph.BOOK,
