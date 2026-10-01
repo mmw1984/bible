@@ -12,10 +12,15 @@ import android.util.Base64
 import androidx.core.view.WindowCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 import org.json.JSONObject
 
 open class MainActivity : FlutterActivity() {
+    // On-device Gemini Nano runs on its own channels so the existing
+    // `bible/android` handler above stays untouched.
+    private var geminiNano: GeminiNanoBridge? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         if (javaClass == MainActivity::class.java && forwardOAuthToChat(intent)) {
             super.onCreate(savedInstanceState)
@@ -76,6 +81,18 @@ open class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+        val bridge = GeminiNanoBridge()
+        geminiNano = bridge
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, GeminiNanoBridge.METHOD_CHANNEL)
+            .setMethodCallHandler(bridge)
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, GeminiNanoBridge.STREAM_CHANNEL)
+            .setStreamHandler(bridge)
+    }
+
+    override fun onDestroy() {
+        geminiNano?.dispose()
+        geminiNano = null
+        super.onDestroy()
     }
 
     private fun deviceRoundedCorners(): Map<String, Any> {

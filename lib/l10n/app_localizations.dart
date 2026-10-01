@@ -375,6 +375,78 @@ abstract class AppLocalizations {
   /// **'儲存模型'**
   String get saveModel;
 
+  /// No description provided for @aiProvider.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'AI 提供者'**
+  String get aiProvider;
+
+  /// No description provided for @providerOpenRouter.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'OpenRouter'**
+  String get providerOpenRouter;
+
+  /// No description provided for @providerGeminiNano.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'Gemini Nano'**
+  String get providerGeminiNano;
+
+  /// No description provided for @geminiNanoConnection.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'Gemini Nano 連線'**
+  String get geminiNanoConnection;
+
+  /// No description provided for @geminiNanoReady.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'已在此裝置就緒'**
+  String get geminiNanoReady;
+
+  /// No description provided for @geminiNanoDownloadable.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'模型可下載'**
+  String get geminiNanoDownloadable;
+
+  /// No description provided for @geminiNanoDownloading.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'模型下載中'**
+  String get geminiNanoDownloading;
+
+  /// No description provided for @geminiNanoChecking.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'正在檢查裝置'**
+  String get geminiNanoChecking;
+
+  /// No description provided for @geminiNanoUnsupported.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'此裝置不支援'**
+  String get geminiNanoUnsupported;
+
+  /// No description provided for @geminiNanoUnavailable.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'AICore 暫時無法用'**
+  String get geminiNanoUnavailable;
+
+  /// No description provided for @downloadGeminiNano.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'下載模型'**
+  String get downloadGeminiNano;
+
+  /// No description provided for @geminiNanoHelper.
+  ///
+  /// In zh_Hant, this message translates to:
+  /// **'完全在裝置上執行，毋須 API key，下載後可離線使用。'**
+  String get geminiNanoHelper;
+
   /// No description provided for @appearance.
   ///
   /// In zh_Hant, this message translates to:

@@ -150,6 +150,42 @@ class AppLocalizationsZh extends AppLocalizations {
   String get saveModel => '儲存模型';
 
   @override
+  String get aiProvider => 'AI 提供者';
+
+  @override
+  String get providerOpenRouter => 'OpenRouter';
+
+  @override
+  String get providerGeminiNano => 'Gemini Nano';
+
+  @override
+  String get geminiNanoConnection => 'Gemini Nano 連線';
+
+  @override
+  String get geminiNanoReady => '已在此裝置就緒';
+
+  @override
+  String get geminiNanoDownloadable => '模型可下載';
+
+  @override
+  String get geminiNanoDownloading => '模型下載中';
+
+  @override
+  String get geminiNanoChecking => '正在檢查裝置';
+
+  @override
+  String get geminiNanoUnsupported => '此裝置不支援';
+
+  @override
+  String get geminiNanoUnavailable => 'AICore 暫時無法用';
+
+  @override
+  String get downloadGeminiNano => '下載模型';
+
+  @override
+  String get geminiNanoHelper => '完全在裝置上執行，毋須 API key，下載後可離線使用。';
+
+  @override
   String get appearance => '外觀';
 
   @override
@@ -521,6 +557,42 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get saveModel => '儲存模型';
+
+  @override
+  String get aiProvider => 'AI 提供者';
+
+  @override
+  String get providerOpenRouter => 'OpenRouter';
+
+  @override
+  String get providerGeminiNano => 'Gemini Nano';
+
+  @override
+  String get geminiNanoConnection => 'Gemini Nano 連線';
+
+  @override
+  String get geminiNanoReady => '已在此裝置就緒';
+
+  @override
+  String get geminiNanoDownloadable => '模型可下載';
+
+  @override
+  String get geminiNanoDownloading => '模型下載中';
+
+  @override
+  String get geminiNanoChecking => '正在檢查裝置';
+
+  @override
+  String get geminiNanoUnsupported => '此裝置不支援';
+
+  @override
+  String get geminiNanoUnavailable => 'AICore 暫時無法用';
+
+  @override
+  String get downloadGeminiNano => '下載模型';
+
+  @override
+  String get geminiNanoHelper => '完全在裝置上執行，毋須 API key，下載後可離線使用。';
 
   @override
   String get appearance => '外觀';

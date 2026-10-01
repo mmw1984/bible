@@ -8,6 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'ai_memory_store.dart';
 import 'app_settings.dart';
 import 'bible_data.dart';
+import 'gemini_nano_service.dart';
 import 'openrouter_service.dart';
 
 enum AiAvailability {
@@ -17,6 +18,23 @@ enum AiAvailability {
   downloadable,
   downloading,
   ready,
+}
+
+/// Which backend answers Bible AI requests. [openrouter] is the default and the
+/// only option on every existing install, so a missing `ai_provider` setting
+/// always resolves back to it.
+enum AiProvider {
+  openrouter('openrouter'),
+  geminiNano('gemini_nano');
+
+  const AiProvider(this.storageValue);
+
+  final String storageValue;
+
+  static AiProvider fromStorage(String? value) => switch (value) {
+    'gemini_nano' => AiProvider.geminiNano,
+    _ => AiProvider.openrouter,
+  };
 }
 
 String sanitizeReasoningForDisplay(String source) {
@@ -279,6 +297,7 @@ class BibleAiController extends ChangeNotifier {
   final OpenRouterAuth _auth;
   final AiSettingsStore _settings;
   late final BibleAiModel _cloudModel;
+  final GeminiNanoBibleModel _geminiNanoModel = GeminiNanoBibleModel();
   final AiMemoryStore _memory;
   final List<AiMessage> _messages = [];
   StreamSubscription<String>? _generationSubscription;
@@ -292,17 +311,47 @@ class BibleAiController extends ChangeNotifier {
   String? generationError;
   bool openRouterSignedIn = false;
   String modelId = 'openrouter/free';
+  AiProvider provider = AiProvider.openrouter;
+
+  /// AICore availability, kept separate from [availability] so Settings can
+  /// report whether Gemini Nano is usable here before the user picks it.
+  AiAvailability geminiNanoAvailability = AiAvailability.checking;
+
+  /// True while AICore is fetching the model, so Settings can lock the download
+  /// action instead of firing `prepareFeature` twice.
+  bool geminiNanoDownloading = false;
   AppLocale responseLocale = AppLocale.zhHant;
 
   List<AiMessage> get messages => List.unmodifiable(_messages);
   bool get isSupported =>
       kIsWeb || defaultTargetPlatform == TargetPlatform.android;
-  bool get isReady => _overrideModel != null
-      ? availability == AiAvailability.ready
-      : openRouterSignedIn;
-  bool get requiresLogin => _overrideModel == null && !openRouterSignedIn;
+
+  /// True when Gemini Nano can actually answer here: present on this device and
+  /// already downloaded. Anything else falls back to OpenRouter.
+  static bool canUseGeminiNano(AiAvailability value) =>
+      value == AiAvailability.ready ||
+      value == AiAvailability.downloadable ||
+      value == AiAvailability.downloading;
+
+  bool get isReady {
+    if (_overrideModel != null) return availability == AiAvailability.ready;
+    return switch (provider) {
+      AiProvider.openrouter => openRouterSignedIn,
+      AiProvider.geminiNano => availability == AiAvailability.ready,
+    };
+  }
+
+  bool get requiresLogin =>
+      _overrideModel == null &&
+      provider == AiProvider.openrouter &&
+      !openRouterSignedIn;
+
   String? get openRouterAuthError => _auth.lastError;
-  BibleAiModel get _activeModel => _overrideModel ?? _cloudModel;
+  BibleAiModel get _activeModel => _overrideModel ??
+      switch (provider) {
+        AiProvider.openrouter => _cloudModel,
+        AiProvider.geminiNano => _geminiNanoModel,
+      };
 
   Future<void> initialize() {
     if (initialized) return Future<void>.value();
@@ -316,11 +365,15 @@ class BibleAiController extends ChangeNotifier {
       if (isSupported) await _auth.initialize();
       openRouterSignedIn = await _auth.isSignedIn;
       modelId = await _settings.read('openrouter_model') ?? 'openrouter/free';
+      geminiNanoAvailability = await _geminiNanoModel.availability();
+      provider = _resolvedProvider(
+        AiProvider.fromStorage(await _settings.read('ai_provider')),
+      );
       final saved = await _memory.transcript();
       _messages
         ..clear()
         ..addAll(saved.map(AiMessage.fromJson));
-      availability = await _activeModel.availability();
+      await _refreshAvailability();
       await _syncShortcut();
       initialized = true;
       notifyListeners();
@@ -342,9 +395,55 @@ class BibleAiController extends ChangeNotifier {
 
   Future<void> reloadSharedSettings() async {
     modelId = await _settings.read('openrouter_model') ?? 'openrouter/free';
+    geminiNanoAvailability = await _geminiNanoModel.availability();
+    provider = _resolvedProvider(
+      AiProvider.fromStorage(await _settings.read('ai_provider')),
+    );
     openRouterSignedIn = await _auth.isSignedIn;
-    availability = await _activeModel.availability();
+    await _refreshAvailability();
     notifyListeners();
+  }
+
+  /// Keeps Gemini Nano selected only where AICore can serve it, so a device
+  /// without AICore lands back on OpenRouter instead of a dead provider.
+  AiProvider _resolvedProvider(AiProvider requested) =>
+      requested == AiProvider.geminiNano &&
+          !canUseGeminiNano(geminiNanoAvailability)
+      ? AiProvider.openrouter
+      : requested;
+
+  Future<void> _refreshAvailability() async {
+    availability = await _activeModel.availability();
+  }
+
+  /// Switches the Bible AI backend. Picking Gemini Nano on a device without
+  /// AICore is rejected and OpenRouter stays selected.
+  Future<void> setProvider(AiProvider value) async {
+    if (value == AiProvider.geminiNano) {
+      geminiNanoAvailability = await _geminiNanoModel.availability();
+    }
+    final next = _resolvedProvider(value);
+    if (next != provider) {
+      provider = next;
+      await _settings.write('ai_provider', next.storageValue);
+    }
+    await _refreshAvailability();
+    notifyListeners();
+  }
+
+  /// Downloads the Gemini Nano model through AICore, then re-checks readiness.
+  Future<void> downloadGeminiNano() async {
+    if (geminiNanoDownloading) return;
+    geminiNanoDownloading = true;
+    notifyListeners();
+    try {
+      await _geminiNanoModel.downloadModel();
+    } finally {
+      geminiNanoDownloading = false;
+      geminiNanoAvailability = await _geminiNanoModel.availability();
+      await _refreshAvailability();
+      notifyListeners();
+    }
   }
 
   void setResponseLocale(AppLocale value) {

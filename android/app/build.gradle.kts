@@ -28,7 +28,11 @@ android {
 
     defaultConfig {
         applicationId = "com.marcow.bible"
-        minSdk = flutter.minSdkVersion
+        // ML Kit's on-device GenAI Prompt API (com.google.mlkit:genai-prompt)
+        // declares minSdkVersion 26, so the app floor has to match. Devices
+        // without AICore are still handled at runtime: BibleAiController falls
+        // back to OpenRouter when Gemini Nano reports unsupported.
+        minSdk = maxOf(flutter.minSdkVersion, 26)
         targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -65,6 +69,17 @@ kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
     }
+}
+
+dependencies {
+    // Gemini Nano runs fully on-device through the AICore system service: no
+    // API key and no network access. This is the ML Kit GenAI Prompt API; the
+    // older Google AI Edge SDK (com.google.ai.edge.aicore:aicore) is still
+    // pinned at 0.0.1-exp02 and has no streaming API, so only this one is used.
+    implementation("com.google.mlkit:genai-prompt:1.0.0-beta4")
+    // genai-prompt only pulls kotlinx-coroutines-core, so Dispatchers.Main needs
+    // the Android artifact added explicitly. Pinned to the version its POM uses.
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 }
 
 flutter {
