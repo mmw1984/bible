@@ -46,14 +46,14 @@ object SettingsDataStoreModule {
     @Provides
     @Singleton
     fun provideSettingsDataStore(@ApplicationContext context: Context): DataStore<Settings> = DataStoreFactory.create(
-            // 1.2.x dropped the `create(context = …, fileName = …)` overload from
-            // `datastore-core` (the `androidx.datastore:datastore` artifact is now an empty
-            // relocation), so the path is spelled out here. `filesDir/datastore` is the same
-            // location `preferencesDataStoreFile` uses.
-            produceFile = { File(context.filesDir, "datastore/$SETTINGS_FILE") },
-            serializer = SettingsSerializer,
-            corruptionHandler = CorruptSettingsHandler,
-        )
+        // 1.2.x dropped the `create(context = …, fileName = …)` overload from
+        // `datastore-core` (the `androidx.datastore:datastore` artifact is now an empty
+        // relocation), so the path is spelled out here. `filesDir/datastore` is the same
+        // location `preferencesDataStoreFile` uses.
+        produceFile = { File(context.filesDir, "datastore/$SETTINGS_FILE") },
+        serializer = SettingsSerializer,
+        corruptionHandler = CorruptSettingsHandler,
+    )
 
     @Provides
     @Singleton
