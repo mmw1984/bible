@@ -73,7 +73,6 @@ fun VerseActionSheet(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val clipboard = LocalClipboardManager.current
     val explainQuestion = stringResource(R.string.explain_scripture_prompt, reference)
     val request = scriptureRequest(
         action = VerseAction.ASK_AI,
@@ -82,7 +81,6 @@ fun VerseActionSheet(
         chapterContext = chapterContext,
         explainQuestion = explainQuestion,
     )
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     // A preview and a golden render one frame, and `Animatable` anchors to the first frame it sees,
     // so a sheet that starts at 0 would be captured fully transparent. Start it open instead.
     val inspection = LocalInspectionMode.current
@@ -100,68 +98,106 @@ fun VerseActionSheet(
             dismissOnClickOutside = false,
         ),
     ) {
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .background(ScrimColor)
-                .pointerInput(Unit) { detectTapGestures { onDismiss() } },
-        ) {
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .graphicsLayer {
-                        // Flutter slid the sheet up from 12% of the dialog's height, which is the
-                        // window's, so the offset is a fraction of the screen rather than of the
-                        // sheet — a tall sheet and a short one start from the same place.
-                        translationY = (1f - progress.value) * EnterOffsetFraction * screenHeight.toPx()
-                        alpha = progress.value
-                    }
-                    .padding(
-                        start = SheetMargin,
-                        end = SheetMargin,
-                        bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
-                            SheetMargin,
-                    )
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(appRadii.surface))
-                    .background(appColors.surfaceRaised)
-                    .border(BorderStroke(1.dp, appColors.line), RoundedCornerShape(appRadii.surface))
-                    .padding(start = SheetPadding, top = SheetPadding, end = SheetPadding, bottom = 12.dp),
-            ) {
-                // The grabber: 32 by 3, in `faint`, and nothing else — Flutter's `Container` with no
-                // radius, so it is a bar rather than a dot.
-                Box(
-                    modifier = Modifier
-                        .size(width = 32.dp, height = 3.dp)
-                        .background(appColors.faint),
+        VerseActionSheetContent(
+            request = request,
+            progress = progress.value,
+            onAction = onAction,
+            onDismiss = onDismiss,
+            modifier = modifier,
+        )
+    }
+}
+
+/**
+ * What the [Popup] above holds: the scrim, and the sheet rising to [progress].
+ *
+ * **It is split out because a golden cannot reach inside a `Popup`.** A `Popup` composes into its own
+ * window, which is exactly what makes it float over the reader rather than displace it, and it is
+ * also why layoutlib — which draws one view hierarchy into a bitmap — has no way to be asked to
+ * include it in a snapshot. Snapshotting [VerseActionSheet] directly would therefore pin whether the
+ * platform happens to composite popups into a render, which is a claim about the harness and not
+ * about this sheet. Snapshotting this instead pins the sheet's own pixels: the grabber, the three
+ * rows, the 12 dp of padding and the 54 dp of each tile.
+ *
+ * Nothing else changes. The `Popup` still owns the dismissal contract — the back press and the
+ * outside tap reach [onDismiss] from here and from `onDismissRequest` above — and this stays
+ * internal to the module because it is a seam for the golden rather than a second public sheet.
+ */
+@Composable
+internal fun VerseActionSheetContent(
+    request: ScriptureRequest,
+    progress: Float,
+    onAction: ((VerseAction, ScriptureRequest) -> Unit)?,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val clipboard = LocalClipboardManager.current
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    // Explain's opening question is the reference and a localised frame around it, and it is asked
+    // for off the request rather than carried on it: Ask sends the same request with a null
+    // question, so one request serves both rows and only Explain supplies the text.
+    val explainQuestion = stringResource(R.string.explain_scripture_prompt, request.reference)
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(ScrimColor)
+            .pointerInput(Unit) { detectTapGestures { onDismiss() } },
+    ) {
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .graphicsLayer {
+                    // Flutter slid the sheet up from 12% of the dialog's height, which is the
+                    // window's, so the offset is a fraction of the screen rather than of the
+                    // sheet — a tall sheet and a short one start from the same place.
+                    translationY = (1f - progress) * EnterOffsetFraction * screenHeight.toPx()
+                    alpha = progress
+                }
+                .padding(
+                    start = SheetMargin,
+                    end = SheetMargin,
+                    bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() +
+                        SheetMargin,
                 )
-                Spacer(Modifier.height(GrabberBelow))
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(appRadii.surface))
+                .background(appColors.surfaceRaised)
+                .border(BorderStroke(1.dp, appColors.line), RoundedCornerShape(appRadii.surface))
+                .padding(start = SheetPadding, top = SheetPadding, end = SheetPadding, bottom = 12.dp),
+        ) {
+            // The grabber: 32 by 3, in `faint`, and nothing else — Flutter's `Container` with no
+            // radius, so it is a bar rather than a dot.
+            Box(
+                modifier = Modifier
+                    .size(width = 32.dp, height = 3.dp)
+                    .background(appColors.faint),
+            )
+            Spacer(Modifier.height(GrabberBelow))
+            ActionTile(
+                glyph = AppGlyph.COPY,
+                label = stringResource(R.string.copy_scripture),
+                onClick = {
+                    clipboard.setText(AnnotatedString(request.text))
+                    onDismiss()
+                },
+            )
+            if (onAction != null) {
                 ActionTile(
-                    glyph = AppGlyph.COPY,
-                    label = stringResource(R.string.copy_scripture),
+                    glyph = AppGlyph.CHAT,
+                    label = stringResource(R.string.ask_ai),
                     onClick = {
-                        clipboard.setText(AnnotatedString(request.text))
+                        onAction(VerseAction.ASK_AI, request)
                         onDismiss()
                     },
                 )
-                if (onAction != null) {
-                    ActionTile(
-                        glyph = AppGlyph.CHAT,
-                        label = stringResource(R.string.ask_ai),
-                        onClick = {
-                            onAction(VerseAction.ASK_AI, request)
-                            onDismiss()
-                        },
-                    )
-                    ActionTile(
-                        glyph = AppGlyph.BOOK,
-                        label = stringResource(R.string.explain_scripture),
-                        onClick = {
-                            onAction(VerseAction.EXPLAIN, request.copy(question = explainQuestion))
-                            onDismiss()
-                        },
-                    )
-                }
+                ActionTile(
+                    glyph = AppGlyph.BOOK,
+                    label = stringResource(R.string.explain_scripture),
+                    onClick = {
+                        onAction(VerseAction.EXPLAIN, request.copy(question = explainQuestion))
+                        onDismiss()
+                    },
+                )
             }
         }
     }
