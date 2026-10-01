@@ -11,23 +11,38 @@ import javax.inject.Singleton
 /**
  * The OpenRouter transport graph.
  *
- * Phase 4 adds the PKCE sign-in here: `OpenRouterSession` is bound to the implementation that holds
- * the key, and nothing else in the app changes.
+ * The session is [OpenRouterAuthManager] — the PKCE sign-in of `NATIVE_PLAN.md` §4.7 — so the key the
+ * chat and the search send with comes from the store the sign-in wrote, and neither of them moved when
+ * it arrived.
  */
 @Module
 @InstallIn(SingletonComponent::class)
 object OpenRouterModule {
     @Provides
     @Singleton
-    fun provideOpenRouterSession(session: SignedOutOpenRouterSession): OpenRouterSession = session
+    fun provideOpenRouterSession(session: OpenRouterAuthManager): OpenRouterSession = session
 
     @Provides
     @Singleton
-    fun provideOpenRouterModelId(modelId: DefaultOpenRouterModelId): OpenRouterModelId = modelId
+    fun provideOpenRouterModelId(modelId: StoredOpenRouterModelId): OpenRouterModelId = modelId
 
     @Provides
     @Singleton
     fun provideOpenRouterChatClient(client: HttpOpenRouterChatClient): OpenRouterChatClient = client
+
+    @Provides
+    @Singleton
+    fun provideOpenRouterTokenExchange(exchange: HttpOpenRouterTokenExchange): OpenRouterTokenExchange = exchange
+
+    @Provides
+    @Singleton
+    fun provideOpenRouterSecureStore(store: EncryptedOpenRouterSecureStore): OpenRouterSecureStore = store
+
+    @Provides
+    @Singleton
+    fun provideOpenRouterAuthorizeLauncher(
+        launcher: CustomTabsOpenRouterAuthorizeLauncher,
+    ): OpenRouterAuthorizeLauncher = launcher
 
     /**
      * One shared client for the whole app.

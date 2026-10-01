@@ -48,6 +48,9 @@ interface OpenRouterSession {
  *
  * Text search is unaffected — it never asks for a key — which is the same split the Flutter build
  * had, where `login_to_search` promises that "Text search works without signing in".
+ *
+ * `OpenRouterModule` binds [OpenRouterAuthManager] now that the sign-in exists; this stays as the null
+ * object a test can bind when it wants the signed-out answers without a store.
  */
 @Singleton
 class SignedOutOpenRouterSession @Inject constructor() : OpenRouterSession {
