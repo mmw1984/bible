@@ -6,7 +6,11 @@
 # plugin and the Kotlin compiler drift apart and the build stops compiling.
 # AGP 9.1.0 has a runtime dependency on kotlin-gradle-plugin 2.2.10 and pairs it with KSP
 # 2.2.10-2.0.2; AGP silently raises any lower KSP to that pair. `kotlin` and `ksp` below are
-# therefore pinned to AGP's own pair rather than to the newest release on Maven.
+# therefore pinned to AGP's own pair rather than to the newest release on Maven. The 2.2.10 line
+# has exactly one KSP release, so this pin cannot be moved forward on its own: KSP only gained
+# AGP 9 built-in Kotlin support in 2.2.21-2.0.5 / 2.3.4+, which need a newer Kotlin. Until AGP
+# and Kotlin move up together, `android.disallowKotlinSourceSets=false` in gradle.properties
+# suppresses the kotlin.sourceSets error that KSP 2.0.2 still triggers (google/ksp#2729).
 # AGP 9.1.0 is the floor for compileSdk 37: Compose 1.12.1 and androidx.hilt 1.4.0 both
 # declare minCompileSdk=37 in their AAR metadata, so the whole toolchain moves up together.
 # AGP 9.1.0 declares GRADLE_MIN_VERSION 9.3.1 (see gradle/wrapper/gradle-wrapper.properties).
