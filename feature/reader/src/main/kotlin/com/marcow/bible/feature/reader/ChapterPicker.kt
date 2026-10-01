@@ -113,8 +113,7 @@ fun chapterCellLabel(chapter: Int): String = chapter.toString()
  * thirty chapters that fit scroll not at all and the longer books — most of the Pentateuch, the
  * Prophets, Psalms at 150 — do.
  */
-fun chapterPickerScrolls(chapterCount: Int): Boolean =
-    chapterCount > ChapterRowsInView * ChapterColumns
+fun chapterPickerScrolls(chapterCount: Int): Boolean = chapterCount > ChapterRowsInView * ChapterColumns
 
 /**
  * The chapter picker, replacing `_ChapterPickerBubble` and the `showGeneralDialog` that opened it
