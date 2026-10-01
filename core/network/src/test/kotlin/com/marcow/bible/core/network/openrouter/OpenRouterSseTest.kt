@@ -345,8 +345,7 @@ class OpenRouterSseTest {
         assertEquals(listOf(ChatEvent.ContentDelta("一")), events)
     }
 
-    private suspend fun eventsOf(vararg lines: String): List<ChatEvent> =
-        openRouterChatEvents(lines.asFlow()).toList()
+    private suspend fun eventsOf(vararg lines: String): List<ChatEvent> = openRouterChatEvents(lines.asFlow()).toList()
 
     /** One `data:` frame carrying a single choice, with only the parts a test names. */
     private fun frame(
