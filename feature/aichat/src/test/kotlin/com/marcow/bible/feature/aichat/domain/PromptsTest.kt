@@ -169,7 +169,7 @@ OUTPUT CONTROL
 End a complete user-facing answer with [[END]]. Use [[MORE]] only when genuinely
 cut off by the output limit. Never show these markers inside prose or a JSON tool
 request.
-""".trimIndent()
+        """.trimIndent()
 
         val CONTINUATION = """
 $PROMPT
@@ -181,6 +181,6 @@ Continue directly after the final characters above. Return only the new
 continuation: do not repeat the title, introduction, outline, or any existing
 paragraph. End with [[END]] when the answer is complete. If another segment is
 still needed, end this segment with [[MORE]].
-""".trimIndent()
+        """.trimIndent()
     }
 }
