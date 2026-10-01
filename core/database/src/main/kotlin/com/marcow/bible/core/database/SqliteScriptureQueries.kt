@@ -1,7 +1,6 @@
 package com.marcow.bible.core.database
 
 import android.database.Cursor
-import android.database.sqlite.SQLiteDatabase
 import com.marcow.bible.core.model.BibleBook
 import com.marcow.bible.core.model.ReadingMode
 import com.marcow.bible.core.model.ScriptureHit
@@ -17,8 +16,9 @@ import javax.inject.Singleton
  * Every method blocks; callers run on `Dispatchers.IO`.
  */
 @Singleton
-class SqliteScriptureQueries @Inject constructor(private val connection: ScriptureConnection) :
-    ScriptureQueries {
+class SqliteScriptureQueries @Inject constructor(
+    private val connection: ScriptureConnection,
+) : ScriptureQueries {
 
     override fun books(): List<BibleBook> = connection.read { db ->
         db.rawQuery(ALL_BOOKS_SQL, null).use { cursor -> readBooks(cursor) }
@@ -82,11 +82,13 @@ class SqliteScriptureQueries @Inject constructor(private val connection: Scriptu
 
     override fun saveProgress(progress: ReadingProgress) {
         connection.write { db ->
-            val arguments = arrayOf(
+            // execSQL binds positionally, so every element is boxed and the
+            // nullable verse becomes SQL NULL rather than the string "null".
+            val arguments = arrayOf<Any?>(
                 progress.bookId,
                 progress.chapter,
-                progress.verse?.toString(),
-                progress.scrollRatio.coerceIn(0f, 1f).toString(),
+                progress.verse,
+                progress.scrollRatio.coerceIn(0f, 1f).toDouble(),
                 progress.mode.storageKey,
                 progress.updatedAtMillis,
             )
