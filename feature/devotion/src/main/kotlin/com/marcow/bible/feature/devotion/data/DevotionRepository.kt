@@ -22,10 +22,7 @@ import kotlinx.coroutines.CancellationException
  * Constructed by [DevotionModule] rather than injected directly, because the tier list *is* the
  * fallback order, and a `List<DevotionTier>` is not a constructor parameter a module can resolve.
  */
-class DevotionRepository(
-    private val tiers: List<DevotionTier>,
-    private val cache: DevotionCache,
-) {
+class DevotionRepository(private val tiers: List<DevotionTier>, private val cache: DevotionCache) {
     /**
      * The last fetch that worked, re-parsed with the current parser. Never fails.
      *
