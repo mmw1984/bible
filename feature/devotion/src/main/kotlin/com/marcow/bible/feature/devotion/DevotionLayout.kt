@@ -109,7 +109,7 @@ object DevotionChrome {
     val POST_DATE_BELOW: Dp = 4.dp
     val POST_DATE_SIZE: TextUnit = 11.sp
     val POST_TITLE_SIZE: TextUnit = 21.sp
-    val POST_TITLE_LINE_HEIGHT: Float = 1.5f
+    const val POST_TITLE_LINE_HEIGHT: Float = 1.5f
     val POST_TITLE_BELOW: Dp = 18.dp
 
     /**
@@ -120,12 +120,12 @@ object DevotionChrome {
      */
     val PARAGRAPH_BELOW: Dp = 14.dp
     val PARAGRAPH_SIZE: TextUnit = 16.sp
-    val PARAGRAPH_LINE_HEIGHT: Float = 1.85f
+    const val PARAGRAPH_LINE_HEIGHT: Float = 1.85f
 
     val HEADING_ABOVE: Dp = 18.dp
     val HEADING_BELOW: Dp = 8.dp
     val HEADING_SIZE: TextUnit = 17.sp
-    val HEADING_LINE_HEIGHT: Float = 1.55f
+    const val HEADING_LINE_HEIGHT: Float = 1.55f
 
     val QUOTE_ABOVE: Dp = 6.dp
     val QUOTE_BELOW: Dp = 6.dp
@@ -133,7 +133,7 @@ object DevotionChrome {
     val QUOTE_PADDING_VERTICAL: Dp = 10.dp
     val QUOTE_BAR_WIDTH: Dp = 2.dp
     val QUOTE_SIZE: TextUnit = 15.sp
-    val QUOTE_LINE_HEIGHT: Float = 1.75f
+    const val QUOTE_LINE_HEIGHT: Float = 1.75f
 
     val IMAGE_ABOVE: Dp = 10.dp
     val IMAGE_BELOW: Dp = 10.dp
@@ -228,13 +228,13 @@ object DevotionChrome {
     val SECTION_TITLE_GAP: Dp = 8.dp
     val SECTION_TITLE_BELOW: Dp = 6.dp
     val SECTION_TITLE_SIZE: TextUnit = 14.sp
-    val SECTION_TITLE_SPACING: Float = 0.5f
+    const val SECTION_TITLE_SPACING: Float = 0.5f
 
     /** The loading spinner and the line under it, centred in the space an article would take. */
     val LOADING_GAP: Dp = 12.dp
     val LOADING_SIZE: TextUnit = 12.sp
     val SPINNER_SIZE: Dp = 20.dp
-    val SPINNER_MILLIS: Int = 820
+    const val SPINNER_MILLIS: Int = 820
 
     /**
      * The failure screen: the glyph, the two lines of message, and the row of two buttons.
@@ -248,8 +248,8 @@ object DevotionChrome {
     val FAILURE_SIZE: TextUnit = 12.sp
     val FAILURE_DETAIL_ABOVE: Dp = 8.dp
     val FAILURE_DETAIL_SIZE: TextUnit = 10.sp
-    val FAILURE_DETAIL_LINE_HEIGHT: Float = 1.4f
-    val FAILURE_DETAIL_LINES: Int = 5
+    const val FAILURE_DETAIL_LINE_HEIGHT: Float = 1.4f
+    const val FAILURE_DETAIL_LINES: Int = 5
     val FAILURE_BUTTONS_ABOVE: Dp = 16.dp
     val FAILURE_BUTTON_GAP: Dp = 10.dp
     val FAILURE_BUTTON_HORIZONTAL: Dp = 18.dp
@@ -269,5 +269,5 @@ object DevotionChrome {
     val IMAGE_GLYPH_SIZE: Dp = 20.dp
 
     /** The copy confirmation, Flutter's `SnackBar(duration: Duration(seconds: 2))`. */
-    val COPY_FEEDBACK_MILLIS: Int = 2_000
+    const val COPY_FEEDBACK_MILLIS: Int = 2_000
 }
