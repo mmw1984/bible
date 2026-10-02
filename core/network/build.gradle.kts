@@ -2,7 +2,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.compose)
+    // No `kotlin.compose`: nothing in this module is a `@Composable`, and the Compose compiler
+    // plugin fails the module's whole compile when there is no Compose runtime on its classpath.
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
 }
