@@ -81,7 +81,7 @@ class DevotionEmbedPlayerTest {
     }
 
     @Test
-    fun `the frame asks youtube for the same two player decisions the dart params made`() {
+    fun `the frame asks youtube for the same three player decisions the dart params made`() {
         val html = youtubePlayerHtml("dQw4w9WgXcQ")
 
         // `showVideoAnnotations: false` at `legacy/flutter/lib/devotion_youtube_player.dart:71`, which
@@ -96,6 +96,12 @@ class DevotionEmbedPlayerTest {
         // not silently dropped.
         assertTrue(html.contains("strict: 1"))
         assertTrue(html.contains("rel: 0"))
+
+        // `enableCaption: true` at `:67`, which is YouTube's `cc_load_policy: 1`. Absent, the iframe
+        // takes 0, and 0 does not mean "no preference" — it means the captions are not loaded at all.
+        // This frame names no native `controls` either, so there is no CC button in it to load them
+        // afterwards: dropped, the captions are unreachable rather than merely off by default.
+        assertTrue(html.contains("cc_load_policy: 1"))
     }
 
     @Test
