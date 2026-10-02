@@ -6,9 +6,15 @@ package com.marcow.bible.feature.aichat.domain
  *
  * `NATIVE_PLAN.md` §4.3 is explicit that these are tuned and must not be reworded: the line breaks,
  * the section order, the `[[END]]` / `[[MORE]]` markers and the `get_scripture` JSON example are all
- * load-bearing. So nothing here is reworded, reordered or re-indented, and the leading and trailing
- * newline are part of the text — Dart's `'''` opened on the line before `ROLE`, which is what puts
- * the blank first line in the prompt the model actually saw.
+ * load-bearing. So nothing here is reworded, reordered or re-indented, and the trailing newline is
+ * part of the text — Dart's `'''` was followed by one too.
+ *
+ * The leading one is not, and Dart's spec is why: "If the first line of a multiline string consists
+ * solely of the whitespace characters ... then that line is ignored, including the line break at its
+ * end." So the prompt the Flutter build sent began at `ROLE`, with no blank line in front of it. A
+ * Kotlin raw string keeps that newline, so `"""` opens straight onto `ROLE` here rather than onto a
+ * line of its own — copying the Dart source's line break across would have asked the model for one
+ * character more than it ever saw.
  *
  * The four interpolations sit exactly where Dart interpolated them. [aiLanguage] is
  * `AppLocale.aiLanguage` (`natural Traditional Chinese` / `natural English`): the prompt is English
@@ -23,8 +29,7 @@ internal fun chatPrompt(
     memory: String,
     recent: String,
     aiLanguage: String,
-): String = """
-ROLE
+): String = """ROLE
 You are Bible AI inside a Bible reader. Continue the same conversation across
 chat, verse explanation, and search entry points.
 
@@ -87,13 +92,13 @@ internal fun limitText(value: String, maxCharacters: Int): String =
  * ceiling, so the tail of what has been written goes back with the instruction to carry on *after*
  * it. Verbatim for the same reason [chatPrompt] is — the phrase "Continue directly after the final
  * characters above", the two `[[END]]` / `[[MORE]]` markers and the four-line sentence about not
- * repeating the title are all tuned — and the leading newline is Dart's as well.
+ * repeating the title are all tuned — and it opens on the conversation prompt itself for Dart's
+ * reason: the whitespace-only first line of its `'''` was not part of the string.
  *
  * [prompt] is the same conversation prompt the first round used, not a new one, so the model is
  * still answering the original question rather than the tail of its own answer.
  */
-internal fun continuationPrompt(prompt: String, answer: String): String = """
-$prompt
+internal fun continuationPrompt(prompt: String, answer: String): String = """$prompt
 
 Response already written:
 ${answerTail(answer, CONTINUATION_TAIL_LIMIT)}

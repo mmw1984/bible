@@ -19,7 +19,7 @@ class PromptsTest {
     @Test
     fun `the conversation prompt is the Flutter one word for word`() {
         assertEquals(
-            "\n$CONVERSATION\n",
+            "$CONVERSATION\n",
             chatPrompt(
                 question = QUESTION,
                 scriptureContext = SCRIPTURE,
@@ -28,6 +28,24 @@ class PromptsTest {
                 aiLanguage = LANGUAGE,
             ),
         )
+    }
+
+    @Test
+    fun `the prompt opens on ROLE, not on a blank line Dart threw away`() {
+        // The spec: "If the first line of a multiline string consists solely of the whitespace
+        // characters ..., then that line is ignored, including the line break at its end." So the
+        // Flutter build's prompt started at `ROLE`, and a Kotlin raw string that kept the newline
+        // would have asked the model for a blank first line it had never seen.
+        val prompt = chatPrompt(
+            question = QUESTION,
+            scriptureContext = SCRIPTURE,
+            memory = MEMORY,
+            recent = RECENT,
+            aiLanguage = LANGUAGE,
+        )
+
+        assertTrue(prompt.startsWith("ROLE\nYou are Bible AI"))
+        assertFalse(prompt.startsWith("\n"))
     }
 
     @Test
@@ -81,10 +99,11 @@ class PromptsTest {
 
     @Test
     fun `the continuation prompt is the Flutter one word for word`() {
-        // The `'''…'''` at `legacy/flutter/lib/ai_service.dart:516`, including the newline Dart's
-        // `'''` put at the front: a reworded instruction here is a different answer to the same
+        // The `'''…'''` at `legacy/flutter/lib/ai_service.dart:517`, which opened on the
+        // conversation prompt itself: a reworded instruction here is a different answer to the same
         // question, so the whole text is compared rather than a few phrases of it.
-        assertEquals("\n$CONTINUATION", continuationPrompt(PROMPT, ANSWER))
+        assertEquals(CONTINUATION, continuationPrompt(PROMPT, ANSWER))
+        assertTrue(continuationPrompt(PROMPT, ANSWER).startsWith(PROMPT))
     }
 
     @Test
