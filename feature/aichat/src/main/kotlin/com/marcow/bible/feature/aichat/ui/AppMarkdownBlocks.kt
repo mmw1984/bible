@@ -111,7 +111,7 @@ internal fun AppMarkdownBlocks(
  * thought being read is deliberately not.
  */
 @Immutable
-private class MarkdownPalette(val foreground: Color, val secondary: Color, val onLink: ((String) -> Unit)?) {
+private class MarkdownPalette(val foreground: Color, val secondary: Color, val onLink: ((String) -> Unit)?)
 
 /**
  * One block, under the bottom space it carried.
