@@ -36,7 +36,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.toSpanStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -479,7 +478,11 @@ private fun markdownAnnotatedString(
 ): AnnotatedString {
     val inlineWash = appColors.line.copy(alpha = INLINE_CODE_WASH)
     return buildAnnotatedString {
-        pushStyle(base.toSpanStyle())
+        // `TextStyle.toSpanStyle()` carried [base] over as one value, but the import that reaches it is
+        // `androidx.compose.ui.text.toSpanStyle` — a name the package also holds on a private
+        // `StyleSpan`, so importing it does not resolve. Naming the three properties `base` sets is
+        // the same span: `lineHeight` is a paragraph property and a `SpanStyle` has never carried it.
+        pushStyle(SpanStyle(color = base.color, fontSize = base.fontSize, fontFamily = base.fontFamily))
         inlines.forEach { inline ->
             when (inline) {
                 is MarkdownInline.Text -> append(inline.text)
