@@ -1,7 +1,6 @@
 package com.marcow.bible.feature.settings
 
 import android.content.Context
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager.PackageInfoFlags
 import android.os.Build
 import androidx.compose.foundation.background
@@ -248,17 +247,14 @@ private fun appVersionName(): String {
     return remember(context) { installedVersionName(context) } ?: UNKNOWN_VERSION
 }
 
+/** `getPackageInfo(pkg, flags)` replaced the `int` flag overload in API 33. */
 private fun installedVersionName(context: Context): String? = runCatching {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        currentPackageInfo(context).versionName
+        context.packageManager.getPackageInfo(context.packageName, PackageInfoFlags.of(0L)).versionName
     } else {
         legacyVersionName(context)
     }
 }.getOrNull()
-
-/** `getPackageInfo(pkg, flags)` replaced the `int` flag overload in API 33. */
-private fun currentPackageInfo(context: Context): PackageInfo =
-    context.packageManager.getPackageInfo(context.packageName, PackageInfoFlags.of(0L))
 
 @Suppress("DEPRECATION")
 private fun legacyVersionName(context: Context): String? =
