@@ -172,7 +172,7 @@ private fun percentDecode(value: String): String {
             bytes.add(' '.code.toByte())
             index++
         } else {
-            bytes.addAll(char.toString().toByteArray(Charsets.UTF_8))
+            bytes.addAll(char.toString().toByteArray(Charsets.UTF_8).asList())
             index++
         }
     }
