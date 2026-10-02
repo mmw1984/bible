@@ -87,6 +87,23 @@ class DevotionArticlePageTest {
     }
 
     @Test
+    fun `an article id survives a trailing slash or query on its url`() {
+        // `pathSegments.lastWhere((s) => s.isNotEmpty)`: the id is the last non-empty segment,
+        // so a permalink that was never canonicalised still resolves instead of becoming 0.
+        val html = """
+            <html><head><title>x</title></head>
+            <body><article><h1>[圖片靈修] 地圖 －2026年8月22日</h1>
+            <div class="entry-content"><p>正文</p></div></article></body></html>
+        """.trimIndent()
+
+        assertEquals(25436L, checkNotNull(parseArticlePage("https://devotion.wkphc.org/25436/", html)).id)
+        assertEquals(
+            25436L,
+            checkNotNull(parseArticlePage("https://devotion.wkphc.org/25436?utm_source=rss", html)).id,
+        )
+    }
+
+    @Test
     fun `a page with no content container is rejected instead of cached empty`() {
         assertNull(parseArticlePage("https://devotion.wkphc.org/25436", ""))
         assertNull(parseArticlePage("https://devotion.wkphc.org/25436", "<html><body></body></html>"))

@@ -133,5 +133,10 @@ internal fun parseArticlePage(url: String, html: String, titleHint: String? = nu
     )
 }
 
-private fun postIdFromUrl(url: String): Long =
-    url.substringAfterLast('/').substringBefore('?').substringBefore('#').toLongOrNull() ?: 0L
+private fun postIdFromUrl(url: String): Long {
+    // `Uri.tryParse(url)?.pathSegments.lastWhere((s) => s.isNotEmpty, orElse: () => '')`: the id
+    // is the last non-empty path segment, so a permalink with a trailing slash or a query still
+    // resolves instead of falling back to 0.
+    val path = url.substringBefore('?').substringBefore('#').trimEnd('/')
+    return path.substringAfterLast('/').toLongOrNull() ?: 0L
+}
