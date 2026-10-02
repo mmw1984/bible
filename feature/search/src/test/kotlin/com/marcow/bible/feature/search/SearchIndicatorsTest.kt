@@ -207,8 +207,5 @@ private const val FULL_TURN_RADIANS = 2f * PI.toFloat()
 /** A half turn, below which an arc stops reading as a spinner. */
 private const val HALF_TURN_RADIANS = PI.toFloat()
 
-/** A quarter turn, below which an arc stops reading as a spinner. */
-private const val QUARTER_TURN_RADIANS = PI.toFloat() / 2f
-
 /** Every spinner side worth drawing: the 20 dp default, the 15 dp the rows ask for, and below both. */
 private val SIDES = listOf(4f, 8f, 13f, 15f, 20f, 48f)
