@@ -116,12 +116,7 @@ internal fun parseHtmlDocument(html: String): HtmlElement {
  * as the flat sequence of steps it is. [index] is the token after the one applied, as it was in the
  * loop this came out of.
  */
-private fun applyToken(
-    stack: ArrayDeque<HtmlElement>,
-    tokens: List<HtmlToken>,
-    index: Int,
-    token: HtmlToken,
-): Int {
+private fun applyToken(stack: ArrayDeque<HtmlElement>, tokens: List<HtmlToken>, index: Int, token: HtmlToken): Int {
     var next = index
     when (token) {
         is HtmlCharacter -> stack.last().children.add(HtmlText(token.data))
