@@ -18,8 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.TextUnit
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.TextUnit
 import com.marcow.bible.core.designsystem.theme.AppFonts
 import com.marcow.bible.core.designsystem.theme.appColors
 import com.marcow.bible.core.model.ReadingMode
@@ -101,11 +101,11 @@ private fun VerseText(verse: VersePair, mode: ReadingMode, verseSize: TextUnit, 
         contentAlignment = Alignment.TopStart,
         transitionSpec = {
             val enter = fadeIn(tween(VerseSwitchEnterMillis, easing = EaseOutCubic)) +
-                slideIn(tween(VerseSwitchEnterMillis, easing = EaseOutCubic)) { width ->
-                    IntOffset((width * VerseSwitchSlideFraction).toInt(), 0)
+                slideIn(tween(VerseSwitchEnterMillis, easing = EaseOutCubic)) { fullSize ->
+                    IntOffset((fullSize.width * VerseSwitchSlideFraction).toInt(), 0)
                 }
             val exit = fadeOut(tween(VerseSwitchExitMillis, easing = EaseOutCubic))
-            val size = SizeTransform(clip = false, sizeAnimationSpec = tween(VerseSizeMillis, easing = EaseOutCubic))
+            val size = SizeTransform(clip = false) { _, _ -> tween(VerseSizeMillis, easing = EaseOutCubic) }
             enter togetherWith exit using size
         },
         label = "verseText",
