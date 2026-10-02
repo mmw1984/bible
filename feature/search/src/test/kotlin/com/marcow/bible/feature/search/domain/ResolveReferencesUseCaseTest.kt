@@ -7,6 +7,7 @@ import com.marcow.bible.core.database.ReadingProgressDao
 import com.marcow.bible.core.database.ReadingProgressEntity
 import com.marcow.bible.core.database.ScriptureSearchRow
 import com.marcow.bible.core.database.VerseEntity
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -27,10 +28,10 @@ import org.junit.jupiter.api.assertThrows
  * `JHN 3:16-400` is a real reference to a real chapter, so the answer is the verses inside it.
  */
 class ResolveReferencesUseCaseTest {
-    private val repository = BibleRepository(FakeBibleDao(), FakeReadingProgressDao())
+    private val repository = BibleRepository(ResolveFakeBibleDao(), ResolveFakeReadingProgressDao())
 
     @Test
-    fun `a range becomes one tile per verse, in canon order`() {
+    fun `a range becomes one tile per verse, in canon order`() = runTest {
         val hits = resolve(reference("JHN", 3, 16, 17))
 
         assertEquals(listOf(16, 17), hits.map { it.hit.verse.number })
@@ -39,7 +40,7 @@ class ResolveReferencesUseCaseTest {
     }
 
     @Test
-    fun `the text on the tile is this device's verse, not the model's`() {
+    fun `the text on the tile is this device's verse, not the model's`() = runTest {
         // The reference carries no text at all — only a reason — so every word the user reads came out
         // of the lookup, and `reason` is the only thing the model was allowed to contribute.
         val hits = resolve(reference("JHN", 3, 16, 16, reason = "耶穌降生"))
@@ -50,7 +51,7 @@ class ResolveReferencesUseCaseTest {
     }
 
     @Test
-    fun `the model's reason rides on every verse of a range`() {
+    fun `the model's reason rides on every verse of a range`() = runTest {
         // `JHN 3:16-17` draws two tiles, and Flutter gave both the one reason from the reference
         // rather than the first tile the reason and the rest none.
         val hits = resolve(reference("JHN", 3, 16, 17, reason = "神的愛"))
@@ -59,7 +60,7 @@ class ResolveReferencesUseCaseTest {
     }
 
     @Test
-    fun `a range running past the end of the chapter shows the verses that exist`() {
+    fun `a range running past the end of the chapter shows the verses that exist`() = runTest {
         // The reference is valid and the verses are not: `JHN 3` has 36 verses. Dropping the whole
         // reference would cost the user a hit the Flutter build showed, so it is clamped instead.
         val hits = resolve(reference("JHN", 3, 35, 400))
@@ -68,14 +69,14 @@ class ResolveReferencesUseCaseTest {
     }
 
     @Test
-    fun `a range past the end of the chapter is not padded with empty verses`() {
+    fun `a range past the end of the chapter is not padded with empty verses`() = runTest {
         val hits = resolve(reference("JHN", 3, 30, 400))
 
         assertEquals(listOf(30, 31, 32, 33, 34, 35, 36), hits.map { it.hit.verse.number })
     }
 
     @Test
-    fun `references keep the order the model gave them`() {
+    fun `references keep the order the model gave them`() = runTest {
         val hits = resolve(
             reference("JHN", 3, 16, 16),
             reference("MAT", 4, 1, 1),
@@ -89,7 +90,7 @@ class ResolveReferencesUseCaseTest {
     }
 
     @Test
-    fun `an unknown book loses its row and not the others`() {
+    fun `an unknown book loses its row and not the others`() = runTest {
         // Unreachable through the search path — [parseSearchReferences] already drops it against the
         // same canon — but it is the one failure that is silently wrong rather than loud, so the skip
         // is pinned rather than left to be discovered.
@@ -102,7 +103,7 @@ class ResolveReferencesUseCaseTest {
     }
 
     @Test
-    fun `a chapter past the end of the book is skipped`() {
+    fun `a chapter past the end of the book is skipped`() = runTest {
         val hits = resolve(
             reference("JHN", 22, 1, 1),
             reference("JHN", 21, 1, 1),
@@ -112,14 +113,14 @@ class ResolveReferencesUseCaseTest {
     }
 
     @Test
-    fun `a chapter below one is skipped rather than read`() {
+    fun `a chapter below one is skipped rather than read`() = runTest {
         val hits = resolve(reference("JHN", 0, 1, 1))
 
         assertEquals(emptyList<AiSearchHit>(), hits)
     }
 
     @Test
-    fun `a chapter with no verses of its own contributes nothing rather than failing`() {
+    fun `a chapter with no verses of its own contributes nothing rather than failing`() = runTest {
         // `chapter` returns an empty list for a chapter the table has no rows for, where the Flutter
         // reader threw. A model asking for one should cost the search nothing.
         val hits = resolve(reference("JHN", 7, 1, 5))
@@ -128,10 +129,10 @@ class ResolveReferencesUseCaseTest {
     }
 
     @Test
-    fun `a chapter that will not load fails the verses half and not the request`() {
+    fun `a chapter that will not load fails the verses half and not the request`() = runTest {
         // `ReferenceFailure.VERSES` is exactly this: a device problem, so the sheet says the verses
         // could not be loaded rather than sending the user to check a network that was fine.
-        val failing = BibleRepository(FakeBibleDao(CHAPTER_FAILURE), FakeReadingProgressDao())
+        val failing = BibleRepository(ResolveFakeBibleDao(CHAPTER_FAILURE), ResolveFakeReadingProgressDao())
 
         val failure = assertThrows<IllegalStateException> {
             ResolveReferencesUseCase(failing).invoke(listOf(reference("JHN", 3, 16, 16)))
@@ -141,7 +142,7 @@ class ResolveReferencesUseCaseTest {
     }
 
     @Test
-    fun `nothing the model asked for resolves to nothing rather than to a failure`() {
+    fun `nothing the model asked for resolves to nothing rather than to a failure`() = runTest {
         assertEquals(emptyList<AiSearchHit>(), resolve())
     }
 
@@ -186,7 +187,7 @@ private fun johnThree() = listOf(
 )
 
 /** The books and verses the resolution reads; the search SQL itself is `BibleSearchTest`'s. */
-private class FakeBibleDao(private val chapterFailure: Throwable? = null) : BibleDao {
+private class ResolveFakeBibleDao(private val chapterFailure: Throwable? = null) : BibleDao {
     private val canon = listOf(GENESIS, MATTHEW, JOHN)
 
     private val rows = johnThree() +
@@ -209,7 +210,7 @@ private class FakeBibleDao(private val chapterFailure: Throwable? = null) : Bibl
     override suspend fun searchContains(pattern: String, limit: Int): List<ScriptureSearchRow> = emptyList()
 }
 
-private class FakeReadingProgressDao : ReadingProgressDao {
+private class ResolveFakeReadingProgressDao : ReadingProgressDao {
     override suspend fun progress(book: String): ReadingProgressEntity? = null
 
     override suspend fun allProgress(): List<ReadingProgressEntity> = emptyList()
