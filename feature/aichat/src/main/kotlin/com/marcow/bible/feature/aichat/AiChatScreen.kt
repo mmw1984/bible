@@ -4,6 +4,7 @@ import androidx.compose.animation.core.EaseOutCubic
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -142,13 +143,18 @@ fun AiChatScreen(
         if (followLatest && state.messages.isNotEmpty()) listState.scrollToItem(0)
     }
     // `_scrollToLatest`: the button's own tap is the one place Dart animated, over 280 ms.
+    // `animateScrollToItem` takes no `animationSpec` — it snaps when the target is more than three
+    // items away and springs when it is not, which is neither the curve nor the length Dart ran — so
+    // the jump is the list's own scroll animated by the tween instead. On a reversed list `value` is 0
+    // at item 0 settled, which is the same destination `scrollToItem(0)` gives above.
     val goToLatest: () -> Unit = {
         followLatest = true
         scope.launch {
-            listState.animateScrollToItem(
-                index = 0,
+            listState.animateScrollBy(
                 animationSpec = tween(SCROLL_TO_LATEST_MILLIS, easing = EaseOutCubic),
-            )
+            ) {
+                scrollBy(-listState.value)
+            }
         }
     }
 
