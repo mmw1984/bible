@@ -144,6 +144,12 @@ fun LibraryPanel(
                 readingMode = readingMode,
                 selectedBookId = selectedBookId,
                 onBookSelected = onBookSelected,
+                // `Expanded` (`legacy/flutter/lib/main.dart:2006`), for the reason the sidebar's
+                // grid needs it too: the list fills its height, and the height it fills has to be
+                // what the title and the switcher left. The panel clips its own corners, so an
+                // unweighted list would not spill past the sheet — it would be cut off by it, with
+                // no way to scroll the books it was hiding.
+                modifier = Modifier.weight(1f),
             )
         }
     }

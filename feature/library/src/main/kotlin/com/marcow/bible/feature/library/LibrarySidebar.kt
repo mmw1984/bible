@@ -138,6 +138,12 @@ fun LibrarySidebar(
             chapterCount = book.chapters,
             chapter = chapter,
             onChapterSelected = onChapterSelected,
+            // `Expanded` (`legacy/flutter/lib/main.dart:1788`). The grid is the only part of this
+            // column that scrolls, and it has to be handed what is left under the rule rather than
+            // the whole column: a child of a `Column` is measured against the column's own height,
+            // so a grid filling its height would push its last row past the sidebar and out of reach
+            // of the scroll that is meant to bring it back.
+            modifier = Modifier.weight(1f),
         )
     }
 }
@@ -151,10 +157,17 @@ fun LibrarySidebar(
  * 220 ms.
  */
 @Composable
-private fun ChapterGrid(chapterCount: Int, chapter: Int, onChapterSelected: (Int) -> Unit) {
+private fun ChapterGrid(
+    chapterCount: Int,
+    chapter: Int,
+    onChapterSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(SidebarChrome.chapterColumns),
-        modifier = Modifier.fillMaxSize(),
+        // The width is the column's, the height is the caller's: the weight is Flutter's `Expanded`
+        // and says the grid scrolls inside what the label and the book row left over.
+        modifier = modifier.fillMaxWidth(),
         contentPadding = PaddingValues(0.dp),
         horizontalArrangement = Arrangement.spacedBy(SidebarChrome.chapterSpacing),
         verticalArrangement = Arrangement.spacedBy(SidebarChrome.chapterSpacing),
