@@ -1542,11 +1542,6 @@ class _AiSettingsPageState extends State<AiSettingsPage> {
                         children: [
                           _AppearanceSettings(settings: settings),
                           const SizedBox(height: 28),
-                          _AiProviderSettings(
-                            key: const ValueKey('ai-provider-settings'),
-                            controller: controller,
-                          ),
-                          const SizedBox(height: 28),
                           _OpenRouterSettings(
                             key: const ValueKey('router-settings'),
                             controller: controller,
@@ -1660,97 +1655,6 @@ class _AppearanceSettings extends StatelessWidget {
       ],
     );
   }
-}
-
-class _AiProviderSettings extends StatelessWidget {
-  const _AiProviderSettings({super.key, required this.controller});
-
-  final BibleAiController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppColors.of(context);
-    final radii = AppRadii.of(context);
-    final l10n = context.l10n;
-    final status = controller.geminiNanoDownloading
-        ? AiAvailability.downloading
-        : controller.geminiNanoAvailability;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _SettingsLabel(l10n.aiProvider),
-        const SizedBox(height: 8),
-        AppSegmented<AiProvider>(
-          choices: [
-            AppChoice(
-              value: AiProvider.openrouter,
-              label: l10n.providerOpenRouter,
-            ),
-            AppChoice(
-              value: AiProvider.geminiNano,
-              label: l10n.providerGeminiNano,
-            ),
-          ],
-          selected: controller.provider,
-          onChanged: controller.setProvider,
-        ),
-        const SizedBox(height: 22),
-        _SettingsLabel(l10n.geminiNanoConnection),
-        const SizedBox(height: 8),
-        Container(
-          key: const ValueKey('gemini-nano-connection-status'),
-          // Same 42px row as the OpenRouter status, but it grows instead of
-          // overflowing when a long status wraps at large text scales.
-          constraints: const BoxConstraints(minHeight: 42),
-          padding: const EdgeInsets.symmetric(horizontal: 11),
-          decoration: BoxDecoration(
-            color: colors.surface,
-            border: Border.all(color: colors.line),
-            borderRadius: BorderRadius.circular(radii.control),
-          ),
-          child: Row(
-            children: [
-              Icon(_statusIcon(status), color: colors.ink, size: 17),
-              const SizedBox(width: 9),
-              Expanded(
-                child: Text(
-                  switch (status) {
-                    AiAvailability.ready => l10n.geminiNanoReady,
-                    AiAvailability.downloadable =>
-                      l10n.geminiNanoDownloadable,
-                    AiAvailability.downloading => l10n.geminiNanoDownloading,
-                    AiAvailability.unsupported => l10n.geminiNanoUnsupported,
-                    AiAvailability.temporarilyUnavailable =>
-                      l10n.geminiNanoUnavailable,
-                    AiAvailability.checking => l10n.geminiNanoChecking,
-                  },
-                  style: TextStyle(color: colors.ink, fontSize: 12),
-                ),
-              ),
-              _SmallAction(
-                onTap: status == AiAvailability.downloadable
-                    ? controller.downloadGeminiNano
-                    : null,
-                label: l10n.downloadGeminiNano,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 7),
-        Text(
-          l10n.geminiNanoHelper,
-          style: TextStyle(color: colors.muted, fontSize: 11, height: 1.4),
-        ),
-      ],
-    );
-  }
-
-  static IconData _statusIcon(AiAvailability status) => switch (status) {
-    AiAvailability.ready => LucideIcons.circleCheckBig,
-    AiAvailability.downloadable || AiAvailability.downloading =>
-      LucideIcons.cloud,
-    _ => LucideIcons.cloudOff,
-  };
 }
 
 class _OpenRouterSettings extends StatelessWidget {

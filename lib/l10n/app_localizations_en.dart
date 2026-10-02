@@ -154,43 +154,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveModel => 'Save model';
 
   @override
-  String get aiProvider => 'AI provider';
-
-  @override
-  String get providerOpenRouter => 'OpenRouter';
-
-  @override
-  String get providerGeminiNano => 'Gemini Nano';
-
-  @override
-  String get geminiNanoConnection => 'Gemini Nano connection';
-
-  @override
-  String get geminiNanoReady => 'Ready on this device';
-
-  @override
-  String get geminiNanoDownloadable => 'Model available to download';
-
-  @override
-  String get geminiNanoDownloading => 'Downloading model';
-
-  @override
-  String get geminiNanoChecking => 'Checking this device';
-
-  @override
-  String get geminiNanoUnsupported => 'Not supported here';
-
-  @override
-  String get geminiNanoUnavailable => 'AICore unavailable';
-
-  @override
-  String get downloadGeminiNano => 'Download model';
-
-  @override
-  String get geminiNanoHelper =>
-      'Runs entirely on-device with no API key. Works offline once downloaded.';
-
-  @override
   String get appearance => 'Appearance';
 
   @override
