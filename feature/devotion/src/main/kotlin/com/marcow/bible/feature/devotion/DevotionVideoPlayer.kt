@@ -1,6 +1,7 @@
 package com.marcow.bible.feature.devotion
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
@@ -130,7 +131,7 @@ internal fun DevotionVideoPlayer(
                     // article's video, would otherwise be handed the previous video's player under
                     // the new page.
                     key = videoId,
-                    factory = { context ->
+                    factory = { context: Context ->
                         WebView(context).apply {
                             settings.javaScriptEnabled = true
                             settings.domStorageEnabled = true
@@ -183,7 +184,7 @@ internal fun DevotionVideoPlayer(
                     // `AndroidView` without re-running an effect keyed on the old instance — so the
                     // frame, its audio and its JavaScript would outlive the video the reader had
                     // scrolled away from.
-                    onRelease = { webView ->
+                    onRelease = { webView: WebView ->
                         // Clearing the reference is what makes a tap arriving while the replacement
                         // is still loading a no-op, rather than a call into a destroyed frame.
                         if (frame === webView) frame = null
@@ -191,7 +192,7 @@ internal fun DevotionVideoPlayer(
                     },
                     // Assigned from `update` rather than `factory`, because `update` runs on every
                     // composition including the first and `factory` only on the first.
-                    update = { webView -> frame = webView },
+                    update = { webView: WebView -> frame = webView },
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(DevotionChrome.VIDEO_ASPECT_RATIO),
