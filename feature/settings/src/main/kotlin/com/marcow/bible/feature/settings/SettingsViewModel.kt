@@ -8,9 +8,7 @@ import com.marcow.bible.core.model.AppSettings
 import com.marcow.bible.core.model.NavBarStyle
 import com.marcow.bible.core.model.ThemeMode
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,12 +22,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class SettingsViewModel @Inject constructor(private val settingsRepository: SettingsRepository) : ViewModel() {
-    val settings: StateFlow<AppSettings> =
-        settingsRepository.settings.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(SUBSCRIPTION_TIMEOUT_MS),
-            AppSettings(),
-        )
+    val settings: Flow<AppSettings> = settingsRepository.settings
 
     fun setThemeMode(themeMode: ThemeMode) = write { settingsRepository.setThemeMode(themeMode) }
 
@@ -43,10 +36,5 @@ class SettingsViewModel @Inject constructor(private val settingsRepository: Sett
 
     private fun write(block: suspend () -> Unit) {
         viewModelScope.launch { block() }
-    }
-
-    private companion object {
-        /** Long enough to survive a rotation, short enough that a backgrounded app stops reading. */
-        const val SUBSCRIPTION_TIMEOUT_MS = 5_000L
     }
 }
