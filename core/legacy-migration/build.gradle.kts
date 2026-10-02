@@ -61,4 +61,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     // The importer test drives a real (file-less) Proto DataStore instead of a hand-written double.
     testImplementation(libs.androidx.datastore.core)
+    // `InMemorySettingsDataStore` lives in core:datastore's test fixtures rather than in its own
+    // `src/test`, which is what lets a module outside core:datastore build the same store.
+    testImplementation(testFixtures(project(":core:datastore")))
 }

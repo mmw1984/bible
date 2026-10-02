@@ -1,7 +1,5 @@
 package com.marcow.bible.core.legacymigration
 
-import androidx.datastore.core.DataStoreFactory
-import androidx.datastore.core.Serializer
 import com.marcow.bible.core.database.BibleDao
 import com.marcow.bible.core.database.BookEntity
 import com.marcow.bible.core.database.DevotionCacheDao
@@ -10,6 +8,7 @@ import com.marcow.bible.core.database.ReadingProgressDao
 import com.marcow.bible.core.database.ReadingProgressEntity
 import com.marcow.bible.core.database.ScriptureSearchRow
 import com.marcow.bible.core.database.VerseEntity
+import com.marcow.bible.core.datastore.InMemorySettingsDataStore
 import com.marcow.bible.core.datastore.SettingsRepository
 import com.marcow.bible.core.datastore.proto.Settings
 import com.marcow.bible.core.model.AppLocale
@@ -22,8 +21,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.io.InputStream
-import java.io.OutputStream
 
 class LegacyPrefsImporterTest {
     @Test
@@ -202,9 +199,11 @@ class LegacyPrefsImporterTest {
     }
 
     private fun harness(preferences: LegacyPreferenceSource): Harness {
-        // No `produceFile`, so this is the in-memory store: the real DataStore machinery, minus a
-        // file that a JVM unit test would otherwise have to fake.
-        val settings = SettingsRepository(DataStoreFactory.create(serializer = TestSettingsSerializer))
+        // `DataStoreFactory.create` has no file-less overload — it wants a `produceFile` alongside
+        // the `serializer` — so the in-memory store is `InMemorySettingsDataStore`, which this
+        // module now builds from core:datastore's test fixtures. It is the real DataStore interface
+        // and the real protobuf `Serializer`, minus the file and the background actor.
+        val settings = SettingsRepository(InMemorySettingsDataStore())
         val progress = FakeReadingProgressDao()
         val devotion = FakeDevotionCacheDao()
         return Harness(
@@ -227,14 +226,6 @@ class LegacyPrefsImporterTest {
         val devotion: FakeDevotionCacheDao,
         val importer: LegacyPrefsImporter,
     )
-}
-
-private val TestSettingsSerializer = object : Serializer<Settings> {
-    override val defaultValue: Settings = Settings.getDefaultInstance()
-
-    override suspend fun readFrom(input: InputStream): Settings = Settings.parseFrom(input)
-
-    override suspend fun writeTo(t: Settings, output: OutputStream) = t.writeTo(output)
 }
 
 private class FakePreferences(
