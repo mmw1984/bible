@@ -5,10 +5,11 @@ package com.marcow.bible.feature.aichat.domain
  * turns as `role: text` lines, which is how the model is told what was already said.
  *
  * This is the whole of the conversation history the model sees, and it is a block of *text* rather
- * than a message array because that is what the prompt is: `chatPrompt` interpolates it under
- * `Recent conversation:` with no other structure, and the model reads a transcript far better than it
- * follows a role-tagged array. It is also why the roles are spelled out as prefixes here rather than
- * inferred from position — the store restores a transcript whose last turn may be either speaker.
+ * than a message array because that is what the prompt is: `chatPrompt` interpolates it whole under
+ * the `RECENT CONVERSATION` heading with no other structure, and the model reads a transcript far
+ * better than it follows a role-tagged array. It is also why the roles are spelled out as prefixes
+ * here rather than inferred from position — the store restores a transcript whose last turn may be
+ * either speaker.
  */
 internal fun recentConversationBlock(messages: List<AiMessage>, question: String): String {
     // The turn being answered is already in the list by the time the prompt is built — `send` appends

@@ -115,8 +115,10 @@ internal fun scriptureToolRequest(answer: String): ScriptureToolRequest? {
  * The prompt of the next round, from the `_streamModelAnswer` call inside the loop.
  *
  * Every result so far is resent rather than only the newest one, so the model can still quote a
- * passage it asked for two rounds ago. Copied word for word, including the space after the JSON
- * request: it is part of the text the model was tuned against.
+ * passage it asked for two rounds ago. Copied word for word, spaces included: Dart wrote the same
+ * sentence across three adjacent string literals, so the space after `result` and the one after
+ * `issue` are part of the text — a port that joined the literals without them would hand the model
+ * `this authoritative resultto answer the user`.
  */
 internal fun toolFollowUpPrompt(prompt: String, toolResults: List<String>): String =
     "$prompt\n\nThe app executed get_scripture. Use this authoritative result " +
