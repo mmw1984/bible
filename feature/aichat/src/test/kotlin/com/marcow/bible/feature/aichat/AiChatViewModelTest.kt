@@ -543,12 +543,8 @@ internal class AiChatViewModelTest {
 }
 
 /** One finished answer, which is all a stubbed question returns. */
-private fun chatAnswer(
-    text: String,
-    reasoning: String = "",
-    incomplete: Boolean = false,
-    stopped: Boolean = false,
-) = ChatAnswer(text = text, reasoning = reasoning, incomplete = incomplete, stopped = stopped)
+private fun chatAnswer(text: String, reasoning: String = "", incomplete: Boolean = false, stopped: Boolean = false) =
+    ChatAnswer(text = text, reasoning = reasoning, incomplete = incomplete, stopped = stopped)
 
 /**
  * The answering loop, stubbed.
