@@ -27,10 +27,17 @@ class LibraryEntranceTest {
     }
 
     @Test
-    fun `the wait stops growing at the tenth book`() {
-        // 0.035 of its own duration, and the tenth book's is 440 ms, so 15 ms.
+    fun `the wait keeps growing while the duration does, and stops where it stops`() {
+        // Flutter clamped the fraction, at the tenth book, rather than the wait: `Interval`'s begin is
+        // a share of the book's own duration, and the duration carries on to the twelfth. So the
+        // eleventh and twelfth each wait a little longer than the tenth, and from the twelfth on —
+        // Malachi is the thirty-ninth book — the wait holds at 166 ms. Reading the cap as a cap on
+        // the wait would have pinned every book from the tenth on to 154 ms, which is not what
+        // Flutter drew.
         assertEquals(154, rowEntranceDelayMillis(staggerIndex = 10))
-        assertEquals(154, rowEntranceDelayMillis(staggerIndex = 38))
+        assertEquals(160, rowEntranceDelayMillis(staggerIndex = 11))
+        assertEquals(166, rowEntranceDelayMillis(staggerIndex = 12))
+        assertEquals(166, rowEntranceDelayMillis(staggerIndex = 38))
     }
 
     @Test

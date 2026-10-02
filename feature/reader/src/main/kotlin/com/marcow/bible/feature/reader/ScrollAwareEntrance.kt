@@ -20,10 +20,14 @@ import kotlinx.coroutines.delay
  * comes in as a short stagger of fades that rise 8 px, so a page of scripture settles instead of
  * landing. Only the verses are wrapped — Flutter's header and chapter links were plain slivers.
  *
- * The stagger is capped, and the cap is the point. Flutter clamped the index twice: the delay at ten
- * items and the duration at twelve, so the twelfth verse onward all take the same 476 ms. A chapter
- * of 176 verses is not a queue of 176 fades, and the numbers are kept as they were rather than made
- * proportional.
+ * The stagger is capped, and the cap is the point. Flutter clamped the index twice: the interval's
+ * begin at ten items and the duration at twelve, so the twelfth verse onward all take the same 476
+ * ms. A chapter of 176 verses is not a queue of 176 fades, and the numbers are kept as they were
+ * rather than made proportional.
+ *
+ * The two clamps stop in different places, and that is not a detail. Flutter clamped the *fraction*,
+ * not the wait it produces, so the wait keeps creeping up while the duration it is a share of is
+ * still growing — it holds at 166 ms from the twelfth verse on, not at the tenth's 154 ms.
  *
  * Why a gate. Flutter asked `Scrollable.recommendDeferredLoadingForContext` whether to skip the
  * animation, and the answer was "yes" for every item the reader had not scrolled to yet — animating
@@ -50,10 +54,15 @@ fun entranceDurationMillis(staggerIndex: Int): Int =
  * Flutter's `Interval` squeezed `easeOutCubic` into the tail of the duration rather than delaying
  * the animation, so the wait is [entranceDurationMillis] multiplied by the fraction and the fade
  * gets what is left — the two functions are only ever read together, in that order.
+ *
+ * The fraction is clamped, the duration it multiplies is not, and the index is passed through
+ * unclamped for exactly that reason: `Interval`'s begin is a share of the whole duration, which
+ * Flutter kept growing to the twelfth verse. Clamping the index first would flatten the eleventh
+ * and twelfth verses onto the tenth's wait, which is not what Flutter drew.
  */
 fun entranceDelayMillis(staggerIndex: Int): Int {
     val staggered = staggerIndex.coerceIn(0, EntranceMaxDelayStagger)
-    return (staggered * EntranceDelayFraction * entranceDurationMillis(staggered)).toInt()
+    return (staggered * EntranceDelayFraction * entranceDurationMillis(staggerIndex)).toInt()
 }
 
 /**
@@ -118,7 +127,7 @@ private const val EntranceBaseMillis = 260
 /** `.clamp(0, 12)` on the duration: from the twelfth verse on, every verse takes the same time. */
 private const val EntranceMaxDurationStagger = 12
 
-/** `.clamp(0, 10)` on the delay: the stagger stops growing at the tenth verse. */
+/** `.clamp(0, 10)` on the interval's begin: the *share* stops growing at the tenth verse. */
 private const val EntranceMaxDelayStagger = 10
 
 /** The 18 ms each of the first twelve verses adds. */

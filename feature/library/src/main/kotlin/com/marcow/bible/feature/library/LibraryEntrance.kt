@@ -30,10 +30,17 @@ import kotlinx.coroutines.delay
 fun rowEntranceDurationMillis(staggerIndex: Int): Int =
     RowBaseMillis + staggerIndex.coerceIn(0, RowMaxDurationStagger) * RowStaggerMillis
 
-/** When this book starts moving, `staggerIndex.clamp(0, 10) * .035` of its own duration. */
+/**
+ * When this book starts moving, `staggerIndex.clamp(0, 10) * .035` of its own duration.
+ *
+ * The index is passed through unclamped for the same reason `entranceDelayMillis` does: Flutter
+ * clamped the interval's *begin*, and that begin is a share of a duration which kept growing to the
+ * twelfth row. Clamping the index first would hold the wait at the tenth book's 154 ms instead of
+ * letting the eleventh and twelfth creep up to 166 ms.
+ */
 fun rowEntranceDelayMillis(staggerIndex: Int): Int {
     val staggered = staggerIndex.coerceIn(0, RowMaxDelayStagger)
-    return (staggered * RowDelayFraction * rowEntranceDurationMillis(staggered)).toInt()
+    return (staggered * RowDelayFraction * rowEntranceDurationMillis(staggerIndex)).toInt()
 }
 
 /** Whether the rows being composed right now belong to the panel's first pass. */
