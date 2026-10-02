@@ -14,17 +14,15 @@ package com.marcow.bible.feature.aichat
  *
  * It is declared here rather than imported from the reader because the dependency runs the other
  * way: `feature/reader` knows about the chat, the chat does not know about the reader. The reader's
- * own [com.marcow.bible.feature.reader.ScriptureRequest] carries the same four pieces of text under
- * the names `reference`, `text`, `chapterContext` and `question`, and a caller holding one maps it
- * across in a single expression:
+ * own `ScriptureRequest` carries the same four pieces of text under the names `reference`, `text`,
+ * `chapterContext` and `question`, and [of] takes those four names, so a caller holding one writes
  *
  * ```
- * ScriptureHandoff(
+ * ScriptureHandoff.of(
  *     reference = request.reference,
- *     attachment = request.text,
- *     context = request.chapterContext,
+ *     text = request.text,
+ *     chapterContext = request.chapterContext,
  *     question = request.question,
- *     autoSend = request.question != null,
  * )
  * ```
  *
@@ -59,4 +57,35 @@ data class ScriptureHandoff(
     /** The question as it will be asked: trimmed, or null when there is nothing to ask. */
     val trimmedQuestion: String?
         get() = question?.trim()?.takeIf { it.isNotEmpty() }
+
+    companion object {
+        /**
+         * The handoff for a request the reader made, mapping the reader's names onto the chat's.
+         *
+         * The parameters are named after the reader's `ScriptureRequest` rather than after the fields
+         * they land on, so a caller's four arguments read as the four Flutter passed at
+         * `legacy/flutter/lib/main.dart:969` — the reference, the selected verse, the chapter, and the
+         * question Explain wrote — and the renaming happens once here instead of at every call site.
+         * The pieces themselves are passed through byte for byte: `text` becomes [attachment] and
+         * `chapterContext` becomes [context], which are the names `ai_chat_page.dart` had, and no
+         * trimming or blanking happens here because Flutter trimmed nothing either — [contextAttached]
+         * is what judged the chapter.
+         *
+         * [autoSend] is derived rather than taken, because a caller passing it could pass the one
+         * pairing the reader never produced: a question with `autoSend = false` would be attached to
+         * the turn and never asked, and 「問 AI」 must open a composer rather than send.
+         */
+        fun of(
+            reference: String,
+            text: String,
+            chapterContext: String,
+            question: String? = null,
+        ): ScriptureHandoff = ScriptureHandoff(
+            reference = reference,
+            context = chapterContext,
+            attachment = text,
+            question = question,
+            autoSend = question != null,
+        )
+    }
 }
