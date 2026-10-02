@@ -334,11 +334,7 @@ private fun ReasoningDisclosure(text: String, streaming: Boolean) {
  * is where [AppGlyphView] puts it everywhere else in the app.
  */
 @Composable
-private fun AnswerAction(
-    glyph: AppGlyph,
-    label: String,
-    onClick: () -> Unit,
-) {
+private fun AnswerAction(glyph: AppGlyph, label: String, onClick: () -> Unit) {
     AppButton(
         onClick = onClick,
         shape = RoundedCornerShape(appRadii.compact),
