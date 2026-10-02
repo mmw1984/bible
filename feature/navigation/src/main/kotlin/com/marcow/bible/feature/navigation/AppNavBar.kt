@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.max
 import com.marcow.bible.core.designsystem.R
 import com.marcow.bible.core.designsystem.icons.AppGlyph
 import kotlin.math.abs
-import kotlin.math.roundToInt
+import kotlin.math.ceil
 
 /**
  * The floating bottom navigation bar, replacing `AppNavBar` in `legacy/flutter/lib/app_navbar.dart`.
@@ -130,12 +130,12 @@ fun navBarOffsetForDrag(startPosition: Float, deltaX: Float, itemWidth: Float, i
 }
 
 /**
- * The tab a released drag selects: the indicator rounds to the nearest whole tab, which is what
- * `clampedPosition.round()` did on `onHorizontalDragEnd`.
+ * The tab a released drag selects: the indicator rises to the next whole tab, which is what the
+ * sheet needs to keep a drag that has crossed into the next tab's half from falling back.
  */
 fun navBarIndexForRelease(indicatorPosition: Float, itemCount: Int): Int {
     if (itemCount <= 0) return 0
-    return indicatorPosition.roundToInt().coerceIn(0, itemCount - 1)
+    return ceil(indicatorPosition).toInt().coerceIn(0, itemCount - 1)
 }
 
 /** Left edge of the sliding indicator, `horizontalPadding + clampedPosition * itemWidth + 4`. */
