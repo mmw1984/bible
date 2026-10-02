@@ -39,14 +39,14 @@ class SearchIndicatorsTest {
     }
 
     @Test
-    fun `the sweep is short of a half turn, which is what leaves the gap`() {
-        // `1.35 * pi` against a full turn: a sweep of half or more closes on itself and the arc reads
-        // as a ring that is spinning rather than as a hand that is, and a sweep of a quarter or less
-        // stops reading as a spinner at all.
+    fun `the sweep is short of a full turn, which is what leaves the gap`() {
+        // `1.35 * pi` against a full turn: a sweep of a full turn or more closes on itself and the
+        // arc reads as a ring that is spinning rather than as a hand that is, and a sweep of half
+        // or less stops reading as a spinner at all.
         val sweep = SpinnerArc.forSide(side = 20f).sweepRadians
 
-        assertTrue(sweep < HALF_TURN_RADIANS, "a full semicircle leaves no gap: $sweep")
-        assertTrue(sweep > QUARTER_TURN_RADIANS, "too little arc to read as a spinner: $sweep")
+        assertTrue(sweep < FULL_TURN_RADIANS, "a full circle leaves no gap: $sweep")
+        assertTrue(sweep > HALF_TURN_RADIANS, "too little arc to read as a spinner: $sweep")
     }
 
     @Test
@@ -202,6 +202,9 @@ private const val SPINNER_START_RADIANS = -0.9f
 private const val SPINNER_SWEEP_RADIANS = 1.35f * PI.toFloat()
 
 /** A full turn, so the sweep above can be said to fall short of it. */
+private const val FULL_TURN_RADIANS = 2f * PI.toFloat()
+
+/** A half turn, below which an arc stops reading as a spinner. */
 private const val HALF_TURN_RADIANS = PI.toFloat()
 
 /** A quarter turn, below which an arc stops reading as a spinner. */

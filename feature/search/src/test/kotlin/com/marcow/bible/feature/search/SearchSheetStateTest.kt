@@ -122,14 +122,21 @@ class SearchSheetStateTest {
 
     @Test
     fun `the verses an AI search returned are not the verses a text search returned`() {
-        val state = SearchSheetState(
+        val aiIgnoresTraditional = SearchSheetState(
             mode = SearchMode.AI,
             query = "love",
+            signedIn = true,
             traditionalHits = listOf(hit()),
+        )
+        val traditionalIgnoresAi = SearchSheetState(
+            mode = SearchMode.TRADITIONAL,
+            query = "love",
+            traditionalHits = emptyList(),
             aiHits = listOf(AiSearchHit(hit = hit(), reason = "God so loved")),
         )
 
-        assertTrue(state.showsNoResults)
+        assertTrue(aiIgnoresTraditional.showsNoResults)
+        assertTrue(traditionalIgnoresAi.showsNoResults)
     }
 }
 

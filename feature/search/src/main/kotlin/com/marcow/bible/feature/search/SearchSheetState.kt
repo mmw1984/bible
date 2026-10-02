@@ -98,15 +98,17 @@ data class SearchSheetState(
     /**
      * The `no_results` paragraph, kept for Flutter's exact condition.
      *
-     * Read it against `legacy/flutter/lib/main.dart:2556`: the sheet shows "no matching scripture"
-     * when nothing is running, the AI half is not waiting on a sign-in, neither AI failure panel is
-     * up, and the half that did run came back with nothing. The two consequences are deliberate and
-     * are the Flutter behaviour, not oversights — a signed-out AI search does not say "no results"
-     * because the sign-in panel above it explains why there are none, and a *failed* search does say
-     * it, under its own failure panel.
+     * Read it against `legacy/flutter/lib/main.dart:2420` and `:2556`: an empty [query] draws the
+     * hint instead of a result list, so "no matching scripture" is only reachable after a search was
+     * submitted. Past that, the sheet shows it when nothing is running, the AI half is not waiting
+     * on a sign-in, neither AI failure panel is up, and the half that did run came back with
+     * nothing. The two consequences are deliberate and are the Flutter behaviour, not oversights —
+     * a signed-out AI search does not say "no results" because the sign-in panel above it explains
+     * why there are none, and a *failed* search does say it, under its own failure panel.
      */
     val showsNoResults: Boolean
-        get() = !searching &&
+        get() = query.isNotEmpty() &&
+            !searching &&
             !(mode == SearchMode.AI && !aiReady) &&
             !overviewFailed &&
             referencesFailure == null &&

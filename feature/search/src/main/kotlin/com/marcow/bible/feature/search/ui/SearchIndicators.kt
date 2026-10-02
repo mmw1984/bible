@@ -79,7 +79,7 @@ internal data class SpinnerArc(
     val stroke: Float,
     /** `-.9`: where the arc starts, in radians, before the rotation transition turns it. */
     val startRadians: Float,
-    /** `math.pi * 1.35`: how far round the arc sweeps, which is a little under half a turn. */
+    /** `math.pi * 1.35`: how far round the arc sweeps, which is a little over half a turn. */
     val sweepRadians: Float,
     /** `(Offset.zero & size).deflate(stroke / 2)`: how far in from each edge the arc's box sits. */
     val inset: Float,

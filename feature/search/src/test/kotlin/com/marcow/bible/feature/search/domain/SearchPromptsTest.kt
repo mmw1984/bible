@@ -50,7 +50,7 @@ class SearchPromptsTest {
         // Flutter build was in on a fresh install: the prompt still asks for the memory it has none of.
         val prompt = searchOverviewPrompt(query = QUERY, memory = "", aiLanguage = LANGUAGE)
 
-        assertTrue(prompt.contains("Persistent user memory:\n\nSearch query: $QUERY"))
+        assertTrue(prompt.contains("Persistent user memory:\n\n\nSearch query: $QUERY"))
     }
 }
 

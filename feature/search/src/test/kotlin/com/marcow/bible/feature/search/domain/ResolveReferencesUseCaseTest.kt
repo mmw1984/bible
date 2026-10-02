@@ -36,7 +36,7 @@ class ResolveReferencesUseCaseTest {
 
         assertEquals(listOf(16, 17), hits.map { it.hit.verse.number })
         assertEquals(listOf(3, 3), hits.map { it.hit.chapter })
-        assertEquals(listOf(JOHN.id), hits.map { it.hit.book.id })
+        assertEquals(listOf(JOHN.id, JOHN.id), hits.map { it.hit.book.id })
     }
 
     @Test
@@ -181,6 +181,11 @@ private fun johnThree() = listOf(
     verse("JHN", 3, 15, zh = "神愛世人"),
     verse("JHN", 3, 16, zh = VERSE_16_ZH, en = VERSE_16_EN),
     verse("JHN", 3, 17, zh = "神差他的兒來", en = "For God did not send his Son"),
+    verse("JHN", 3, 30, zh = "三十", en = "thirty"),
+    verse("JHN", 3, 31, zh = "三十一", en = "thirty-one"),
+    verse("JHN", 3, 32, zh = "三十二", en = "thirty-two"),
+    verse("JHN", 3, 33, zh = "三十三", en = "thirty-three"),
+    verse("JHN", 3, 34, zh = "三十四", en = "thirty-four"),
     verse("JHN", 3, 35, zh = "父愛子", en = "The Father loves the Son"),
     verse("JHN", 3, 36, zh = "信從子的必有永生", en = "Whoever believes the Son has eternal life"),
     verse("JHN", 4, 24, zh = "敬拜父", en = "Worship the Father in spirit and truth"),
@@ -191,7 +196,8 @@ private class ResolveFakeBibleDao(private val chapterFailure: Throwable? = null)
     private val canon = listOf(GENESIS, MATTHEW, JOHN)
 
     private val rows = johnThree() +
-        verse("MAT", 4, 1, zh = "耶穌被聖靈引到曠野", en = "Then Jesus was led by the Spirit")
+        verse("MAT", 4, 1, zh = "耶穌被聖靈引到曠野", en = "Then Jesus was led by the Spirit") +
+        verse("JHN", 21, 1, zh = "二十一", en = "twenty-one")
 
     override suspend fun books(): List<BookEntity> = canon
 
