@@ -312,9 +312,9 @@ private fun BookTitleText(title: String, family: FontFamily, titleSize: TextUnit
         lineHeight = titleSize * ReaderChrome.titleLineHeight,
         fontWeight = FontWeight.Medium,
         maxLines = TitleMaxLines,
-        // Flutter's `overflow: TextOverflow.fade`, so a two-line title softens rather than growing an
-        // ellipsis.
-        overflow = TextOverflow.Fade,
+        // Flutter's `overflow: TextOverflow.fade`, for which Compose has no counterpart, so the
+        // two-line title is cut with an ellipsis instead of a soft edge.
+        overflow = TextOverflow.Ellipsis,
         modifier = modifier,
     )
 }
