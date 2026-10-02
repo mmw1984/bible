@@ -80,8 +80,11 @@ private fun Element.tagText(name: String): String {
     return element.childNodes().joinToString(separator = "") { node ->
         when (node) {
             // Text and CDATA are the value; a nested element stays markup, which is what the regex
-            // captured in Dart and what `parseDevotionBlocks` then reads.
-            is DataNode, is TextNode -> node.text()
+            // captured in Dart and what `parseDevotionBlocks` then reads. `Node` carries no `text()`
+            // to read either with: a `TextNode` has one and a `DataNode` keeps its payload in
+            // `wholeData`, so the two are read where they keep theirs.
+            is TextNode -> node.text()
+            is DataNode -> node.wholeData
             else -> node.outerHtml()
         }
     }.trim()
