@@ -44,7 +44,7 @@ class OpenRouterPkceTest {
 
         assertEquals(86, verifier.length)
         assertFalse(verifier.contains('='), "the verifier must not be padded: $verifier")
-        assertTrue(verifier.all { it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'-9' || it == '-' || it == '_' })
+        assertTrue(verifier.all { it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' || it == '-' || it == '_' })
     }
 
     @Test

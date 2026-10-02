@@ -396,8 +396,12 @@ class WebResearchTest {
         }.toString()
     }
 
+    /**
+     * A null entry is a part that carries neither a type nor any text, which is what
+     * [contentPart] writes when both of its arguments are null.
+     */
     private fun partsArray(parts: List<Pair<String?, String>?>): JsonArray =
-        buildJsonArray { parts.forEach { (type, text) -> add(contentPart(type, text)) } }
+        buildJsonArray { parts.forEach { part -> add(contentPart(part?.first, part?.second)) } }
 
     /** `{"web_search_requests": <count>}`, the one key read out of `usage`. */
     private fun webSearch(count: JsonPrimitive): JsonObject = buildJsonObject { put("web_search_requests", count) }

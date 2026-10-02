@@ -284,7 +284,9 @@ private class FakeNanoModelFactory : NanoModelFactory {
     override suspend fun availability(): NanoAvailability = availability
 
     override suspend fun open(): NanoModel {
-        if (availability is NanoAvailability.Gated) throw NanoException.Gated(availability.gate)
+        // Read through a local, because [availability] is a `var` and Kotlin will not smart-cast it.
+        val gated = availability
+        if (gated is NanoAvailability.Gated) throw NanoException.Gated(gated.gate)
         return model
     }
 }
