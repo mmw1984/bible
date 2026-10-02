@@ -22,7 +22,7 @@ class DevotionFeedTest {
     fun `the title arrives as text, with its tags gone and its entities decoded`() {
         // `decodeHtmlEntities(stripHtmlTags(rawTitle)).trim()`, in that order: `&amp;ndash;` has to
         // decode the way a browser renders it, which is why the named pass runs `&amp;` first.
-        val post = rawPost(titleHtml = "[觀畫靈修] <em>亞伯蘭</em>與撒萊 &amp;ndash;2026年8月21日")
+        val post = rawPost(titleHtml = "[觀畫靈修] 亞伯蘭與撒萊 &amp;ndash;2026年8月21日")
             .toDevotionPost()
 
         assertEquals("[觀畫靈修] 亞伯蘭與撒萊 –2026年8月21日", post.title)

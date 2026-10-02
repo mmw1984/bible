@@ -41,7 +41,7 @@ class DevotionPlainTextTest {
 
     @Test
     fun `the day is written the way the English page writes it`() {
-        val post = postOf(blocks = listOf(DevotionParagraph("Opening.")))
+        val post = postOf(title = "Today's devotion", blocks = listOf(DevotionParagraph("Opening.")))
 
         assertEquals(
             """

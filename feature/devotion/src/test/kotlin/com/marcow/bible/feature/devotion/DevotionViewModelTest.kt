@@ -51,6 +51,9 @@ class DevotionViewModelTest {
         // `viewModelScope` runs on the main dispatcher, so the tests replace it with the test one and
         // `advanceUntilIdle()` becomes the only thing that moves the state forward.
         Dispatchers.setMain(dispatcher)
+    }
+
+    private fun newViewModel() {
         viewModel = DevotionViewModel(DevotionRepository(listOf(feed), DevotionCache(dao)), settings)
     }
 
@@ -63,6 +66,7 @@ class DevotionViewModelTest {
     fun `a cold start paints the cache and then asks the network`() = runTest(dispatcher) {
         dao.rows["feed"] = cacheRow(post(1, TODAY))
         feed.seed(listOf(post(2, TODAY)))
+        newViewModel()
 
         advanceUntilIdle()
 
@@ -75,6 +79,7 @@ class DevotionViewModelTest {
     @Test
     fun `a successful fetch loads the feed`() = runTest(dispatcher) {
         feed.seed(listOf(post(1, TODAY)))
+        newViewModel()
 
         advanceUntilIdle()
 
@@ -88,6 +93,7 @@ class DevotionViewModelTest {
     @Test
     fun `a failed fetch with nothing cached is the failure screen`() = runTest(dispatcher) {
         feed.failWith("devotion site unreachable")
+        newViewModel()
 
         advanceUntilIdle()
 
@@ -101,6 +107,7 @@ class DevotionViewModelTest {
     fun `a failed fetch with a cached feed shows the cache, not an error`() = runTest(dispatcher) {
         dao.rows["feed"] = cacheRow(post(1, TODAY))
         feed.failWith("offline")
+        newViewModel()
 
         advanceUntilIdle()
 
@@ -112,6 +119,7 @@ class DevotionViewModelTest {
     @Test
     fun `a silent refresh keeps the reader on the post they were reading`() = runTest(dispatcher) {
         feed.seed(listOf(post(1, YESTERDAY), post(2, TODAY), post(3, TWO_DAYS_AGO)))
+        newViewModel()
         advanceUntilIdle()
         viewModel.select(0)
         assertEquals(1L, viewModel.state.value.post?.id)
@@ -129,6 +137,7 @@ class DevotionViewModelTest {
     @Test
     fun `a silent refresh puts no spinner over an article`() = runTest(dispatcher) {
         feed.seed(listOf(post(1, TODAY)))
+        newViewModel()
         advanceUntilIdle()
 
         viewModel.refreshIfStale(now = LocalDateTime.now().plusMinutes(31))
@@ -139,6 +148,7 @@ class DevotionViewModelTest {
     @Test
     fun `a silent failure is not reported to a reader who has content`() = runTest(dispatcher) {
         feed.seed(listOf(post(1, TODAY)))
+        newViewModel()
         advanceUntilIdle()
 
         feed.failWith("gone offline")
@@ -153,6 +163,7 @@ class DevotionViewModelTest {
     @Test
     fun `a reader asking to refresh sees the cause under the article they have`() = runTest(dispatcher) {
         feed.seed(listOf(post(1, TODAY)))
+        newViewModel()
         advanceUntilIdle()
 
         feed.failWith("gone offline")
@@ -167,12 +178,14 @@ class DevotionViewModelTest {
 
     @Test
     fun `a feed that has never been fetched is always stale`() = runTest(dispatcher) {
+        newViewModel()
         assertTrue(viewModel.shouldRefresh(LocalDateTime.now()))
     }
 
     @Test
     fun `a feed fetched moments ago is not stale, and is not refetched`() = runTest(dispatcher) {
         feed.seed(listOf(post(1, TODAY)))
+        newViewModel()
         advanceUntilIdle()
 
         assertFalse(viewModel.shouldRefresh(LocalDateTime.now()))
@@ -186,6 +199,7 @@ class DevotionViewModelTest {
     @Test
     fun `a feed goes stale after half an hour, or at midnight`() = runTest(dispatcher) {
         feed.seed(listOf(post(1, TODAY)))
+        newViewModel()
         advanceUntilIdle()
         val now = LocalDateTime.now()
 
@@ -199,6 +213,7 @@ class DevotionViewModelTest {
     fun `the interface language is read out of settings`() = runTest(dispatcher) {
         settings.setLocale(AppLocale.EN)
         feed.seed(listOf(post(1, TODAY)))
+        newViewModel()
 
         advanceUntilIdle()
 
@@ -208,6 +223,7 @@ class DevotionViewModelTest {
 
     @Test
     fun `today's devotion opens by default rather than a scheduled one`() {
+        newViewModel()
         val posts = listOf(
             post(3, TOMORROW.plusDays(1)),
             post(2, TOMORROW),
@@ -220,6 +236,7 @@ class DevotionViewModelTest {
 
     @Test
     fun `with no devotion for today the newest past one opens`() {
+        newViewModel()
         val posts = listOf(post(2, TOMORROW), post(1, TWO_DAYS_AGO))
 
         assertEquals(1, viewModel.todayIndex(posts, TODAY))
@@ -227,6 +244,7 @@ class DevotionViewModelTest {
 
     @Test
     fun `a feed of only future devotions opens the earliest of them`() {
+        newViewModel()
         val posts = listOf(post(3, TOMORROW.plusDays(2)), post(2, TOMORROW))
 
         assertEquals(1, viewModel.todayIndex(posts, TODAY))
@@ -234,12 +252,14 @@ class DevotionViewModelTest {
 
     @Test
     fun `two devotions for the same day open the first`() {
+        newViewModel()
         assertEquals(0, viewModel.todayIndex(listOf(post(2, TODAY), post(1, TODAY)), TODAY))
     }
 
     @Test
     fun `an empty feed opens nothing, and selects nothing`() = runTest(dispatcher) {
         feed.seed(emptyList())
+        newViewModel()
         advanceUntilIdle()
         viewModel.select(4)
 
