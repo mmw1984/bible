@@ -16,6 +16,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
@@ -190,7 +191,7 @@ class SearchUseCaseTest {
     private fun overview(client: OpenRouterChatClient) = SearchOverviewUseCase(client, modelId)
 
     private fun references(client: OpenRouterChatClient) =
-        SearchReferencesUseCase(client, modelId, BibleRepository(FakeBibleDao(), FakeReadingProgressDao()))
+        SearchReferencesUseCase(client, modelId, BibleRepository(SearchHalfFakeBibleDao(), SearchHalfFakeReadingProgressDao()))
 
     /** Runs one half and hands back the request it put on the wire. */
     private suspend fun capture(client: ScriptedClient, call: suspend () -> Unit): ChatCompletionRequest {
@@ -246,6 +247,8 @@ private fun JsonObject.schemaName(): String? = (this["response_format"] as? Json
 
 private fun JsonObject.string(key: String): String? = (this[key] as? JsonPrimitive)?.takeIf { it.isString }?.content
 
+private fun JsonObject.int(key: String): Int = getValue(key).jsonPrimitive.int
+
 private fun JsonObject.boolean(key: String): Boolean? = (this[key] as? JsonPrimitive)?.booleanOrNull
 
 private val GENESIS = BookEntity("GEN", 1, "創世記", "Genesis", 50, 0)
@@ -253,7 +256,7 @@ private val GENESIS = BookEntity("GEN", 1, "創世記", "Genesis", 50, 0)
 private val JOHN = BookEntity("JHN", 43, "約翰福音", "John", 21, 1)
 
 /** The canon the references half validates against; the search SQL itself is `BibleSearchTest`'s. */
-private class FakeBibleDao : BibleDao {
+private class SearchHalfFakeBibleDao : BibleDao {
     private val canon = listOf(GENESIS, JOHN)
 
     override suspend fun books(): List<BookEntity> = canon
@@ -269,7 +272,7 @@ private class FakeBibleDao : BibleDao {
     override suspend fun searchContains(pattern: String, limit: Int): List<ScriptureSearchRow> = emptyList()
 }
 
-private class FakeReadingProgressDao : ReadingProgressDao {
+private class SearchHalfFakeReadingProgressDao : ReadingProgressDao {
     override suspend fun progress(book: String): ReadingProgressEntity? = null
 
     override suspend fun allProgress(): List<ReadingProgressEntity> = emptyList()
