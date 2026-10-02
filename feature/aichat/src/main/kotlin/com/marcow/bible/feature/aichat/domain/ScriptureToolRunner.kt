@@ -35,8 +35,11 @@ class ScriptureToolRunner @Inject constructor(private val bibleRepository: Bible
      * The range is capped at 100 verses because that is where Dart capped it: the result is appended
      * to the next prompt verbatim, and a model that asked for a whole chapter would otherwise push
      * the conversation past what the request carries.
+     *
+     * Internal because [ScriptureToolRequest] is: [AskQuestionUseCase] is the only caller, and it
+     * lives here. Public, the signature would expose an internal type.
      */
-    suspend fun run(request: ScriptureToolRequest): String {
+    internal suspend fun run(request: ScriptureToolRequest): String {
         val book = bibleRepository.book(request.bookId)
             ?: return "Tool error: unknown bookId ${request.bookId}"
         val chapter = request.chapter
