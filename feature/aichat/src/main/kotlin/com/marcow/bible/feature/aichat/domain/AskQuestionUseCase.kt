@@ -34,10 +34,12 @@ import kotlin.time.TimeSource
  * `ai_provider` setting is what chooses it, and whoever holds the setting is the one that can.
  *
  * Public rather than internal because `AiChatModule` names it in an `@Binds` signature, which a public
- * module cannot do with an internal type. The [scriptureToolRunner] it is built from stays internal,
- * because a private constructor property is not part of what the class exposes.
+ * module cannot do with an internal type. The [scriptureToolRunner] it is built from stays internal:
+ * a constructor parameter type is part of the signature whether or not the property is private, so the
+ * exposure is suppressed here rather than papered over by widening either declaration.
  */
 @Singleton
+@Suppress("EXPOSED_PARAMETER_TYPE")
 class AskQuestionUseCase @Inject constructor(private val scriptureToolRunner: ScriptureToolRunner) : AskAiQuestion {
 
     /**
