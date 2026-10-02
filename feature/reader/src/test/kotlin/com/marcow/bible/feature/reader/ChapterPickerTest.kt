@@ -36,7 +36,7 @@ class ChapterPickerTest {
 
     @Test
     fun `an anchor that is not against the right edge keeps its exact gap`() {
-        assertEquals(100.dp, chapterPickerRightMargin(anchorRight = 311.dp, windowWidth = PhoneWidth))
+        assertEquals(20.dp, chapterPickerRightMargin(anchorRight = 391.dp, windowWidth = PhoneWidth))
     }
 
     @Test
