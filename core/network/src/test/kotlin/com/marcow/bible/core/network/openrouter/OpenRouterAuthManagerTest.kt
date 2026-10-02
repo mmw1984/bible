@@ -51,11 +51,12 @@ class OpenRouterAuthManagerTest {
     fun `a callback exchanges the code for a key and clears the parking`() = runTest {
         val signIn = signIn()
         signIn.auth.beginSignIn()
+        val verifier = requireNotNull(signIn.store.read(OPENROUTER_PKCE_VERIFIER))
 
         signIn.auth.handleCallback("bible://openrouter/callback?code=the-code")
 
         assertEquals("the-key", signIn.store.read(OPENROUTER_API_KEY))
-        assertEquals(listOf("the-code" to THE_VERIFIER), signIn.exchanges)
+        assertEquals(listOf("the-code" to verifier), signIn.exchanges)
         assertNull(signIn.store.read(OPENROUTER_PENDING_CODE))
         assertNull(signIn.store.read(OPENROUTER_PKCE_VERIFIER))
         assertNull(signIn.store.read(OPENROUTER_PKCE_METHOD_KEY))
