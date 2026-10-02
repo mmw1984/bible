@@ -46,7 +46,7 @@ data class WebResearchResponse(
     val compactEvidence: String
         get() {
             val evidence = sources
-                .map { source -> "[${source.title}] ${source.excerpt.take(EXCERPT_LIMIT).trim()}" }
+                .map { source -> "[${source.title}] ${source.excerpt.take(EXCERPT_LIMIT).trim()}".trim() }
                 .filter { it.isNotBlank() }
                 .joinToString(separator = "\n\n")
             return if (evidence.isEmpty()) summary else "$summary\n\n$evidence"
