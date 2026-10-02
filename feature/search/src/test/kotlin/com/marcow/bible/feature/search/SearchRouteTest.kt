@@ -99,7 +99,7 @@ class SearchRouteTest {
     @Test
     fun `a sign-in landing inside the button still runs the query that was typed`() = runTest(dispatcher) {
         val aiSearch = RecordingAiSearch()
-        val session = FakeOpenRouterSession(initial = false)
+        val session = RouteFakeOpenRouterSession(initial = false)
         val viewModel = searchViewModel(aiSearch = aiSearch, session = session)
 
         // What the sheet does on a tap: pick AI mode, then submit a box nobody can answer yet. The
@@ -154,7 +154,7 @@ private class RecordingAiSearch : AiSearch {
 }
 
 /** A session whose sign-in the host's callback can complete, which is all the race needs. */
-private class FakeOpenRouterSession(initial: Boolean) : OpenRouterSession {
+private class RouteFakeOpenRouterSession(initial: Boolean) : OpenRouterSession {
     private val state = MutableStateFlow(initial)
 
     override val signedIn: StateFlow<Boolean> = state.asStateFlow()
