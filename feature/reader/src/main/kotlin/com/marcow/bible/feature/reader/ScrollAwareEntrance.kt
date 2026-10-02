@@ -53,7 +53,7 @@ fun entranceDurationMillis(staggerIndex: Int): Int =
  */
 fun entranceDelayMillis(staggerIndex: Int): Int {
     val staggered = staggerIndex.coerceIn(0, EntranceMaxDelayStagger)
-    return (staggered * EntranceDelayFraction * entranceDurationMillis(staggerIndex)).toInt()
+    return (staggered * EntranceDelayFraction * entranceDurationMillis(staggered)).toInt()
 }
 
 /**
