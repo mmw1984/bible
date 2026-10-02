@@ -346,7 +346,7 @@ class WebResearchTest {
         // evidence a reader would lose if they were treated as tracking.
         assertEquals("https://one.test/a?utm", normalizeResearchUrl("https://one.test/a?utm"))
         assertEquals(
-            "https://one.test/a?refs=1&sourced=2&utm_medium=3",
+            "https://one.test/a?refs=1&sourced=2",
             normalizeResearchUrl("https://one.test/a?refs=1&sourced=2&utm_medium=3"),
         )
     }
