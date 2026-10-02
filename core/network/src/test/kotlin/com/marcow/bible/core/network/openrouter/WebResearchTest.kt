@@ -257,7 +257,7 @@ class WebResearchTest {
         val response = readWebResearch(
             researchPayload(
                 summary = null,
-                parts = listOf("first " to "reasoning.text", null to "second"),
+                parts = listOf("reasoning.text" to "first ", null to "second"),
                 annotations = emptyList(),
                 searchRequests = JsonPrimitive(1),
             ),
