@@ -124,8 +124,7 @@ class BibleSearchTest {
      * `Properties` as its second argument and so has no one-argument form to call. sqlite-jdbc
      * registers itself as a JDBC driver, so the URL opens the same database either way.
      */
-    private fun <T> withDb(block: (Connection) -> T): T =
-        DriverManager.getConnection("jdbc:sqlite:$asset").use(block)
+    private fun <T> withDb(block: (Connection) -> T): T = DriverManager.getConnection("jdbc:sqlite:$asset").use(block)
 
     private fun ResultSet.toRow(): ScriptureSearchRow = ScriptureSearchRow(
         bookId = getString("book_id"),
