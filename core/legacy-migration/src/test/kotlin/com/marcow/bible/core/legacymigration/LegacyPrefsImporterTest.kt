@@ -118,10 +118,11 @@ class LegacyPrefsImporterTest {
                 strings = mapOf(
                     LegacyPrefsImporter.KEY_READER_BOOK to "PSA",
                     LegacyPrefsImporter.KEY_READER_MODE to "bilingual",
-                    // Flutter's key is `reader_scroll_<bookId>-<chapter>`.
-                    LegacyPrefsImporter.scrollKey("PSA", 23) to "1420.5",
                 ),
                 ints = mapOf(LegacyPrefsImporter.KEY_READER_CHAPTER to 23),
+                // Flutter's key is `reader_scroll_<bookId>-<chapter>`, and the offset arrives as a
+                // double rather than a string.
+                doubles = mapOf(LegacyPrefsImporter.scrollKey("PSA", 23) to 1420.5),
             ),
         )
 
