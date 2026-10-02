@@ -249,7 +249,7 @@ class DevotionViewModelTest {
 
     private fun post(id: Long, day: LocalDate) = DevotionPost(
         id = id,
-        publishedAt = LocalDateTime.of(day.atTime(9, 0)),
+        publishedAt = day.atTime(9, 0),
         devotionDate = day,
         title = "$day 默想",
         link = "https://devotion.wkphc.org/$id",

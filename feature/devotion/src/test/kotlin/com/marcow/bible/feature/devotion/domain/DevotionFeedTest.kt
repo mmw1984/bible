@@ -100,7 +100,7 @@ class DevotionFeedTest {
     fun `the feed link decodes its entities, while the REST link arrives verbatim`() {
         val link = "https://devotion.wkphc.org/25436?preview=1&amp;lang=zh"
 
-        val feedPost = rawPost(link = link).toRssDevotionPosts().single()
+        val feedPost = listOf(rawPost(link = link)).toRssDevotionPosts().single()
         assertEquals("https://devotion.wkphc.org/25436?preview=1&lang=zh", feedPost.link)
         // JSON gives back the characters the blog wrote, so `&amp;` here is the blog's own text and
         // stays as it is — `decodeHtmlEntities(tag('link'))` only ever ran on the feed.

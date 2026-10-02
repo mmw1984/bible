@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 /**
  * The tier fallback and the cache handoff, which together are what `fetchDevotionPosts` was.
@@ -135,7 +134,7 @@ class DevotionRepositoryTest {
 
     private fun post(id: Long, day: LocalDate) = DevotionPost(
         id = id,
-        publishedAt = LocalDateTime.of(day.atTime(9, 0)),
+        publishedAt = day.atTime(9, 0),
         devotionDate = day,
         title = "$day 默想",
         link = "https://devotion.wkphc.org/$id",
