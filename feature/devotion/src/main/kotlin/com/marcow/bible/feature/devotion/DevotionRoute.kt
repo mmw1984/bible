@@ -1,8 +1,17 @@
 package com.marcow.bible.feature.devotion
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -28,7 +37,6 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.marcow.bible.core.designsystem.R
 import com.marcow.bible.core.designsystem.theme.appColors
-import com.marcow.bible.core.network.devotion.DEVOTION_ORIGIN
 import com.marcow.bible.feature.devotion.domain.devotionPostToPlainText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -41,7 +49,7 @@ import kotlinx.coroutines.isActive
  * browser or a clock. [DevotionScreen] takes a state and six callbacks so that it can be drawn from a
  * fixed [DevotionUiState] without any of them — which is what lets a preview or a golden draw it.
  *
- * Four things Flutter did here and this does too, and none of them are visible in the screen:
+ * Five things Flutter did here and this does too, and none of them are visible in the screen:
  *
  *  - **The copy writes the article as text and then says so.** `Clipboard.setData` and the snackbar
  *    that followed it were `_copyArticle`'s whole body. The two seconds are
@@ -55,10 +63,13 @@ import kotlinx.coroutines.isActive
  *    on a half-hour timer and re-checked on resume, both times going through `_shouldRefresh`, which
  *    is [DevotionViewModel.refreshIfStale] — silent, because a spinner over an article somebody is
  *    reading is worse than a stale day.
- *  - **A link goes to the browser and the web reader is the host's.** `onOpenWebReader` is the screen's
- *    `showDevotionWebReader(context, post?.link ?? devotionOrigin)`: the URL is decided here, because
- *    the fallback — the site's front page, when there is no post to open — is a rule about the
- *    content, and the WebView that shows it belongs to whoever owns navigation.
+ *  - **A link goes to the browser and the web reader is a screen of its own.** Both are
+ *    `showDevotionWebReader`'s business on the Dart side and both are named here, because which URL is
+ *    decided by the content — `post?.link ?? devotionOrigin` — while where that URL is *shown* is the
+ *    host's arrangement. See [onOpenWebReader] for the two arrangements.
+ *  - **The reader leaves on the back press.** Flutter's push was on the root navigator, so back popped
+ *    it and left the article exactly where it was; the reader here takes that press itself while it is
+ *    the one showing, and the page behind it never moves.
  *
  * The poll is a [LaunchedEffect] over the half hour rather than a timer Flutter started and stopped by
  * hand: the effect is torn down with the page, which covers everything Flutter cancelled its timer
@@ -68,13 +79,19 @@ import kotlinx.coroutines.isActive
  * [bottomClearance] is the host's navigation bar. The article leaves room for it, and so does the
  * confirmation, which floats above it exactly as Flutter's `ScaffoldMessenger` put its `SnackBar`
  * above the bottom navigation bar.
+ *
+ * @param onOpenWebReader where the fallback reader is shown. Left out — which is what the Dart page did
+ *   and what a host gets by default — this route draws [DevotionWebReader] over the page and takes the
+ *   back press for it. A host with a navigation graph of its own passes a callback instead and is handed
+ *   the [DevotionWebReaderTarget] to turn into a destination; nothing else changes, and the reader's own
+ *   screen, toolbar and frame are the same composable either way.
  */
 @Composable
 fun DevotionRoute(
     bottomClearance: Dp,
-    onOpenWebReader: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: DevotionViewModel = hiltViewModel(),
+    onOpenWebReader: ((DevotionWebReaderTarget) -> Unit)? = null,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val clipboard = LocalClipboardManager.current
@@ -84,8 +101,17 @@ fun DevotionRoute(
     // keep the first copy's deadline when the second tap lands on the same true.
     var copies by remember { mutableIntStateOf(0) }
     var confirming by remember { mutableStateOf(false) }
+    // Which reader this route is showing, or null while it is showing none. It stays null for a host
+    // that passed a callback, so the reader below is never composed when the host owns one.
+    var reader by remember { mutableStateOf<DevotionWebReaderTarget?>(null) }
+    val closeReader: () -> Unit = { reader = null }
+    val openWebReader: (DevotionWebReaderTarget) -> Unit = onOpenWebReader ?: { target -> reader = target }
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshIfStale() }
+    // The reader's back press, and only while this route is the one showing the reader: a host that
+    // pushes its own destination gets the `NavHost`'s press for that, exactly as the Dart page's push
+    // was popped by its navigator.
+    BackHandler(enabled = onOpenWebReader == null && reader != null, onBack = closeReader)
     LaunchedEffect(viewModel) {
         while (isActive) {
             delay(DevotionViewModel.STALE_AFTER.toMillis())
@@ -113,7 +139,7 @@ fun DevotionRoute(
                     copies++
                 }
             },
-            onOpenWebReader = { onOpenWebReader(state.post?.link ?: DEVOTION_ORIGIN) },
+            onOpenWebReader = { openWebReader(devotionWebReaderTarget(state.post)) },
             onOpenUrl = uriHandler::openUri,
             modifier = Modifier.fillMaxSize(),
         )
@@ -132,5 +158,52 @@ fun DevotionRoute(
                 content = { Text(copied) },
             )
         }
+        // `Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(...))`: a screen of its own
+        // over the page, covering the article and the confirmation the way the pushed route covered
+        // everything under it. It fills the area this route was given rather than the window, so whether
+        // the host draws its navigation bar over the reader is the host's arrangement, and the reader's
+        // own toolbar button is what a finger presses to leave.
+        AnimatedContent(
+            targetState = reader,
+            transitionSpec = { webReaderArrive() togetherWith webReaderLeave() },
+            label = WEB_READER_LABEL,
+            modifier = Modifier.fillMaxSize(),
+        ) { target ->
+            // `AnimatedContent` keeps the reader composed through its exit and hands the content the
+            // value that was open, which is why the reader is drawn for the target rather than for
+            // whatever `reader` is at this instant: a null target is the empty screen behind it.
+            if (target != null) {
+                DevotionWebReader(
+                    url = target.url,
+                    title = target.title,
+                    onBack = closeReader,
+                    onOpenUrl = uriHandler::openUri,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
     }
 }
+
+/**
+ * The reader arriving: Flutter's default page transition on Android, a zoom out of 0.85 with a fade.
+ *
+ * `Curves.fastOutSlowIn` in Dart and [FastOutSlowInEasing] here are the same Material curve, and
+ * 300 ms was that builder's own `transitionDuration` rather than the 420 ms this build gives the
+ * library sheet — a route that opens a browser tab is not a panel arriving over an article.
+ */
+private fun webReaderArrive(): EnterTransition = fadeIn(tween(DevotionChrome.WEB_READER_ARRIVE_MILLIS)) +
+    scaleIn(
+        animation = tween(DevotionChrome.WEB_READER_ARRIVE_MILLIS, easing = FastOutSlowInEasing),
+        initialScale = DevotionChrome.WEB_READER_SCALE_FROM,
+    )
+
+/** The way out: the same zoom and fade in reverse, over Material's 300 ms `reverseTransitionDuration`. */
+private fun webReaderLeave(): ExitTransition = fadeOut(tween(DevotionChrome.WEB_READER_DISMISS_MILLIS)) +
+    scaleOut(
+        animation = tween(DevotionChrome.WEB_READER_DISMISS_MILLIS, easing = FastOutSlowInEasing),
+        targetScale = DevotionChrome.WEB_READER_SCALE_FROM,
+    )
+
+/** The reader's arrival, named for what Compose reports it as in a trace or a layout inspector. */
+private const val WEB_READER_LABEL = "devotionWebReader"

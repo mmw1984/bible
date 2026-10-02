@@ -305,4 +305,16 @@ object DevotionChrome {
      */
     val WEB_PROGRESS_THICKNESS: Dp = 2.dp
     const val WEB_PROGRESS_TRACK_ALPHA: Float = 0.4f
+
+    /**
+     * The push the reader arrived on, from the `MaterialPageRoute` `showDevotionWebReader` pushed.
+     *
+     * Flutter's `MaterialApp` sets no `pageTransitionsTheme`, so this route was Material's Android
+     * default: 300 ms, a zoom from 0.85 and a fade, both ways. The numbers are named here for the same
+     * reason the toolbar's are — they belong to the reader's arrival rather than to any one composable,
+     * and a transition that had to restate them would be free to restate them differently.
+     */
+    const val WEB_READER_ARRIVE_MILLIS: Int = 300
+    const val WEB_READER_DISMISS_MILLIS: Int = 300
+    const val WEB_READER_SCALE_FROM: Float = 0.85f
 }

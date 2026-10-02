@@ -49,8 +49,45 @@ import com.marcow.bible.core.designsystem.components.AppGlyphView
 import com.marcow.bible.core.designsystem.components.AppTap
 import com.marcow.bible.core.designsystem.icons.AppGlyph
 import com.marcow.bible.core.designsystem.theme.appColors
+import com.marcow.bible.core.network.devotion.DEVOTION_ORIGIN
+import com.marcow.bible.feature.devotion.domain.DevotionPost
 import java.net.URI
 import android.graphics.Color as AndroidColor
+
+/**
+ * What the page asks the reader to open, as one value.
+ *
+ * These are the two named arguments of `showDevotionWebReader(context, url:, title:)` in
+ * `legacy/flutter/lib/devotion_web_reader_io.dart:17`, kept together because they are one decision:
+ * which page the fallback reader is pointed at, and what its toolbar calls it.
+ *
+ * The title is nullable because Flutter's own two call sites disagreed about it — the masthead's button
+ * passed `post.title` and the failure screen's button passed nothing, which left the toolbar naming the
+ * host there. One type can carry either, so a host that pushes its own destination can put both in its
+ * arguments without having to know which control was pressed.
+ */
+data class DevotionWebReaderTarget(
+    /** The page to load: the post's permalink, or [DEVOTION_ORIGIN] when there is no post. */
+    val url: String,
+    /** What the toolbar's title says, falling back to the host when this is null. */
+    val title: String?,
+)
+
+/**
+ * The page's one rule for what the reader opens: `post?.link ?? DEVOTION_ORIGIN`.
+ *
+ * Flutter wrote that fallback twice — `showDevotionWebReader(context, url: post?.link ?? devotionOrigin)`
+ * at the failure screen's button — and passed `url: post.link` alone at the masthead's, where the button
+ * is disabled without a post so the two could not disagree. It is one rule here because there is one
+ * rule there, and the title rides along with the post it came from.
+ *
+ * Naming the origin rather than leaving it implicit matters: it is the one URL the reader is given that
+ * is not an article, and it is what a device with no post to show opens.
+ */
+internal fun devotionWebReaderTarget(post: DevotionPost?): DevotionWebReaderTarget = DevotionWebReaderTarget(
+    url = post?.link ?: DEVOTION_ORIGIN,
+    title = post?.title,
+)
 
 /**
  * The fallback reader, replacing `DevotionWebReaderPage` in
@@ -62,10 +99,12 @@ import android.graphics.Color as AndroidColor
  * and a reader whose day has gone dark would otherwise have nothing at all. The two buttons on the
  * failure screen are both ways back out to a browser the system owns.
  *
- * Flutter pushed this as a route from `showDevotionWebReader`. Here it is a composable and the push is
- * the host's, because the host is what owns navigation: `DevotionRoute` passes its `onOpenWebReader`
- * straight up, the same way it hands a link to the browser. What this owns is the reader itself — the
- * frame, its toolbar, its progress line and the screen it falls back to.
+ * Flutter pushed this as a route from `showDevotionWebReader`. Here it is a composable and the showing is
+ * the host's, because the host is what owns navigation: `DevotionRoute` draws it over the page when no
+ * `onOpenWebReader` is given, which is what the Dart page got for free from a root navigator, and hands
+ * a host that would rather push a destination a [DevotionWebReaderTarget] to put in its arguments. What
+ * this owns is the reader itself — the frame, its toolbar, its progress line and the screen it falls
+ * back to.
  *
  * **The frame is the site's own page, so it is opened as narrowly as it can be.** `allowFileAccess` and
  * `allowContentAccess` stay off even here, where the temptation to leave them on is strongest because
