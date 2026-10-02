@@ -379,7 +379,12 @@ private fun AiChatHeaderButton(glyph: AppGlyph, label: String, onClick: () -> Un
     AppControlSurface {
         AppTap(onClick = onClick) {
             Box(modifier = Modifier.size(HEADER_BUTTON_SIZE), contentAlignment = Alignment.Center) {
-                AppGlyphView(glyph = glyph, color = appColors.muted, size = HEADER_GLYPH_SIZE, contentDescription = label)
+                AppGlyphView(
+                    glyph = glyph,
+                    color = appColors.muted,
+                    size = HEADER_GLYPH_SIZE,
+                    contentDescription = label,
+                )
             }
         }
     }
