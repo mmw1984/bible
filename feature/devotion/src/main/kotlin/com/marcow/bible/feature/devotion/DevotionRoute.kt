@@ -194,14 +194,14 @@ fun DevotionRoute(
  */
 private fun webReaderArrive(): EnterTransition = fadeIn(tween(DevotionChrome.WEB_READER_ARRIVE_MILLIS)) +
     scaleIn(
-        animation = tween(DevotionChrome.WEB_READER_ARRIVE_MILLIS, easing = FastOutSlowInEasing),
+        tween(DevotionChrome.WEB_READER_ARRIVE_MILLIS, easing = FastOutSlowInEasing),
         initialScale = DevotionChrome.WEB_READER_SCALE_FROM,
     )
 
 /** The way out: the same zoom and fade in reverse, over Material's 300 ms `reverseTransitionDuration`. */
 private fun webReaderLeave(): ExitTransition = fadeOut(tween(DevotionChrome.WEB_READER_DISMISS_MILLIS)) +
     scaleOut(
-        animation = tween(DevotionChrome.WEB_READER_DISMISS_MILLIS, easing = FastOutSlowInEasing),
+        tween(DevotionChrome.WEB_READER_DISMISS_MILLIS, easing = FastOutSlowInEasing),
         targetScale = DevotionChrome.WEB_READER_SCALE_FROM,
     )
 
