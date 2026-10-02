@@ -75,7 +75,7 @@ class DevotionRestClientTest {
         assertEquals(DEVOTION_ORIGIN, post.link)
         assertEquals("", post.titleHtml)
         assertEquals("", post.contentHtml)
-        assertEquals(0L, post.id)
+        assertEquals(7L, post.id)
     }
 
     @Test
