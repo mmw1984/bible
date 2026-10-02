@@ -106,7 +106,7 @@ fun libraryPanelSlideOffset(panelWidth: Float, progress: Float): Float =
  * wants an [androidx.compose.ui.unit.IntOffset], so the fraction is floored rather than rounded on
  * its way there.
  */
-fun libraryPageSlideOffset(pageWidth: Int): Int = libraryPanelSlideOffset(pageWidth.toFloat(), 1f).toInt()
+fun libraryPageSlideOffset(pageWidth: Int): Int = libraryPanelSlideOffset(pageWidth.toFloat(), 0f).toInt()
 
 /**
  * Every measurement inside the sidebar that Flutter chose against its fixed width, rather than
