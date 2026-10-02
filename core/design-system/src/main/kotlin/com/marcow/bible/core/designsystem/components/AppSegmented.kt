@@ -5,13 +5,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -80,9 +80,12 @@ fun <T> AppSegmented(
                 label = "segmentPillLeft",
             )
             if (selectedIndex >= 0) {
+                // Flutter positioned the pill with `Positioned(left:)`, a physical edge: index 0
+                // sits on the left even in RTL. `padding(start:)` is direction-aware and would
+                // mirror the pill to the wrong side, so the offset stays absolute.
                 AppControlSurface(
                     modifier = Modifier
-                        .padding(start = pillLeft, top = inset, bottom = inset)
+                        .absolutePadding(left = pillLeft, top = inset, bottom = inset)
                         .width(innerWidth)
                         .fillMaxHeight(),
                     shape = pillShape,
@@ -110,10 +113,12 @@ fun <T> AppSegmented(
 
             Box(modifier = Modifier.fillMaxSize()) {
                 choices.forEachIndexed { index, choice ->
+                    // Same physical edge as the pill above: Flutter's hit targets used
+                    // `Positioned(left:)`, so they never mirror in RTL either.
                     AppTap(
                         onClick = { onChanged(choice.value) },
                         modifier = Modifier
-                            .padding(start = hitWidth * index)
+                            .absolutePadding(left = hitWidth * index)
                             .width(hitWidth)
                             .fillMaxHeight(),
                         selected = choice.value == selected,
@@ -134,8 +139,9 @@ private fun SegmentLabel(choice: AppChoice<*>, active: Boolean, modifier: Modifi
         contentAlignment = Alignment.Center,
     ) {
         Row(
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalArrangement = Arrangement.Center,
         ) {
             if (choice.glyph != null) {
                 AppGlyphView(
@@ -143,15 +149,19 @@ private fun SegmentLabel(choice: AppChoice<*>, active: Boolean, modifier: Modifi
                     color = if (active) colors.ink else colors.muted,
                     size = 15.dp,
                 )
+                Spacer(Modifier.width(6.dp))
             }
             Text(
                 text = choice.label,
                 // Flutter wrapped this in a `FittedBox(scaleDown)`, so a long label shrinks instead
-                // of wrapping or truncating.
+                // of wrapping or truncating. Compose has no shrinking text container, so the label
+                // takes only the room that is left and ellipsizes on a narrow segment rather than
+                // pushing its neighbours out of the track.
+                modifier = Modifier.weight(1f, fill = false),
                 maxLines = 1,
                 softWrap = false,
                 textAlign = TextAlign.Center,
-                overflow = TextOverflow.Clip,
+                overflow = TextOverflow.Ellipsis,
                 style = TextStyle(
                     color = if (active) colors.ink else colors.muted,
                     fontSize = 11.sp,
@@ -160,7 +170,7 @@ private fun SegmentLabel(choice: AppChoice<*>, active: Boolean, modifier: Modifi
             )
             // The trailing gap in Flutter's label row, which is what keeps a glyph-only choice
             // optically centred in its segment.
-            if (choice.glyph != null) Spacer(Modifier.size(21.dp))
+            if (choice.glyph != null) Spacer(Modifier.width(21.dp))
         }
     }
 }
