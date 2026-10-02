@@ -140,6 +140,40 @@ jobs:
           mv app/build/outputs/apk/release/app-release.apk "bible-${VERSION}-release.apk"
           mv app/build/outputs/bundle/release/app-release.aab "bible-${VERSION}-release.aab"
 
+      # NATIVE_PLAN.md §5 Phase 6 (R10): the release carries an 8.7 MB Bible database and
+      # ~4.6 MB of fonts on top of Compose + Hilt, so the size is a budget, not an
+      # accident. 40 MiB is the ceiling (fail), 25 MiB the target (warn only) — both in
+      # MiB, because that is what the on-disk numbers and the download manager count.
+      # The AAB is held to the same numbers as the APK: it is the same dex, resources
+      # and assets in a container, so one budget covers both. Nothing here shrinks the
+      # app; R8 and asset packing are a later phase, and until then this gate reports
+      # the floor rather than the best case.
+      - name: Size gate
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          readonly CEILING_MIB=40
+          readonly TARGET_MIB=25
+          status=0
+          summary=""
+          for artifact in "bible-${VERSION}-release.apk" "bible-${VERSION}-release.aab"; do
+            bytes=$(stat -c %s "$artifact")
+            mib=$(((bytes + 524287) / 1048576))
+            echo "${artifact}: ${mib} MiB"
+            summary+="- ${artifact}: ${mib} MiB (ceiling ${CEILING_MIB} MiB)"$'\n'
+            if ((mib > CEILING_MIB)); then
+              echo "::error::${artifact} is ${mib} MiB, over the ${CEILING_MIB} MiB release ceiling"
+              status=1
+            elif ((mib > TARGET_MIB)); then
+              echo "::warning::${artifact} is ${mib} MiB, over the ${TARGET_MIB} MiB target"
+            fi
+          done
+          if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
+            printf '## Release size\n\n%s' "$summary" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          exit "$status"
+
       - name: Checksum artifacts
         env:
           VERSION: ${{ steps.version.outputs.version }}
