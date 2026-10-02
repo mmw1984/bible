@@ -223,7 +223,10 @@ class GeminiNanoAiProviderTest {
         // A model that keeps talking: stopping is what the chat's toolbar does, so a half-read answer
         // is the common case rather than the rare one, and leaving the model open keeps a Play services
         // binding alive for a question that is never coming.
-        factory.supplyFrames = { emit(NanoChunk("more")); awaitCancellation() }
+        factory.supplyFrames = {
+            emit(NanoChunk("more"))
+            awaitCancellation()
+        }
         val job = launch { provider.stream(AiRequest.Chat(PROMPT)).toList() }
         advanceUntilIdle()
         job.cancelAndJoin()
