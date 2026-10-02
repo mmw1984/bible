@@ -3,6 +3,7 @@ package com.marcow.bible.feature.aichat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.marcow.bible.core.datastore.SettingsRepository
+import com.marcow.bible.core.model.AiProviderId
 import com.marcow.bible.core.network.ai.AiProvider
 import com.marcow.bible.feature.aichat.domain.AiChatSignIn
 import com.marcow.bible.feature.aichat.domain.AiMemoryStore
@@ -23,6 +24,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 /**
  * The chat, replacing `BibleAiController` in `legacy/flutter/lib/ai_service.dart:296` for the five
@@ -49,7 +51,8 @@ class AiChatViewModel @Inject constructor(
     private val memoryStore: AiMemoryStore,
     private val settingsRepository: SettingsRepository,
     private val signIn: AiChatSignIn,
-    private val provider: AiProvider,
+    @Named(OPEN_ROUTER_PROVIDER) private val openRouter: AiProvider,
+    @Named(GEMINI_NANO_PROVIDER) private val geminiNano: AiProvider,
 ) : ViewModel() {
     private val holder = AiChatStateHolder()
     val state: StateFlow<AiChatState> = holder.state
@@ -129,8 +132,12 @@ class AiChatViewModel @Inject constructor(
         viewModelScope.launch {
             // `setResponseLocale`: the language is a prompt input rather than the chat's own, so it
             // follows the app's locale and a reader who changes it re-asks in the new language.
+            // The provider travels in the same flow for the same reason: it is the `ai_provider`
+            // setting (`NATIVE_PLAN.md` §4), OpenRouter by default, and a reader who switches to the
+            // on-device model stops needing a key — which is what `requiresLogin` and `isReady`
+            // already answer once this is published.
             settingsRepository.settings.collect { settings ->
-                holder.update { it.copy(responseLocale = settings.locale) }
+                holder.update { it.copy(responseLocale = settings.locale, aiProvider = settings.aiProvider) }
             }
         }
     }
@@ -188,9 +195,11 @@ class AiChatViewModel @Inject constructor(
             }
             return
         }
-        if (!holder.current.signedIn) {
+        if (holder.current.requiresLogin) {
             // `_send` put the question on `pendingQuestion` and opened the sign-in sheet rather than
-            // dropping it, so it is asked as soon as there is a provider to ask.
+            // dropping it, so it is asked as soon as there is a provider to ask. A reader on Gemini
+            // Nano never lands here: the on-device model needs no key, so `requiresLogin` is false
+            // for it and the question is asked straight away.
             pendingQuestion = text to kind
             return
         }
@@ -397,7 +406,7 @@ class AiChatViewModel @Inject constructor(
      */
     private fun flushPendingQuestion() {
         val held = pendingQuestion ?: return
-        if (holder.current.generating || !holder.current.initialized || !holder.current.signedIn) return
+        if (holder.current.generating || !holder.current.initialized || holder.current.requiresLogin) return
         pendingQuestion = null
         send(held.first, held.second)
     }
@@ -461,6 +470,12 @@ class AiChatViewModel @Inject constructor(
                     ),
                     recent = recentConversationBlock(state.messages, question),
                 )
+                // The `ai_provider` setting (`NATIVE_PLAN.md` §4): OpenRouter by default, Gemini Nano
+                // when the reader chose the phone's own weights. The prompt goes over untouched
+                // either way — reshaping a tuned prompt for the on-device model is forbidden, so the
+                // only thing that changes here is which port answers.
+                val provider =
+                    if (state.aiProvider == AiProviderId.GeminiNano) geminiNano else openRouter
                 val answer = askQuestion.ask(
                     provider = provider,
                     question = ask,

@@ -1,6 +1,8 @@
 package com.marcow.bible.feature.aichat
 
 import com.marcow.bible.core.network.ai.AiProvider
+import com.marcow.bible.core.network.aicore.GeminiNanoAiProvider
+import com.marcow.bible.core.network.aicore.NanoModelFactory
 import com.marcow.bible.core.network.openrouter.OpenRouterAiProvider
 import com.marcow.bible.feature.aichat.domain.AiChatSignIn
 import com.marcow.bible.feature.aichat.domain.AiMemoryStore
@@ -13,6 +15,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -31,6 +34,8 @@ import javax.inject.Singleton
  *
  * [AiChatSignIn] is the sign-in, whose OpenRouter half is `OpenRouterChatSignIn` — an adapter rather
  * than the manager itself, because the port is the chat's and core cannot depend on a feature.
+ *
+ * [NanoModelFactory] is the on-device model behind the second provider; see below.
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -46,22 +51,41 @@ abstract class AiChatModule {
     @Binds
     @Singleton
     abstract fun bindAiChatSignIn(signIn: OpenRouterChatSignIn): AiChatSignIn
+
+    /**
+     * The on-device model behind [GeminiNanoAiProvider], bound to the placeholder until the Play
+     * services for AI Edge client lands. The swap is this one line: the provider and the chat both
+     * read the port and never name the implementation.
+     */
+    @Binds
+    @Singleton
+    abstract fun bindNanoModelFactory(factory: UnavailableNanoModelFactory): NanoModelFactory
 }
 
 /**
- * The provider the chat answers through, provided rather than bound because [AiProvider] has two
- * implementations in the plan and one of them today.
+ * The two providers the chat answers through, named rather than bound because [AiProvider] is one
+ * port with two implementations and the `ai_provider` setting is what chooses between them.
  *
- * `NATIVE_PLAN.md` §4.3 makes OpenRouter the default precisely so that this binding is a temporary
- * answer rather than a decision: `AiProviderId.fromStorage` reads the `ai_provider` setting, that
- * setting is not in the proto yet, and when it arrives this becomes a lookup against it. Binding
- * `OpenRouterAiProvider` directly to the port now is what lets the chat, the search and any future
- * screen take [AiProvider] without each of them naming a transport.
+ * OpenRouter is the default (`AiProviderId.fromStorage` resolves a fresh install and every unknown
+ * tag to it), and `AiChatViewModel` is the one that reads the setting — a use case takes its
+ * provider as a parameter precisely so the choice stays in one place.
  */
 @Module
 @InstallIn(SingletonComponent::class)
 object AiChatProviderModule {
     @Provides
     @Singleton
-    fun provideAiProvider(provider: OpenRouterAiProvider): AiProvider = provider
+    @Named(OPEN_ROUTER_PROVIDER)
+    fun provideOpenRouterAiProvider(provider: OpenRouterAiProvider): AiProvider = provider
+
+    @Provides
+    @Singleton
+    @Named(GEMINI_NANO_PROVIDER)
+    fun provideGeminiNanoAiProvider(provider: GeminiNanoAiProvider): AiProvider = provider
 }
+
+/** Qualifier for the OpenRouter [AiProvider]: the cloud half of the pair. */
+const val OPEN_ROUTER_PROVIDER = "openRouter"
+
+/** Qualifier for the Gemini Nano [AiProvider]: the on-device half of the pair. */
+const val GEMINI_NANO_PROVIDER = "geminiNano"

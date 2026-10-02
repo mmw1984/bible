@@ -531,15 +531,78 @@ internal class AiChatViewModelTest {
         memory: RecordingMemoryStore = RecordingMemoryStore(),
         signIn: FakeSignIn = FakeSignIn(signedIn = true),
         locale: AppLocale = AppLocale.ZH_HANT,
+        aiProvider: AiProviderId = AiProviderId.OpenRouter,
+        openRouter: AiProvider = StubProvider(AiProviderId.OpenRouter),
+        geminiNano: AiProvider = StubProvider(AiProviderId.GeminiNano),
     ): AiChatViewModel = AiChatViewModel(
         askQuestion = ask,
         memoryStore = memory,
         settingsRepository = SettingsRepository(
-            InMemorySettingsDataStore(Settings.newBuilder().setLocaleTag(locale.storageValue).build()),
+            InMemorySettingsDataStore(
+                Settings.newBuilder()
+                    .setLocaleTag(locale.storageValue)
+                    .setAiProvider(aiProvider.storageValue)
+                    .build(),
+            ),
         ),
         signIn = signIn,
-        provider = UnusedProvider,
+        openRouter = openRouter,
+        geminiNano = geminiNano,
     ).also { advanceUntilIdle() }
+
+    @Test
+    fun `the on-device provider answers without a sign-in`() = runTest(dispatcher) {
+        val ask = ScriptedAsk(answers = listOf(chatAnswer("本機答案")))
+        val viewModel = viewModel(
+            ask = ask,
+            signIn = FakeSignIn(signedIn = false),
+            aiProvider = AiProviderId.GeminiNano,
+        )
+        advanceUntilIdle()
+
+        assertFalse(viewModel.state.value.requiresLogin)
+        assertTrue(viewModel.state.value.isReady)
+
+        viewModel.send("飛機上有冇網絡都答到嗎？")
+        advanceUntilIdle()
+
+        assertEquals(listOf("飛機上有冇網絡都答到嗎？"), ask.questions.map { it.question })
+        assertEquals(listOf(AiProviderId.GeminiNano), ask.askedProviders)
+        assertEquals("本機答案", viewModel.state.value.messages.last().text)
+    }
+
+    @Test
+    fun `the cloud provider still holds a question until sign-in`() = runTest(dispatcher) {
+        val ask = ScriptedAsk(answers = listOf(chatAnswer("答案")))
+        val signIn = FakeSignIn(signedIn = false)
+        val viewModel = viewModel(
+            ask = ask,
+            signIn = signIn,
+            aiProvider = AiProviderId.OpenRouter,
+        )
+        advanceUntilIdle()
+
+        assertTrue(viewModel.state.value.requiresLogin)
+        assertFalse(viewModel.state.value.isReady)
+
+        viewModel.send("雲端問題")
+        advanceUntilIdle()
+        assertTrue(ask.questions.isEmpty())
+
+        signIn.signIn()
+        advanceUntilIdle()
+
+        assertEquals(listOf("雲端問題"), ask.questions.map { it.question })
+        assertEquals(listOf(AiProviderId.OpenRouter), ask.askedProviders)
+    }
+
+    @Test
+    fun `the stored provider choice reaches the state`() = runTest(dispatcher) {
+        val viewModel = viewModel(aiProvider = AiProviderId.GeminiNano)
+        advanceUntilIdle()
+
+        assertEquals(AiProviderId.GeminiNano, viewModel.state.value.aiProvider)
+    }
 }
 
 /** One finished answer, which is all a stubbed question returns. */
@@ -564,6 +627,9 @@ private class ScriptedAsk(
 ) : AskAiQuestion {
     val questions: MutableList<AskQuestion> = mutableListOf()
 
+    /** Which provider each question was asked of, in order — the `ai_provider` choice made real. */
+    val askedProviders: MutableList<AiProviderId> = mutableListOf()
+
     override suspend fun ask(
         provider: AiProvider,
         question: AskQuestion,
@@ -571,6 +637,7 @@ private class ScriptedAsk(
         isStopped: () -> Boolean,
     ): ChatAnswer {
         questions += question
+        askedProviders += provider.id
         progress.forEach(onProgress)
         failure?.let { throw IllegalStateException(it) }
         val next = answers.getOrNull(questions.size - 1)
@@ -656,9 +723,8 @@ private class FakeSignIn(signedIn: Boolean) : AiChatSignIn {
     }
 }
 
-/** A provider the stub never asks, standing in for the binding so the view model can be built. */
-private object UnusedProvider : AiProvider {
-    override val id = AiProviderId.OpenRouter
+/** A provider the stub is told about, standing in for the binding so the view model can be built. */
+private class StubProvider(override val id: AiProviderId) : AiProvider {
     override suspend fun availability(): AiAvailability = AiAvailability.Available
     override fun stream(request: AiRequest, options: AiRequestOptions): Flow<ChatEvent> = emptyFlow()
     override suspend fun complete(request: AiRequest, options: AiRequestOptions): AiResponse = AiResponse("")

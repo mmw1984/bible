@@ -1,5 +1,6 @@
 package com.marcow.bible.feature.aichat
 
+import com.marcow.bible.core.model.AiProviderId
 import com.marcow.bible.core.model.AppLocale
 import com.marcow.bible.core.network.openrouter.FREE_ROUTER_MODEL_ID
 import com.marcow.bible.feature.aichat.domain.AiMessage
@@ -54,6 +55,14 @@ data class AiChatState(
     val modelId: String = FREE_ROUTER_MODEL_ID,
     /** `AppLocale responseLocale`, which is the language the prompt asks the answer in. */
     val responseLocale: AppLocale = AppLocale.ZH_HANT,
+    /**
+     * Which provider the chat answers through, the `ai_provider` setting (`NATIVE_PLAN.md` §4).
+     *
+     * OpenRouter rather than null for the same reason [modelId] defaults to the free router: the
+     * field has to hold something before the stored choice is read back, and a fresh install answers
+     * through OpenRouter.
+     */
+    val aiProvider: AiProviderId = AiProviderId.OpenRouter,
     /** `String? attachedScriptureContext`, the chapter the chat was opened on. */
     val attachedScriptureContext: String? = null,
     /**
@@ -78,20 +87,21 @@ data class AiChatState(
      * `bool get requiresLogin`: the chat cannot answer without a provider, and OpenRouter needs a key.
      *
      * Flutter's getter was `_overrideModel == null && !openRouterSignedIn`, where the override was
-     * the on-device model. There is no override here, so the sign-in alone decides — which is what
-     * `NATIVE_PLAN.md` §4.1 means by making OpenRouter the default provider.
+     * the on-device model. [aiProvider] is that override: Gemini Nano answers from the phone's own
+     * weights and never asks for a key, so only the OpenRouter half of the pair can require a login.
      */
     val requiresLogin: Boolean
-        get() = !signedIn
+        get() = aiProvider == AiProviderId.OpenRouter && !signedIn
 
     /**
      * `bool get isReady`: what `_send` checked before it would add a question.
      *
      * Both halves, and the order matters: an uninitialized chat has no transcript, so answering
-     * before the restore lands would write an answer the restore then replaces.
+     * before the restore lands would write an answer the restore then replaces. A reader on the
+     * on-device provider is ready as soon as the restore lands — there is no key to wait for.
      */
     val isReady: Boolean
-        get() = initialized && signedIn
+        get() = initialized && (aiProvider == AiProviderId.GeminiNano || signedIn)
 
     /**
      * `bool get contextAttached`: whether the reader's chapter is still attached.
