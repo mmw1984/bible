@@ -91,7 +91,10 @@ fun positionForProgress(books: List<BibleBook>, progress: ReadingProgress): Read
  * A tie goes to the earlier book in canon order, which is the one Flutter would have shown had two
  * writes landed inside the same millisecond and only one of them survived.
  */
-fun mostRecentPosition(books: List<BibleBook>, progressFor: suspend (BibleBook) -> ReadingProgress?): ReaderPosition? {
+suspend fun mostRecentPosition(
+    books: List<BibleBook>,
+    progressFor: suspend (BibleBook) -> ReadingProgress?,
+): ReaderPosition? {
     var newest: ReadingProgress? = null
     var newestIndex = -1
     books.forEachIndexed { index, book ->
