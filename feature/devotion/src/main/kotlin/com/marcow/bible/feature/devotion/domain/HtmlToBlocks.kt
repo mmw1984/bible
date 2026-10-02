@@ -1,20 +1,17 @@
 package com.marcow.bible.feature.devotion.domain
 
-import org.jsoup.parser.Parser
-import org.jsoup.parser.Token
-
 /**
  * WordPress post HTML → [DevotionBlock]s, ported from `parseDevotionBlocks` and the tolerant tree
  * it walks in `legacy/flutter/lib/devotion_content.dart`.
  *
- * The tree is built from Jsoup's tokenizer rather than Jsoup's own tree builder, which is the whole
- * point of the file. `Jsoup.parse` would apply HTML5's implied end tags — a `<div>` closes an open
+ * The tree is built by this file's own scan rather than by Jsoup's tree builder, which is the whole
+ * point of it. `Jsoup.parse` would apply HTML5's implied end tags — a `<div>` closes an open
  * `<p>`, `<li>` closes `<li>` — and the Dart build never did, because it nested tags by position and
  * ignored close tags that matched nothing. Posts are hand-written markup wrapped in five layers of
  * `<div>`; the difference between those two readings is the difference between one paragraph and two,
- * and between a 觀畫 section being rendered at all or being swallowed into a paragraph. Tokenizing
- * with Jsoup and *building* the tree with the Dart stack keeps the malformed-markup tolerance of the
- * original while taking Jsoup's quote-aware attribute scanning off our hands.
+ * and between a 觀畫 section being rendered at all or being swallowed into a paragraph. Scanning the
+ * tags here and *building* the tree with the Dart stack keeps the malformed-markup tolerance of the
+ * original, and the scan has to be ours as well as the tree: Jsoup exposes no tokenizer to borrow.
  */
 private const val DOCUMENT_TAG = "#document"
 
@@ -24,7 +21,7 @@ private val VOID_ELEMENTS = setOf(
     "meta", "param", "source", "track", "wbr",
 )
 
-/** Raw-text elements, whose body Jsoup hands over as one character run and the parser drops. */
+/** Raw-text elements, whose body arrives as one character run and the parser drops. */
 private val RAW_TEXT_ELEMENTS = setOf("script", "style")
 
 /**
@@ -100,16 +97,18 @@ internal fun parseHtmlDocument(html: String): HtmlElement {
     val document = HtmlElement(DOCUMENT_TAG)
     val stack = ArrayDeque<HtmlElement>()
     stack.addLast(document)
-    val tokens = Parser.tokenize(html)
+    val tokens = tokenize(html)
     var index = 0
     while (index < tokens.size) {
         val token = tokens[index]
         index++
-        if (token.isCharacter) {
-            stack.last().children.add(HtmlText(token.data()))
-        } else if (token.isEndTag) {
-            closeTag(stack, token.normalName())
-        } else if (token.isStartTag) {
+        if (token is HtmlCharacter) {
+            stack.last().children.add(HtmlText(token.data))
+            continue
+        }
+        if (token.isEndTag) {
+            closeTag(stack, token.data)
+        } else {
             val element = openTag(stack, token)
             if (element.tag in RAW_TEXT_ELEMENTS) index = skipRawText(tokens, index, element.tag)
         }
@@ -117,27 +116,215 @@ internal fun parseHtmlDocument(html: String): HtmlElement {
     return document
 }
 
+/** One step of the scan: a run of text, or a tag. */
+private sealed interface HtmlToken {
+    val data: String
+}
+
+/**
+ * A run of text, raw and undecoded.
+ *
+ * Named rather than reused from Jsoup because `org.jsoup.parser.Token` is package-private, and
+ * `Parser.tokenize` — the method that produced them — is not part of Jsoup's public API in 1.23.2,
+ * so there is no token to alias.
+ */
+private class HtmlCharacter(override val data: String) : HtmlToken
+
+/** A tag, named lowercased the way `Token.normalName()` named the ones this file was written against. */
+private class HtmlTag(
+    override val data: String,
+    val attributes: Map<String, String> = emptyMap(),
+    val isEndTag: Boolean = false,
+    val isSelfClosing: Boolean = false,
+) : HtmlToken
+
+/**
+ * Scans [html] into the token stream the tree is built from, and never throws.
+ *
+ * This is the hand-rolled tokenizer the file was always going to need: Jsoup's `Token` and
+ * `Tokeniser` are both package-private and `Parser.tokenize` is not public, so no code outside
+ * `org.jsoup.parser` can ask Jsoup for a token stream, and `Jsoup.parse` is the one reading of the
+ * markup this file exists to avoid. Only what the tree walk reads is produced — a run of text, a
+ * start tag or an end tag — because a doctype, an XML declaration and a comment carry nothing the
+ * walk ever looked at, so they are stepped over here rather than carried as tokens nobody reads.
+ */
+private fun tokenize(html: String): List<HtmlToken> {
+    val tokens = mutableListOf<HtmlToken>()
+    var index = 0
+    while (index < html.length) {
+        val bracket = html.indexOf('<', index)
+        if (bracket < 0) {
+            tokens.add(HtmlCharacter(html.substring(index)))
+            break
+        }
+        if (bracket > index) tokens.add(HtmlCharacter(html.substring(index, bracket)))
+        index = readMarkup(html, bracket, tokens)
+    }
+    return tokens
+}
+
+/**
+ * A `<` that opens nothing this tree can use: a doctype, an XML declaration, a comment, or the
+ * bogus comment a browser makes of a `<` followed by neither a letter nor a `/`.
+ */
+private fun readIgnoredMarkup(html: String, start: Int): Int {
+    if (!html.startsWith(COMMENT_OPEN, start)) return skipToTagEnd(html, start)
+    val end = html.indexOf(COMMENT_CLOSE, start + COMMENT_OPEN.length)
+    return if (end < 0) html.length else end + COMMENT_CLOSE.length
+}
+
+/** Steps over to the `>` that ends a construct, or to the end of the post when it never arrives. */
+private fun skipToTagEnd(html: String, start: Int): Int {
+    val end = html.indexOf('>', start)
+    return if (end < 0) html.length else end + 1
+}
+
+/** One `<`, dispatched on what follows it, returning where the next token begins. */
+private fun readMarkup(html: String, start: Int, tokens: MutableList<HtmlToken>): Int {
+    val afterBracket = html.getOrNull(start + 1)
+    if (afterBracket == null || (!afterBracket.isLetter() && afterBracket != '/')) {
+        return readIgnoredMarkup(html, start)
+    }
+    return if (afterBracket == '/') readEndTag(html, start, tokens) else readStartTag(html, start, tokens)
+}
+
+/**
+ * A close tag: its name, and nothing else — the tree walk reads attributes from open tags only.
+ *
+ * A `</div` the post ended in the middle of is still a close tag to the stack, because the blog's
+ * markup does run out of `</div>` and a name that never arrived must not close anything.
+ */
+private fun readEndTag(html: String, start: Int, tokens: MutableList<HtmlToken>): Int {
+    val nameStart = start + 2
+    var index = nameStart
+    while (index < html.length && isTagNameChar(html[index])) index++
+    if (index > nameStart) tokens.add(HtmlTag(html.substring(nameStart, index).lowercase(), isEndTag = true))
+    val end = html.indexOf('>', index)
+    return if (end < 0) html.length else end + 1
+}
+
+/**
+ * An open tag: its lowercased name, its attributes, and whether the post wrote the `/` of `<br />`.
+ *
+ * The loop reads the attributes rather than handing them to a sub-scan of their own, because a bare
+ * attribute (`allowfullscreen`) and an assigned one (`class=title`) have to both leave the cursor
+ * somewhere the loop can keep going from.
+ */
+private fun readStartTag(html: String, start: Int, tokens: MutableList<HtmlToken>): Int {
+    val nameStart = start + 1
+    var index = nameStart
+    while (index < html.length && isTagNameChar(html[index])) index++
+    val name = html.substring(nameStart, index).lowercase()
+    val attributes = linkedMapOf<String, String>()
+    var selfClosing = false
+    while (index < html.length && html[index] != '>') {
+        val c = html[index]
+        if (c == '/') selfClosing = true
+        if (c.isWhitespace() || c == '/') {
+            index++
+            continue
+        }
+        index = readAttribute(html, index, attributes)
+    }
+    tokens.add(HtmlTag(name, attributes, isSelfClosing = selfClosing))
+    val afterTag = skipToTagEnd(html, index)
+    return if (!selfClosing && name in RAW_TEXT_ELEMENTS) readRawText(html, afterTag, name, tokens) else afterTag
+}
+
+/**
+ * One attribute, added only the first time it appears — Word-pasted markup repeats attributes, and a
+ * later copy must not overwrite what the post wrote first.
+ *
+ * A quoted value is read whole, so a `>`, a `/` or a `&` inside a `style`, a data URI or a SoundCloud
+ * query cannot be mistaken for the end of the tag or the end of the value.
+ */
+private fun readAttribute(html: String, start: Int, into: MutableMap<String, String>): Int {
+    var index = start
+    while (index < html.length && isAttributeNameChar(html[index])) index++
+    // A stray `=` or quote between two attributes is not one: skip it, or the scan would stall on it.
+    if (index == start) return start + 1
+    val name = html.substring(start, index).lowercase()
+    index = skipSpaces(html, index)
+    if (index >= html.length || html[index] != '=') {
+        if (name !in into) into[name] = ""
+        return index
+    }
+    val value = readAttributeValue(html, skipSpaces(html, index + 1))
+    if (name !in into) into[name] = value.value
+    return value.end
+}
+
+/** An attribute value, quoted or bare, and where it ended. */
+private class ScannedValue(val value: String, val end: Int)
+
+private fun readAttributeValue(html: String, start: Int): ScannedValue {
+    val quote = html.getOrNull(start)
+    if (quote == '"' || quote == '\'') {
+        val close = html.indexOf(quote, start + 1)
+        if (close < 0) return ScannedValue(html.substring(start + 1), html.length)
+        return ScannedValue(html.substring(start + 1, close), close + 1)
+    }
+    var index = start
+    while (index < html.length && !html[index].isWhitespace() && html[index] != '>') index++
+    return ScannedValue(html.substring(start, index), index)
+}
+
+/**
+ * The body of a `<script>`/`<style>`, which runs to its close tag and cannot hold markup.
+ *
+ * Emitted as one character run so [skipRawText] still steps over it, and the close tag itself is
+ * left for the scan to read as an end tag — the same two tokens the tokenizer this file was written
+ * against produced for this shape.
+ */
+private fun readRawText(html: String, start: Int, tag: String, tokens: MutableList<HtmlToken>): Int {
+    val close = html.indexOf("</$tag", start, ignoreCase = true)
+    if (close < 0) {
+        if (start < html.length) tokens.add(HtmlCharacter(html.substring(start)))
+        return html.length
+    }
+    if (close > start) tokens.add(HtmlCharacter(html.substring(start, close)))
+    return close
+}
+
+private fun skipSpaces(html: String, start: Int): Int {
+    var index = start
+    while (index < html.length && html[index].isWhitespace()) index++
+    return index
+}
+
+private fun isTagNameChar(c: Char): Boolean = c.isLetterOrDigit() || c == '-' || c == '_' || c == ':' || c == '.'
+
+/** Everything that may appear inside an attribute name — `/` and `=` end it, as in HTML5. */
+private fun isAttributeNameChar(c: Char): Boolean =
+    !c.isWhitespace() && c != '=' && c != '>' && c != '/' && c != '"' && c != '\''
+
+private const val COMMENT_OPEN = "<!--"
+
+private const val COMMENT_CLOSE = "-->"
+
 /**
  * Adds an element under the current node, and leaves it open unless it cannot hold anything.
  *
  * Raw-text elements are not left on the stack either: the Dart scanner jumped past `</script` without
  * unwinding, so what followed a script stayed a sibling of it rather than a child.
  */
-private fun openTag(stack: ArrayDeque<HtmlElement>, token: Token): HtmlElement {
-    val element = HtmlElement(token.normalName(), readAttributes(token))
+private fun openTag(stack: ArrayDeque<HtmlElement>, token: HtmlTag): HtmlElement {
+    // Attribute names arrive lowercased and first-occurrence-wins: the scan applies both policies as
+    // it reads, so the tree walk can take the map as it stands.
+    val element = HtmlElement(token.data, token.attributes)
     stack.last().children.add(element)
     val staysOpen = !token.isSelfClosing && element.tag !in VOID_ELEMENTS && element.tag !in RAW_TEXT_ELEMENTS
     if (staysOpen) stack.addLast(element)
     return element
 }
 
-/** Steps over a `<script>`/`<style>` body, which the tokeniser hands over as one character run. */
-private fun skipRawText(tokens: List<Token>, from: Int, tag: String): Int {
+/** Steps over a `<script>`/`<style>` body, which the scan hands over as one character run. */
+private fun skipRawText(tokens: List<HtmlToken>, from: Int, tag: String): Int {
     var index = from
     while (index < tokens.size) {
         val token = tokens[index]
         index++
-        if (token.isEndTag && token.normalName() == tag) return index
+        if (token is HtmlTag && token.isEndTag && token.data == tag) return index
     }
     return index
 }
@@ -157,19 +344,6 @@ private fun closeTag(stack: ArrayDeque<HtmlElement>, tag: String) {
             return
         }
     }
-}
-
-/** Attribute names lowercased, first occurrence wins — Word-pasted markup repeats attributes. */
-private fun readAttributes(token: Token): Map<String, String> {
-    val attributes = linkedMapOf<String, String>()
-    // Jsoup's `Attributes` is a `Map<String, String>` whose `iterator()` it re-declares for its own
-    // `Attribute` type, so it is read through the map view to get plain name/value pairs.
-    val tokenAttributes: Map<String, String> = token.attributes()
-    for ((rawName, rawValue) in tokenAttributes) {
-        val name = rawName.lowercase()
-        if (name !in attributes) attributes[name] = rawValue
-    }
-    return attributes
 }
 
 /**
