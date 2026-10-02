@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
@@ -168,6 +169,7 @@ fun ReaderTopBar(
     val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     Row(
         modifier = modifier
+            .fillMaxWidth()
             .padding(top = topInset + ReaderTopBarTopGap)
             .padding(horizontal = ReaderTopBarHorizontalInset),
         verticalAlignment = Alignment.CenterVertically,
