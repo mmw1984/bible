@@ -88,6 +88,11 @@ internal data class DevotionImageCache(
  * long while even for somebody reading the same post every morning, and it is small enough that being
  * wrong about it costs a re-download rather than a disk.
  *
+ * There was no ceiling to port: Flutter's `buildDevotionImage` used `Image.network`, which keeps
+ * decoded images in `ImageCache` and bytes nowhere, and `NATIVE_PLAN.md` asks for a disk cache here in
+ * the first place (`圖片 → Coil 3 + disk cache`). So the number is this feature's decision to defend
+ * rather than a figure the Dart side happened to have.
+ *
  * The directory is the app's `cacheDir` and not Coil's default `cacheDir/coil3_disk_cache`, for the
  * same reason it is under `cacheDir` at all: nothing here is content the user would miss if Android
  * reclaimed it under storage pressure, and a cache the system knows it may delete is one that gets
