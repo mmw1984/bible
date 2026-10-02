@@ -56,7 +56,9 @@ fun rememberSearchViewModelForOpen(): SearchViewModel {
  * place: a host-scoped factory over an open-scoped store is the whole design, and a `remember` of a
  * store on its own would have left the factory to whoever called it.
  */
-internal class SearchOpenOwner(host: ViewModelStoreOwner) : ViewModelStoreOwner, HasDefaultViewModelProviderFactory {
+internal class SearchOpenOwner(host: ViewModelStoreOwner) :
+    ViewModelStoreOwner,
+    HasDefaultViewModelProviderFactory {
     /**
      * A store of its own, which is the whole of what makes a reopen a new open.
      *
