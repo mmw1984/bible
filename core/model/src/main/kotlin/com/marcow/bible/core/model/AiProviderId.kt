@@ -6,7 +6,7 @@ package com.marcow.bible.core.model
  * It lives here rather than beside `AiProvider` in `core/network/ai` for the same reason
  * `AppLocale.aiLanguage` does: the value is a *setting*, so the screen that renders the selector, the
  * screen that shows the sign-in and every screen that asks a question all have to be able to name it,
- * and `feature/*` modules that must not depend on `core/network` still can. `core/model` is the one
+ * and the feature modules that must not depend on `core/network` still can. `core/model` is the one
  * module every one of them already has.
  *
  * [fromStorage] defaults to [OpenRouter] on a missing or unrecognised value, and that default is a
