@@ -391,7 +391,7 @@ internal fun youtubePlayerHtml(videoId: String): String = """
     </script>
     </body>
     </html>
-    """.trimIndent()
+""".trimIndent()
 
 /**
  * The id as it goes into the `videoId` line above.
