@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,11 +78,14 @@ internal fun AppMarkdownBlocks(
     data: String,
     modifier: Modifier = Modifier,
     compact: Boolean = false,
+    foreground: Color = appColors.ink,
+    secondary: Color = appColors.muted,
     onLink: ((String) -> Unit)? = null,
 ) {
     // Parsed per answer rather than per recomposition, because a streaming answer redraws about twenty
     // times a second and this is the only part of the drawing that walks the whole text.
     val blocks = remember(data) { parseAppMarkdown(data) }
+    val palette = remember(foreground, secondary, onLink) { MarkdownPalette(foreground, secondary, onLink) }
     // Dart's `_selectableRichText` joined the ambient `SelectionContainer` instead of making one
     // (`app_markdown.dart:332`), which put selection over the whole transcript rather than one answer.
     // Here the container is per call, so a selection stops at an answer's edge — the two agree on every
@@ -89,11 +93,29 @@ internal fun AppMarkdownBlocks(
     SelectionContainer {
         Column(modifier = modifier.fillMaxWidth()) {
             blocks.forEach { block ->
-                MarkdownBlockRow(block = block, compact = compact, onLink = onLink)
+                MarkdownBlockRow(block = block, palette = palette, compact = compact)
             }
         }
     }
 }
+
+/**
+ * The three things a whole answer is drawn with: `AppMarkdown`'s `foreground`, `secondary` and `onLink`.
+ *
+ * Carried as one value because they change together — an answer and its thinking block are the only
+ * two callers and they differ in all three — and threading them separately put `MarkdownTableRow` over
+ * the eight-parameter limit for no gain.
+ *
+ * The thinking block passes `muted` for *both* colours (`ai_chat_page.dart:872`), which is why
+ * [foreground] is a parameter at all rather than being read from the theme: an answer is ink, and a
+ * thought being read is deliberately not.
+ */
+@Immutable
+private class MarkdownPalette(
+    val foreground: Color,
+    val secondary: Color,
+    val onLink: ((String) -> Unit)?,
+)
 
 /**
  * One block, under the bottom space it carried.
@@ -105,14 +127,19 @@ internal fun AppMarkdownBlocks(
 @Composable
 private fun MarkdownBlockRow(
     block: MarkdownBlock,
+    palette: MarkdownPalette,
     compact: Boolean,
-    onLink: ((String) -> Unit)?,
 ) {
     val margin = if (block is MarkdownBlock.ListItem) listMargin(compact) else blockMargin(compact)
     Column(modifier = Modifier.padding(bottom = margin)) {
         when (block) {
             is MarkdownBlock.Paragraph ->
-                MarkdownBody(inlines = block.inlines, compact = compact, onLink = onLink)
+                MarkdownBody(
+                    inlines = block.inlines,
+                    color = palette.foreground,
+                    compact = compact,
+                    onLink = palette.onLink,
+                )
 
             is MarkdownBlock.Heading -> MarkdownHeading(level = block.level, text = block.text, compact = compact)
 
@@ -125,11 +152,19 @@ private fun MarkdownBlockRow(
 
             is MarkdownBlock.CodeBlock -> MarkdownCodeBlock(code = block.code, compact = compact)
 
-            is MarkdownBlock.Quote -> MarkdownQuote(inlines = block.inlines, compact = compact, onLink = onLink)
+            is MarkdownBlock.Quote -> MarkdownQuote(
+                inlines = block.inlines,
+                palette = palette,
+                compact = compact,
+            )
 
-            is MarkdownBlock.ListItem -> MarkdownListItem(item = block, compact = compact, onLink = onLink)
+            is MarkdownBlock.ListItem -> MarkdownListItem(
+                item = block,
+                palette = palette,
+                compact = compact,
+            )
 
-            is MarkdownBlock.Table -> MarkdownTable(table = block, compact = compact, onLink = onLink)
+            is MarkdownBlock.Table -> MarkdownTable(table = block, palette = palette, compact = compact)
         }
     }
 }
@@ -137,27 +172,28 @@ private fun MarkdownBlockRow(
 /**
  * The run of text a paragraph, a quote, a list item and a table cell all share.
  *
- * [secondary] is the one switch: a quote and a table body drew in `muted`, which is how Dart kept
- * quoted material apart from the model's own words (`app_markdown.dart:163, 253`).
+ * [color] is the block's own choice of ink or muted rather than a switch, so that the thinking block —
+ * which passes muted for both — needs no flag of its own to be drawn.
  */
 @Composable
 private fun MarkdownBody(
     inlines: List<MarkdownInline>,
+    color: Color,
     compact: Boolean,
     onLink: ((String) -> Unit)?,
     modifier: Modifier = Modifier,
     lineHeight: TextUnit = bodyLineHeight(compact),
-    secondary: Boolean = false,
 ) {
     Text(
         text = markdownAnnotatedString(
             inlines = inlines,
             base = TextStyle(
-                color = if (secondary) appColors.muted else appColors.ink,
+                color = color,
                 fontFamily = AppFonts.OpenRunde,
                 fontSize = bodyFontSize(compact),
                 lineHeight = lineHeight,
             ),
+            foreground = color,
             compact = compact,
             onLink = onLink,
         ),
@@ -197,16 +233,16 @@ private fun MarkdownHeading(level: Int, text: String, compact: Boolean) {
 @Composable
 private fun MarkdownQuote(
     inlines: List<MarkdownInline>,
+    palette: MarkdownPalette,
     compact: Boolean,
-    onLink: ((String) -> Unit)?,
 ) {
     val colors = appColors
     MarkdownBody(
         inlines = inlines,
+        color = palette.secondary,
         compact = compact,
-        onLink = onLink,
+        onLink = palette.onLink,
         lineHeight = bodyFontSize(compact) * QUOTE_LINE_HEIGHT,
-        secondary = true,
         modifier = Modifier
             .fillMaxWidth()
             .background(colors.line.copy(alpha = QUOTE_WASH))
@@ -257,8 +293,8 @@ private fun MarkdownCodeBlock(code: String, compact: Boolean) {
 @Composable
 private fun MarkdownListItem(
     item: MarkdownBlock.ListItem,
+    palette: MarkdownPalette,
     compact: Boolean,
-    onLink: ((String) -> Unit)?,
 ) {
     Row(verticalAlignment = Alignment.Top) {
         Box(modifier = Modifier.width(if (item.checked == null) MARKER_COLUMN else CHECK_COLUMN)) {
@@ -270,8 +306,9 @@ private fun MarkdownListItem(
         }
         MarkdownBody(
             inlines = item.inlines,
+            color = palette.foreground,
             compact = compact,
-            onLink = onLink,
+            onLink = palette.onLink,
             modifier = Modifier.weight(1f),
         )
     }
@@ -330,8 +367,8 @@ private fun MarkdownCheckbox(checked: Boolean) {
 @Composable
 private fun MarkdownTable(
     table: MarkdownBlock.Table,
+    palette: MarkdownPalette,
     compact: Boolean,
-    onLink: ((String) -> Unit)?,
 ) {
     val colors = appColors
     val shape = RoundedCornerShape(appRadii.compact)
@@ -352,8 +389,8 @@ private fun MarkdownTable(
                     rowIndex = rowIndex,
                     columns = columns,
                     width = tableWidth / columns,
+                    palette = palette,
                     compact = compact,
-                    onLink = onLink,
                 )
             }
         }
@@ -378,8 +415,8 @@ private fun MarkdownTableRow(
     rowIndex: Int,
     columns: Int,
     width: Dp,
+    palette: MarkdownPalette,
     compact: Boolean,
-    onLink: ((String) -> Unit)?,
 ) {
     val colors = appColors
     val header = rowIndex == 0
@@ -422,8 +459,8 @@ private fun MarkdownTableRow(
                 MarkdownCell(
                     inlines = cells.getOrNull(column).orEmpty(),
                     header = header,
+                    palette = palette,
                     compact = compact,
-                    onLink = onLink,
                 )
             }
         }
@@ -435,15 +472,15 @@ private fun MarkdownTableRow(
 private fun MarkdownCell(
     inlines: List<MarkdownInline>,
     header: Boolean,
+    palette: MarkdownPalette,
     compact: Boolean,
-    onLink: ((String) -> Unit)?,
 ) {
     MarkdownBody(
         inlines = inlines,
+        color = if (header) palette.foreground else palette.secondary,
         compact = compact,
-        onLink = onLink,
+        onLink = palette.onLink,
         lineHeight = tableFontSize(compact) * TABLE_LINE_HEIGHT,
-        secondary = !header,
         modifier = Modifier.fillMaxWidth(),
     )
 }
@@ -461,6 +498,7 @@ private fun MarkdownCell(
 private fun markdownAnnotatedString(
     inlines: List<MarkdownInline>,
     base: TextStyle,
+    foreground: Color,
     compact: Boolean,
     onLink: ((String) -> Unit)?,
 ): AnnotatedString {
@@ -473,11 +511,11 @@ private fun markdownAnnotatedString(
 
                 is MarkdownInline.Code -> {
                     // Dart named `foreground` on this run rather than leaving it to inherit
-                    // (`app_markdown.dart:375`), so inline code stays ink inside a quote or a table
-                    // cell whose surrounding text does not.
+                    // (`app_markdown.dart:375`), so inline code keeps the block's colour where its
+                    // surrounding text is muted — a quote's code, or a table cell's.
                     pushStyle(
                         SpanStyle(
-                            color = appColors.ink,
+                            color = foreground,
                             background = inlineWash,
                             fontFamily = FontFamily.Monospace,
                             fontSize = codeFontSize(compact),
