@@ -11,10 +11,29 @@ plugins {
 // Signing is copied verbatim from the Flutter build (`legacy/flutter/android/app/build.gradle.kts`)
 // so the native app can be installed over the Flutter app without uninstalling: same
 // applicationId (`com.marcow.bible`) plus the same keystore means the same signature
-// (NATIVE_PLAN.md §6 R2). CI supplies the keystore through ANDROID_KEYSTORE_* secrets.
+// (NATIVE_PLAN.md §6 R2). CI supplies the keystore through ANDROID_KEYSTORE_* secrets, which is
+// what keeps the certificate identical to every release published so far.
 val keystoreEnv: Map<String, String> = System.getenv()
+
+// The Flutter build's own alias; ANDROID_KEY_ALIAS only overrides it, and a blank secret is
+// treated as "not set" so an empty env var cannot turn into an empty alias.
+const val DEFAULT_KEY_ALIAS = "bible"
+
 fun envSigningAvailable(): Boolean = !keystoreEnv["ANDROID_KEYSTORE_BASE64"].isNullOrBlank() &&
     !keystoreEnv["ANDROID_KEYSTORE_PASSWORD"].isNullOrBlank()
+
+// A missing keystore is fine locally — you get the debug key and a build you can sideload. It
+// is not fine anywhere that publishes: the release below would fall through to the debug key,
+// the build would still succeed, and Android would then refuse the upgrade because the
+// certificate differs, which is precisely what R2 exists to prevent. The release workflow sets
+// REQUIRE_RELEASE_SIGNING=true, so there the build stops instead of quietly signing wrong.
+// Only the presence of the variables is checked; their values never reach a log or an exception.
+if (keystoreEnv["REQUIRE_RELEASE_SIGNING"] == "true" && !envSigningAvailable()) {
+    throw GradleException(
+        "REQUIRE_RELEASE_SIGNING is set but ANDROID_KEYSTORE_BASE64/ANDROID_KEYSTORE_PASSWORD are " +
+            "missing; refusing to sign the release with the debug key (NATIVE_PLAN.md §6 R2).",
+    )
+}
 
 android {
     namespace = "com.marcow.bible"
@@ -37,13 +56,15 @@ android {
         if (envSigningAvailable()) {
             create("release") {
                 val decoded = Base64.getDecoder().decode(keystoreEnv["ANDROID_KEYSTORE_BASE64"])
+                // build/ is ignored, so the decoded keystore never lands in git. It is written at
+                // configuration time because System.getenv() is all this module has to go on.
                 storeFile = File(
                     layout.buildDirectory.dir("tmp/keystore").get().asFile.apply { mkdirs() },
                     "release.jks",
                 ).also { it.writeBytes(decoded) }
                 storePassword = keystoreEnv["ANDROID_KEYSTORE_PASSWORD"]
-                keyAlias = keystoreEnv["ANDROID_KEY_ALIAS"] ?: "bible"
-                keyPassword = keystoreEnv["ANDROID_KEY_PASSWORD"]
+                keyAlias = keystoreEnv["ANDROID_KEY_ALIAS"]?.takeUnless { it.isBlank() } ?: DEFAULT_KEY_ALIAS
+                keyPassword = keystoreEnv["ANDROID_KEY_PASSWORD"]?.takeUnless { it.isBlank() }
                     ?: keystoreEnv["ANDROID_KEYSTORE_PASSWORD"]
             }
         }
@@ -55,7 +76,9 @@ android {
             versionNameSuffix = null
         }
         release {
-            // Keep the debug key as fallback so a local build without secrets still installs.
+            // Fall back to the debug key so a local build without secrets still installs. The
+            // REQUIRE_RELEASE_SIGNING guard above makes this branch unreachable in the release
+            // workflow, which is the only place where picking the wrong key goes unnoticed.
             signingConfig = if (envSigningAvailable()) {
                 signingConfigs.getByName("release")
             } else {

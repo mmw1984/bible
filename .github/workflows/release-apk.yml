@@ -56,19 +56,6 @@ jobs:
       - name: Unit tests
         run: ./gradlew test --stacktrace
 
-      # ANDROID_KEYSTORE_* are read from the environment by `app/build.gradle.kts`
-      # while it configures, so they have to be on the step that starts Gradle
-      # (NATIVE_PLAN.md §6 R2). Same secrets, same keystore and alias as the
-      # Flutter build ever used, which is what makes the native release install
-      # over the existing app without uninstalling.
-      - name: Build release APK and AAB
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: ./gradlew :app:assembleRelease :app:bundleRelease --stacktrace
-
       # versionName lives in `app/build.gradle.kts` now, not in a pubspec. Match
       # only the bare defaultConfig assignment (8 spaces of indent) so a
       # versionCode/versionName pair cannot resolve the wrong line, and refuse to
@@ -84,6 +71,66 @@ jobs:
             exit 1
           fi
           echo "version=${versions[0]}" >> "$GITHUB_OUTPUT"
+
+      # ANDROID_KEYSTORE_* are read from the environment by `app/build.gradle.kts`
+      # while it configures, so they have to be on the step that starts Gradle
+      # (NATIVE_PLAN.md §6 R2). Same secrets, same keystore and alias as the
+      # Flutter build ever used, which is what makes the native release install
+      # over the existing app without uninstalling. REQUIRE_RELEASE_SIGNING tells
+      # the build to fail rather than fall back to the debug key if they are absent.
+      - name: Build release APK and AAB
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          REQUIRE_RELEASE_SIGNING: 'true'
+        run: ./gradlew :app:assembleRelease :app:bundleRelease --stacktrace
+
+      # NATIVE_PLAN.md §6 R2, checked instead of assumed: `signingReport` shows what the release
+      # variant actually resolved to (a fall back to debug prints `Config: debug`), and apksigner
+      # shows what certificate the finished APK carries. Only public certificate digests are read
+      # and printed here — no secret is passed to either command, and the keystore vars are needed
+      # again because the release signing config only exists when they are present.
+      - name: Verify release certificate
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          REQUIRE_RELEASE_SIGNING: 'true'
+        run: |
+          set -euo pipefail
+          report=$(./gradlew --console=plain :app:signingReport)
+          # Only the release block: the report repeats these fields per variant, and the next
+          # "Variant:" line ends it.
+          release_variant=$(awk '/^Variant: release$/ { found = 1; next } /^Variant:/ { found = 0 } found' <<<"$report")
+          config=$(sed -n 's/^Config:[[:space:]]*//p' <<<"$release_variant")
+          alias=$(sed -n 's/^Alias:[[:space:]]*//p' <<<"$release_variant")
+          # Colons stripped because the report has been printed both ways across AGP versions.
+          store_digest=$(sed -n 's/^SHA-256:[[:space:]]*//p' <<<"$release_variant" | tr -d ':')
+          if [ "$config" != "release" ] || [ -z "$alias" ] || [ -z "$store_digest" ]; then
+            echo "release variant resolved to config='$config' alias='$alias'; expected the release keystore" >&2
+            exit 1
+          fi
+
+          # AGP downloaded the build-tools the release build just used, so apksigner is on disk.
+          apksigner=$(ls -1 "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -n 1)
+          certs=$("$apksigner" verify --print-certs "bible-${VERSION}-release.apk")
+          mapfile -t apk_digests < <(grep -o 'certificate SHA-256 digest: .*' <<<"$certs" | awk '{ print $NF }')
+          if [ "${#apk_digests[@]}" -ne 1 ]; then
+            echo "expected the APK to carry exactly one signing certificate, found ${#apk_digests[@]}" >&2
+            exit 1
+          fi
+          # apksigner prints the digest base64-encoded, signingReport prints it as hex.
+          apk_digest=$(python3 -c 'import base64, sys; print(base64.b64decode(sys.argv[1]).hex().upper())' \
+            "${apk_digests[0]}")
+          if [ "$apk_digest" != "$store_digest" ]; then
+            echo "APK certificate $apk_digest does not match the release keystore certificate $store_digest" >&2
+            exit 1
+          fi
+          echo "release APK signed by the release keystore (alias $alias, cert $apk_digest)"
 
       - name: Rename artifacts
         env:
