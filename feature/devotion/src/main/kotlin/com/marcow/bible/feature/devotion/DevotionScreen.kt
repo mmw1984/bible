@@ -203,12 +203,12 @@ private fun LazyListScope.articleItems(
             modifier = column.padding(bottom = DevotionChrome.POST_TITLE_BELOW),
         )
     }
-    itemsIndexed(count = post.blocks.size) { index ->
+    itemsIndexed(post.blocks) { index, block ->
         // `SliverPadding`'s bottom went under the last item only, and its left and right went around
         // all three kinds rather than onto the list.
         val last = index == post.blocks.lastIndex
         DevotionBlocks(
-            blocks = listOf(post.blocks[index]),
+            blocks = listOf(block),
             indent = layout.blockIndent,
             onOpenUrl = onOpenUrl,
             modifier = column.then(if (last) Modifier.padding(bottom = layout.articleBottom) else Modifier),
@@ -375,9 +375,9 @@ private fun DevotionDateChips(
     modifier: Modifier = Modifier,
 ) {
     LazyRow(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(DevotionChrome.CHIP_GAP)) {
-        itemsIndexed(count = state.posts.size, key = { index -> state.posts[index].id }) { index ->
+        itemsIndexed(state.posts, key = { _, post -> post.id }) { index, post ->
             DateChip(
-                post = state.posts[index],
+                post = post,
                 active = index == state.selected,
                 locale = locale,
                 onClick = { onSelectDate(index) },
