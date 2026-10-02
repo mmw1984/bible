@@ -1,6 +1,5 @@
 package com.marcow.bible.core.designsystem.components
 
-import android.os.Build
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -16,7 +15,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
@@ -38,8 +36,11 @@ import com.marcow.bible.core.designsystem.theme.tapAnimationSpec
  *
  * Two modes, chosen by the stored navbar style exactly as the Flutter build chose them:
  *
- *  - blur: a translucent tint so the content behind shows through, a softened border, and a real
- *    blur where the platform has one.
+ *  - blur: a translucent tint so the content behind shows through, with a softened border.
+ *    The tint alone carries the frosted look: Flutter sampled the backdrop with a `BackdropFilter`,
+ *    which blurs what is *behind* the control, while Compose's `Modifier.blur` blurs the layer it
+ *    decorates — the control itself, including its glyph and label. Applying it here blurred every
+ *    button's own content, so no blur is applied and the surface stays crisp.
  *  - solid: an opaque fill.
  *
  * A selected control is always solid: the Flutter build skipped the blur for `selected` because a
@@ -73,9 +74,7 @@ fun AppControlSurface(
 
     Box(
         modifier = modifier
-            .then(
-                if (blur) Modifier.appFrosted(resolvedShape) else Modifier.clip(resolvedShape),
-            )
+            .clip(resolvedShape)
             .background(tint, resolvedShape)
             .border(BorderStroke(1.dp, stroke), resolvedShape)
             .then(
@@ -108,21 +107,6 @@ private fun blurTint(colors: AppColors, requested: Color?, emphasized: Boolean):
     requested != null && requested != Color.Transparent -> requested.copy(alpha = BLUR_TINT_ALPHA)
     emphasized -> colors.surfaceRaised.copy(alpha = BLUR_EMPHASIZED_ALPHA)
     else -> colors.surface.copy(alpha = BLUR_TINT_ALPHA)
-}
-
-/**
- * The blur behind a frosted surface.
- *
- * Flutter drew a real `BackdropFilter`, which samples whatever is behind the control. Compose has no
- * backdrop equivalent, and `Modifier.blur` blurs the layer it decorates rather than its
- * surroundings, so on API 31+ the control's own tint is blurred — which is what makes a frosted
- * control look frosted over a flat canvas — and below that the tint alone carries the effect. The
- * translucent fill is what actually sells it either way; the blur is the finish on top.
- */
-private fun Modifier.appFrosted(shape: Shape): Modifier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-    this.clip(shape).blur(FROST_SIGMA.dp)
-} else {
-    this.clip(shape)
 }
 
 /**
@@ -242,6 +226,3 @@ private const val BLUR_BORDER_ALPHA = 0.72f
 private const val PRESSED_SCALE = 0.975f
 private const val PRESSED_ALPHA = 0.72f
 private const val DISABLED_ALPHA = 0.42f
-
-/** `ImageFilter.blur(sigmaX: 18, sigmaY: 18)` in the Flutter `AppControlSurface`. */
-private const val FROST_SIGMA = 18f
