@@ -2,11 +2,11 @@ package com.marcow.bible.core.network.devotion
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.Headers.Companion.toHeaders
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 /**
  * The one request every tier of the devotion fetch makes, matching the shape
@@ -14,8 +14,8 @@ import java.io.IOException
  *
  * The bound is Flutter's 20 s and not the shared client's, because that client also serves AI
  * completions that legitimately run for minutes: one client cannot carry one timeout for both, so
- * the devotion bound is applied per call here. The body is read inside the timeout so a stalled
- * connection is closed rather than left half-read when the coroutine is cancelled.
+ * the devotion bound is applied per call here via OkHttp's `callTimeout`, which closes a stalled
+ * connection rather than leaving it half-read.
  *
  * The bytes are decoded as UTF-8 explicitly instead of through `ResponseBody.string()`, which
  * honours the response's declared charset — `utf8.decode(response.bodyBytes)` did not, and CJK feed
@@ -24,10 +24,12 @@ import java.io.IOException
  * Every way this can go wrong comes out as a [DevotionFetchException], so a tier's contract is one
  * type: a DNS failure, a refused connection and a 503 are all "this tier did not deliver".
  */
-internal suspend fun OkHttpClient.devotionGetText(url: String): String = withTimeoutOrNull(DEVOTION_TIMEOUT_MS) {
-    withContext(Dispatchers.IO) {
-        try {
-            newCall(
+internal suspend fun OkHttpClient.devotionGetText(url: String): String = withContext(Dispatchers.IO) {
+    try {
+        newBuilder()
+            .callTimeout(DEVOTION_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+            .build()
+            .newCall(
                 Request.Builder()
                     .url(url)
                     .headers(DEVOTION_HEADERS.toHeaders())
@@ -38,11 +40,10 @@ internal suspend fun OkHttpClient.devotionGetText(url: String): String = withTim
                 }
                 response.body?.bytes()?.toString(Charsets.UTF_8).orEmpty()
             }
-        } catch (unreachable: IOException) {
-            throw DevotionFetchException("devotion request $url failed: ${unreachable.message}", unreachable)
-        }
+    } catch (unreachable: IOException) {
+        throw DevotionFetchException("devotion request $url failed: ${unreachable.message}", unreachable)
     }
-} ?: throw DevotionFetchException("devotion request $url timed out")
+}
 
 /** `.timeout(const Duration(seconds: 20))` on every `_kDevotionHeaders` request. */
 private const val DEVOTION_TIMEOUT_MS = 20_000L
