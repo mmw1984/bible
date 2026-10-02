@@ -82,8 +82,10 @@ data class AppRadii(
             )
         }
 
-        private fun radiusDp(insets: android.view.WindowInsets, position: Int, density: Float): Float =
-            (insets.getRoundedCorner(position)?.radius ?: 0) / density
+        private fun radiusDp(insets: android.view.WindowInsets, position: Int, density: Float): Float {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return 0f
+            return (insets.getRoundedCorner(position)?.radius ?: 0) / density
+        }
 
         // `radius * .24`, `radius * .34`, `radius * .48` and their clamps, from `AppRadii.load`.
         private const val COMPACT_SCALE = 0.24f
