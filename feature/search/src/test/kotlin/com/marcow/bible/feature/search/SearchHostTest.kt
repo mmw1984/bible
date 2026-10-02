@@ -7,7 +7,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -32,6 +32,12 @@ import org.junit.jupiter.api.Test
  * `catch (_: Exception)` catches `CancellationException` — it is an `IllegalStateException` — so without
  * the clause a cancelled sheet would report a sign-in that finished. The cancelled *scope* below is the
  * case a reader can reach, and that one is tested.
+ *
+ * `advanceUntilIdle` would leave every assertion below reading zero. It stops the virtual clock "once only
+ * the coroutines in this scope are left unprocessed", and the coroutines in `backgroundScope` are exactly
+ * that — so the launched sign-in never starts and `beginSignInCalls` stays at 0 however long the clock is
+ * advanced. `runCurrent` runs them, because it runs pending tasks at the current moment rather than
+ * draining the queue, and nothing here waits on the clock.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SearchHostTest {
@@ -42,16 +48,16 @@ class SearchHostTest {
      * A tap that opens the browser, which the next two are variations of.
      *
      * `backgroundScope` rather than a scope of the test's own, so that an uncaught exception in the
-     * launched coroutine fails this test instead of reaching a global handler: `backgroundScope`'s job
-     * is a child of the test's, and `runTest` fails on a failed child. That is what lets the next test
-     * be a test of the catch.
+     * launched coroutine fails this test instead of reaching a global handler: that scope is cancelled
+     * with the test and `runTest` rethrows whatever it collected on the way out. That is what lets the
+     * next test be a test of the catch.
      */
     @Test
     fun `a tap opens the authorize page`() = runTest(dispatcher) {
         val signIn = RecordingSearchSignIn()
 
         beginSignInOnTap(signIn, backgroundScope)()
-        advanceUntilIdle()
+        runCurrent()
 
         assertEquals(1, signIn.beginSignInCalls)
     }
@@ -72,7 +78,7 @@ class SearchHostTest {
         val signIn = RecordingSearchSignIn(onBegin = { throw IllegalStateException(LAUNCH_FAILED_MESSAGE) })
 
         beginSignInOnTap(signIn, backgroundScope)()
-        advanceUntilIdle()
+        runCurrent()
 
         assertEquals(1, signIn.beginSignInCalls)
         assertNull(signIn.lastError.value)
@@ -94,7 +100,7 @@ class SearchHostTest {
 
         scopeJob.cancel()
         beginSignInOnTap(signIn, scope)()
-        advanceUntilIdle()
+        runCurrent()
 
         assertEquals(0, signIn.beginSignInCalls)
     }
@@ -122,7 +128,7 @@ class SearchHostTest {
             arm = { calls += "arm" },
             signIn = beginSignInOnTap(signIn, backgroundScope),
         )()
-        advanceUntilIdle()
+        runCurrent()
 
         assertEquals(listOf("arm", "beginSignIn"), calls)
     }
