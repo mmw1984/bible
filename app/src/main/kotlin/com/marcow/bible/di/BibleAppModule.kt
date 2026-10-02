@@ -12,7 +12,7 @@ import javax.inject.Singleton
 
 /**
  * Marks app-level work that outlives any screen, so it can be distinguished from the
- * feature-scoped singletons each `feature/*` module binds for itself.
+ * feature-scoped singletons each feature module binds for itself.
  */
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
@@ -21,8 +21,8 @@ annotation class ApplicationScope
 /**
  * The app-level Hilt module: the single place `:app` wires the graph together.
  *
- * Every repository, database, DataStore and network binding lives in its own `core/*` or
- * `feature/*` module (`BibleDbModule`, `SettingsDataStoreModule`, `OpenRouterModule`,
+ * Every repository, database, DataStore and network binding lives in its own core or
+ * feature module (`BibleDbModule`, `SettingsDataStoreModule`, `OpenRouterModule`,
  * `AiChatModule`, `SearchModule`, `DevotionModule`, `LegacyMigrationModule`), each
  * `@InstallIn(SingletonComponent::class)`, so each is already a singleton without anything here
  * re-declaring it. Hilt aggregates those modules automatically because `:app` depends on every one
