@@ -147,6 +147,7 @@ dependencies {
     implementation(project(":feature:aichat"))
     implementation(project(":feature:devotion"))
     implementation(project(":feature:library"))
+    implementation(project(":feature:navigation"))
     implementation(project(":feature:reader"))
     implementation(project(":feature:search"))
     implementation(project(":feature:settings"))
