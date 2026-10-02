@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -67,6 +68,9 @@ fun LibrarySidebar(
     val colors = appColors
     val name = book.displayName(readingMode, usesEnglishUi)
     val openLibraryLabel = stringResource(R.string.select_book)
+    // `Dp.toSp()` is the conversion that keeps the token absolute: the sp it hands back is scaled
+    // up by the same font scale before the text engine sees it, so the tracking stays 2 dp.
+    val labelTracking = with(LocalDensity.current) { SidebarChrome.readingLabelSpacing.toSp() }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -84,7 +88,7 @@ fun LibrarySidebar(
             text = stringResource(R.string.currently_reading),
             color = colors.faint,
             fontSize = SidebarChrome.readingLabelSize,
-            letterSpacing = SidebarChrome.readingLabelSpacing,
+            letterSpacing = labelTracking,
         )
         Spacer(Modifier.height(SidebarChrome.belowReadingLabel))
         AppTap(
@@ -169,6 +173,9 @@ private fun ChapterGrid(chapterCount: Int, chapter: Int, onChapterSelected: (Int
 @Composable
 private fun ChapterCell(number: Int, active: Boolean, onClick: () -> Unit) {
     val colors = appColors
+    // Read here rather than inside the `semantics` block below, which is a plain lambda: a
+    // `stringResource` is composable and only the enclosing function is.
+    val chapterLabel = stringResource(R.string.chapter_number, number)
     val fill by animateColorAsState(
         targetValue = if (active) colors.ink else Color.Transparent,
         animationSpec = tween(SidebarChrome.chapterFillMillis),
@@ -181,7 +188,7 @@ private fun ChapterCell(number: Int, active: Boolean, onClick: () -> Unit) {
         // defaults to one, so a cell is as tall as its row is wide whatever the width works out to.
         modifier = Modifier
             .aspectRatio(1f)
-            .semantics { contentDescription = stringResource(R.string.chapter_number, number) },
+            .semantics { contentDescription = chapterLabel },
     ) {
         Box(
             modifier = Modifier
