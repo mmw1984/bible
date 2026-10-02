@@ -83,17 +83,32 @@ fun scriptureStyle(
     weight: Int = AppFontWeights.SERIF_REGULAR,
     color: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Unspecified,
 ): TextStyle = TextStyle.Default.copy(
-    fontFamily = AppFonts.NotoSerifTC,
+    fontFamily = notoSerifTcAt(weight),
     fontSize = size,
     lineHeight = lineHeight,
     color = color,
     // `FontWeight.Normal` keeps Compose from synthesising a bold face; the axis does the work.
     fontWeight = FontWeight.Normal,
-    fontVariationSettings = FontVariation.Settings(FontVariation.weight(weight)),
     platformStyle = PlatformTextStyle(includeFontPadding = false),
     lineHeightStyle = LineHeightStyle(
         alignment = LineHeightStyle.Alignment.Center,
         trim = LineHeightStyle.Trim.None,
+    ),
+)
+
+/**
+ * [AppFonts.NotoSerifTC] rendered at the font's own `wght` [weight].
+ *
+ * A variation setting belongs to a [Font] and not to a [TextStyle] — `copy` takes no such parameter —
+ * so the family is built for the weight that was asked for. `FontWeight` could not reach the axis:
+ * the bundled font is the one variable file, and Compose resolves it at 400 whatever the style asks
+ * for.
+ */
+private fun notoSerifTcAt(weight: Int): FontFamily = FontFamily(
+    Font(
+        resId = R.font.noto_serif_tc_variable,
+        weight = FontWeight.Normal,
+        variationSettings = FontVariation.Settings(FontVariation.weight(weight)),
     ),
 )
 
