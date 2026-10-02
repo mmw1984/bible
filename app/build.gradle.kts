@@ -17,7 +17,7 @@ val keystoreEnv: Map<String, String> = System.getenv()
 
 // The Flutter build's own alias; ANDROID_KEY_ALIAS only overrides it, and a blank secret is
 // treated as "not set" so an empty env var cannot turn into an empty alias.
-const val DEFAULT_KEY_ALIAS = "bible"
+val DEFAULT_KEY_ALIAS = "bible"
 
 fun envSigningAvailable(): Boolean = !keystoreEnv["ANDROID_KEYSTORE_BASE64"].isNullOrBlank() &&
     !keystoreEnv["ANDROID_KEYSTORE_PASSWORD"].isNullOrBlank()
