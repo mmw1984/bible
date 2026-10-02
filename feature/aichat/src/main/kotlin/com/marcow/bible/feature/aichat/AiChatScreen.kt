@@ -4,7 +4,6 @@ import androidx.compose.animation.core.EaseOutCubic
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -142,18 +141,19 @@ fun AiChatScreen(
     LaunchedEffect(followLatest, state.messages, dockHeight, dockOffset) {
         if (followLatest && state.messages.isNotEmpty()) listState.scrollToItem(0)
     }
-    // `_scrollToLatest`: the button's own tap is the one place Dart animated, over 280 ms.
-    // `animateScrollToItem` takes no `animationSpec` — it snaps when the target is more than three
-    // items away and springs when it is not, which is neither the curve nor the length Dart ran — so
-    // the jump is the list's own scroll animated by the tween instead. On a reversed list `value` is 0
-    // at item 0 settled, which is the same destination `scrollToItem(0)` gives above.
+    // `_scrollToLatest`: the button's own tap is the one place Dart animated rather than jumped. The
+    // list runs newest-first, so item 0 settled is the newest turn and is the same destination the
+    // auto-follow effect's `scrollToItem(0)` reaches — this is that same move animated, not snapped.
+    //
+    // `animateScrollToItem` takes no `animationSpec`, so the 280 ms `EaseOutCubic` cannot be handed to
+    // it: it runs the list's own distance-based animation instead. A `tween` could only have been
+    // spelled by scrolling a measured pixel count, and that count is what stopped being readable —
+    // `ScrollableState` in Compose 1.12.1 carries `dispatchRawDelta` and `scroll` but no `value`, so
+    // there is no longer a distance on the state to animate towards the newest end by.
     val goToLatest: () -> Unit = {
         followLatest = true
         scope.launch {
-            listState.animateScrollBy(
-                value = -listState.value,
-                animationSpec = tween(SCROLL_TO_LATEST_MILLIS, easing = EaseOutCubic),
-            )
+            listState.animateScrollToItem(index = 0)
         }
     }
 
@@ -423,9 +423,8 @@ private val HEADER_BUTTON_GAP = 4.dp
 private val HEADER_BUTTON_SIZE = 40.dp
 private val HEADER_GLYPH_SIZE = 19.dp
 
-/** The 220 ms the dock's `AnimatedPadding` ran for, and the 280 of an explicit jump to the latest. */
+/** The 220 ms the dock's `AnimatedPadding` ran for, the one duration the window still animates. */
 private const val DOCK_OFFSET_MILLIS = 220
-private const val SCROLL_TO_LATEST_MILLIS = 280
 private const val DOCK_OFFSET_LABEL = "aiChatDockOffset"
 
 /** The 96 `notification.metrics.pixels - minScrollExtent < 96` was comparing against. */
