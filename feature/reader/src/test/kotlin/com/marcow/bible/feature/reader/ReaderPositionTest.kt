@@ -136,7 +136,10 @@ class ReaderPositionTest {
     }
 
     @Test
-    fun `a device with no stored position opens the first book rather than nothing`() = runTest {
+    fun `a device with no stored row to resume leaves the choice to the caller`() = runTest {
+        // Genesis 1 is the view model's fallback rather than this function's: it has no books to
+        // index into, so the caller is the one that knows what to open. `ReaderViewModelTest` holds
+        // that half down.
         assertNull(mostRecentPosition(books) { null })
     }
 
@@ -161,12 +164,18 @@ class ReaderPositionTest {
         scrollRatio: Float = 0f,
     ) = ReaderPosition(bookIndex, chapter, mode, scrollRatio)
 
+    /**
+     * A stored row. [updatedAt] only decides which row wins a resume, so the tests that are about the
+     * chapter or the ratio leave it at the epoch rather than inventing a timestamp for it — and
+     * Kotlin wants the default, because a parameter with no default cannot follow ones that have
+     * them and still be left out at a call site.
+     */
     private fun progress(
         bookId: String,
         chapter: Int,
         mode: ReadingMode = ReadingMode.CHINESE,
         scrollRatio: Float = 0f,
-        updatedAt: Long,
+        updatedAt: Long = 0L,
     ) = ReadingProgress(
         bookId = bookId,
         chapter = chapter,

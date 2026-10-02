@@ -356,6 +356,22 @@ private object SilentScrollSink : ReaderScrollSink {
     override fun onChapterMeasured(maxScrollPx: Float) = Unit
 }
 
+/**
+ * John, the book every golden in this class reads from.
+ *
+ * Declared before [JOHN_1] because Kotlin initialises a file's top-level properties in order and
+ * refuses to read one that has not been initialised yet — so a fixture that names its book has to
+ * come after the book, not before it.
+ */
+private val JOHN = BibleBook(
+    id = "JHN",
+    ordinal = 43,
+    nameZh = "約翰福音",
+    nameEn = "John",
+    chapters = 21,
+    testament = Testament.NEW,
+)
+
 /** John 1:1–5, the five verses a golden can hold whole. */
 private val JOHN_1 = ReaderUiState(
     book = JOHN,
@@ -389,15 +405,6 @@ private val JOHN_1 = ReaderUiState(
         ),
     ),
     loading = false,
-)
-
-private val JOHN = BibleBook(
-    id = "john",
-    ordinal = 43,
-    nameZh = "約翰福音",
-    nameEn = "John",
-    chapters = 21,
-    testament = Testament.NEW,
 )
 
 private val JOHN_ONE_VERSE_1 = JOHN_1.verses.first()
