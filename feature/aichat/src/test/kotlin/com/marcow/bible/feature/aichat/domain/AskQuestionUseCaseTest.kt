@@ -1,12 +1,12 @@
 package com.marcow.bible.feature.aichat.domain
 
 import com.marcow.bible.core.database.BibleRepository
+import com.marcow.bible.core.model.AiProviderId
 import com.marcow.bible.core.model.BibleBook
 import com.marcow.bible.core.model.Testament
 import com.marcow.bible.core.model.VersePair
 import com.marcow.bible.core.network.ai.AiAvailability
 import com.marcow.bible.core.network.ai.AiProvider
-import com.marcow.bible.core.network.ai.AiProviderId
 import com.marcow.bible.core.network.ai.AiRequest
 import com.marcow.bible.core.network.ai.AiRequestOptions
 import com.marcow.bible.core.network.ai.AiResponse

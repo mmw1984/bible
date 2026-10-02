@@ -69,4 +69,6 @@ data class AppSettings(
     val glassPerfBlocked: Boolean = false,
     val showNavbar: Boolean = true,
     val showDevotion: Boolean = true,
+    /** Which provider Bible AI answers through, defaulting to OpenRouter as §4 Phase 4 requires. */
+    val aiProvider: AiProviderId = AiProviderId.OpenRouter,
 )

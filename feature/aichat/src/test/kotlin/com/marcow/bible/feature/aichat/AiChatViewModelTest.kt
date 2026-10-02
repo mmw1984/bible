@@ -3,10 +3,10 @@ package com.marcow.bible.feature.aichat
 import com.marcow.bible.core.datastore.InMemorySettingsDataStore
 import com.marcow.bible.core.datastore.SettingsRepository
 import com.marcow.bible.core.datastore.proto.Settings
+import com.marcow.bible.core.model.AiProviderId
 import com.marcow.bible.core.model.AppLocale
 import com.marcow.bible.core.network.ai.AiAvailability
 import com.marcow.bible.core.network.ai.AiProvider
-import com.marcow.bible.core.network.ai.AiProviderId
 import com.marcow.bible.core.network.ai.AiRequest
 import com.marcow.bible.core.network.ai.AiRequestOptions
 import com.marcow.bible.core.network.ai.AiResponse

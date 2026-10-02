@@ -1,8 +1,8 @@
 package com.marcow.bible.core.network.openrouter
 
+import com.marcow.bible.core.model.AiProviderId
 import com.marcow.bible.core.network.ai.AiAvailability
 import com.marcow.bible.core.network.ai.AiProvider
-import com.marcow.bible.core.network.ai.AiProviderId
 import com.marcow.bible.core.network.ai.AiRequest
 import com.marcow.bible.core.network.ai.AiRequestOptions
 import com.marcow.bible.core.network.ai.AiResponse

@@ -1,4 +1,4 @@
-package com.marcow.bible.core.network.ai
+package com.marcow.bible.core.model
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

@@ -57,4 +57,11 @@ message Settings {
   // until Compose measures it, so the value is parked here until the reader first lays that chapter
   // out, and the reader clears it after writing the ratio.
   optional double legacy_scroll_px = 8;
+  // Which provider Bible AI answers through, native-only: Flutter had only OpenRouter, so there was
+  // nothing to store. A string rather than an enum for the same reason `locale_tag` is one — the
+  // value is handed straight to `AiProviderId.fromStorage`, which resolves an empty or unrecognised
+  // tag to OpenRouter. That resolution is the load-bearing part: the setting is new, so every
+  // existing install has no value here and every OpenRouter user must keep the provider they signed
+  // in to.
+  string ai_provider = 9;
 }

@@ -6,6 +6,7 @@ import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.Serializer
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import com.marcow.bible.core.datastore.proto.Settings
+import com.marcow.bible.core.model.AiProviderId
 import com.marcow.bible.core.model.AppLocale
 import com.marcow.bible.core.model.AppSettings
 import com.marcow.bible.core.model.NavBarStyle
@@ -124,6 +125,17 @@ class SettingsRepository(private val dataStore: DataStore<Settings>) {
         current.toBuilder().setShowDevotion(show).build()
     }
 
+    /**
+     * Which provider Bible AI answers through.
+     *
+     * The stored value is the enum's own `storageValue` rather than its name, so the proto file stays
+     * the one place the on-disk spelling is written down and a rename cannot silently invalidate
+     * every stored choice.
+     */
+    suspend fun setAiProvider(provider: AiProviderId) = update { current ->
+        current.toBuilder().setAiProvider(provider.storageValue).build()
+    }
+
     /** Writes the whole message. Used by `LegacyPrefsImporter` and by tests. */
     suspend fun replace(settings: Settings) = update { settings }
 
@@ -168,4 +180,8 @@ fun Settings.toDomain(): AppSettings = AppSettings(
     // the Flutter default of true should apply.
     showNavbar = if (hasShowNavbar()) showNavbar else true,
     showDevotion = if (hasShowDevotion()) showDevotion else true,
+    // proto3 leaves an unwritten string at "", and `AiProviderId.fromStorage` resolves both that and
+    // an unrecognised tag to OpenRouter — which is the §4 Phase 4 requirement, not an accident of
+    // the mapping.
+    aiProvider = AiProviderId.fromStorage(aiProvider),
 )

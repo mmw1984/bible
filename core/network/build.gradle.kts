@@ -48,7 +48,7 @@ hilt {
 dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    implementation(project(":core:model"))
+    api(project(":core:model"))
     implementation(project(":core:common"))
     implementation(libs.kotlinx.coroutines.android)
     api(libs.kotlinx.serialization.json)

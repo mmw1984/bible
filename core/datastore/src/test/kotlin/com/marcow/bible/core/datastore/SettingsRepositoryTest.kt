@@ -1,6 +1,7 @@
 package com.marcow.bible.core.datastore
 
 import com.marcow.bible.core.datastore.proto.Settings
+import com.marcow.bible.core.model.AiProviderId
 import com.marcow.bible.core.model.AppLocale
 import com.marcow.bible.core.model.NavBarStyle
 import com.marcow.bible.core.model.ThemeMode
@@ -24,6 +25,20 @@ class SettingsRepositoryTest {
         assertFalse(settings.glassPerfBlocked)
         assertTrue(settings.showNavbar)
         assertTrue(settings.showDevotion)
+        // The setting is new, so every existing install has no value for it. §4 Phase 4 requires the
+        // OpenRouter users to keep the provider they signed in to rather than being moved.
+        assertEquals(AiProviderId.OpenRouter, settings.aiProvider)
+    }
+
+    @Test
+    fun `the AI provider round-trips and an unrecognised one falls back to OpenRouter`() = runTest {
+        repo.setAiProvider(AiProviderId.GeminiNano)
+        assertEquals(AiProviderId.GeminiNano, repo.settings.first().aiProvider)
+
+        // A downgrade must not leave the chat with no provider to ask, so the same resolution
+        // `fromStorage` does is asserted on the stored-message path too.
+        val restored = Settings.newBuilder().setAiProvider("some_future_provider").build().toDomain()
+        assertEquals(AiProviderId.OpenRouter, restored.aiProvider)
     }
 
     @Test
@@ -88,6 +103,7 @@ class SettingsRepositoryTest {
         repo.setGlassPerfBlocked(true)
         repo.setShowNavbar(false)
         repo.setShowDevotion(false)
+        repo.setAiProvider(AiProviderId.GeminiNano)
         repo.markLegacyImportCompleted()
 
         // Presence matters here: `showNavbar = false` and "never written" both serialize to the
