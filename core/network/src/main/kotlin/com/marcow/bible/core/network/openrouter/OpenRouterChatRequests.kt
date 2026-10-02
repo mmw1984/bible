@@ -221,8 +221,8 @@ internal fun bibleSearchResponseFormat(): JsonObject = buildJsonObject {
             put("type", "object")
             put("additionalProperties", false)
             putJsonArray("required") {
-                add("scriptures")
-                add("suggestedQuestions")
+                add(JsonPrimitive("scriptures"))
+                add(JsonPrimitive("suggestedQuestions"))
             }
             putJsonObject("properties") {
                 putJsonObject("scriptures") {
@@ -232,11 +232,11 @@ internal fun bibleSearchResponseFormat(): JsonObject = buildJsonObject {
                         put("type", "object")
                         put("additionalProperties", false)
                         putJsonArray("required") {
-                            add("bookId")
-                            add("chapter")
-                            add("verseStart")
-                            add("verseEnd")
-                            add("reason")
+                            add(JsonPrimitive("bookId"))
+                            add(JsonPrimitive("chapter"))
+                            add(JsonPrimitive("verseStart"))
+                            add(JsonPrimitive("verseEnd"))
+                            add(JsonPrimitive("reason"))
                         }
                         putJsonObject("properties") {
                             putJsonObject("bookId") { put("type", "string") }
