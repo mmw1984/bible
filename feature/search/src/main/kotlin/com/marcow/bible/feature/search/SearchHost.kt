@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.marcow.bible.core.model.AppLocale
 import com.marcow.bible.core.model.ReadingMode
@@ -33,14 +32,17 @@ import kotlinx.coroutines.launch
  * the two parameters that are the reader's rather than the sheet's, and the [viewModel] whose lifetime
  * the host still decides.
  *
- * **Draw it while the sheet is open, and give each open its own [viewModel].** The sheet is a Compose
- * `Dialog` window, so there is no destination to navigate to and nothing to keep it alive but the host's
- * own state — the same arrangement `LibraryRoute` documents for itself. The view model is the half
- * that a host gets wrong by accident: `hiltViewModel()` resolves against the host's
- * `ViewModelStoreOwner`, which is the activity or the destination, and both outlive the sheet, so the
- * second open of a session would start on the first one's query, its results and its mode. `_openSearch`
- * pushed a new `_SearchDialog` every time, and every push was a new `_SearchDialogState` — an empty
- * box, no results, no mode — so pass a view model scoped to this open.
+ * **Draw it while the sheet is open.** The sheet is a Compose `Dialog` window, so there is no
+ * destination to navigate to and nothing to keep it alive but the host's own state — the same
+ * arrangement `LibraryRoute` documents for itself.
+ *
+ * [viewModel] already defaults to [rememberSearchViewModelForOpen], which is what keeps an open from
+ * outliving itself: a plain `hiltViewModel()` resolves against the host's `ViewModelStoreOwner`, which
+ * is the activity or the destination, and both outlive the sheet, so the second open of a session
+ * would start on the first one's query, its results and its mode. `_openSearch` pushed a new
+ * `_SearchDialog` every time, and every push was a new `_SearchDialogState` — an empty box, no
+ * results, no mode. Pass a view model of your own only when you have made one per open, because the
+ * same rule applies to it.
  *
  * @see SearchRoute for the rest of the contract, which this adds nothing to.
  */
@@ -52,7 +54,7 @@ fun SearchHost(
     onDismiss: () -> Unit,
     signIn: SearchSignIn,
     modifier: Modifier = Modifier,
-    viewModel: SearchViewModel = hiltViewModel(),
+    viewModel: SearchViewModel = rememberSearchViewModelForOpen(),
 ) {
     val authError by signIn.lastError.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()

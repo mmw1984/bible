@@ -3,7 +3,6 @@ package com.marcow.bible.feature.search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.marcow.bible.core.model.AppLocale
 import com.marcow.bible.core.model.ReadingMode
@@ -52,12 +51,13 @@ import com.marcow.bible.core.model.ScriptureHit
  * `OpenRouterCallbackForwarder.forwardFrom`, from the activity's `onCreate` and `onNewIntent` — the
  * one leg that genuinely needs the activity this sheet is drawn over.
  *
- * [viewModel] is a parameter so that its lifetime is the host's decision, and a host that reopens the
- * sheet has to decide it deliberately: `_openSearch` pushed a new `_SearchDialog` every time, and
- * every push was a new `_SearchDialogState` — an empty box, no results, no mode. A view model scoped
- * to the activity outlives the sheet instead, and the second open of a session would start on the
- * first one's query and its results, which is the Flutter behaviour this whole feature is written
- * against. Give each open its own.
+ * [viewModel] is a parameter so that its lifetime is the host's decision, and it defaults to
+ * [rememberSearchViewModelForOpen] so that the decision a host is given is already the right one.
+ * `_openSearch` pushed a new `_SearchDialog` every time, and every push was a new `_SearchDialogState`
+ * — an empty box, no results, no mode — so a reopen starts over. A view model scoped to the activity
+ * outlives the sheet instead, and the second open of a session would start on the first one's query
+ * and its results, which is the Flutter behaviour this whole feature is written against. Each open
+ * gets a view model of its own; pass one of your own only when you have made one per open.
  *
  * @see SearchDialog for the parameters, which are the same ones this hands it.
  */
@@ -70,7 +70,7 @@ fun SearchRoute(
     onSignIn: () -> Unit,
     modifier: Modifier = Modifier,
     authError: String? = null,
-    viewModel: SearchViewModel = hiltViewModel(),
+    viewModel: SearchViewModel = rememberSearchViewModelForOpen(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
