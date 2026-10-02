@@ -9,7 +9,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 
 /*
@@ -70,7 +69,7 @@ fun RowEntrance(staggerIndex: Int, gate: RowGate, modifier: Modifier = Modifier,
     Box(
         modifier = modifier.graphicsLayer {
             alpha = progress.value
-            translationY = (RowRiseDp * (1f - progress.value)).dp
+            translationY = (RowRiseDp * (1f - progress.value)).toPx()
         },
     ) {
         content()
