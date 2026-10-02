@@ -48,7 +48,7 @@ interface FlutterSecureStorageReader {
  * file was opened, and building a new one under this alias cannot decrypt what the old one encrypted.
  */
 @Singleton
-class EncryptedFlutterSecureStorageReader @Inject constructor(@ApplicationContext private val context: Context) :
+class EncryptedFlutterSecureStorageReader @Inject constructor(@param:ApplicationContext private val context: Context) :
     FlutterSecureStorageReader {
     @Suppress("TooGenericExceptionCaught")
     override suspend fun read(key: String): String? = withContext(Dispatchers.IO) {
