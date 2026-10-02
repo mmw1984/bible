@@ -366,8 +366,7 @@ private fun String?.toPlayerClock(): Pair<Double, Double>? {
  * are not English. Leaving it off lets the track list fall to the viewer's own preference, which is
  * the reading of the same decision that survives an English-only track not existing.
  */
-internal fun youtubePlayerHtml(videoId: String): String =
-    """
+internal fun youtubePlayerHtml(videoId: String): String = """
     <!doctype html>
     <html>
     <head>

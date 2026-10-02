@@ -33,8 +33,7 @@ class PrepackagedBibleDbTest {
      * registers itself as a JDBC driver, so the URL opens the same database either way — the same
      * swap `BibleSearchTest` makes for the same reason.
      */
-    private fun <T> withDb(block: (Connection) -> T): T =
-        DriverManager.getConnection("jdbc:sqlite:$asset").use(block)
+    private fun <T> withDb(block: (Connection) -> T): T = DriverManager.getConnection("jdbc:sqlite:$asset").use(block)
 
     @Test
     fun `ships 66 books in canon order`() = withDb { db ->
