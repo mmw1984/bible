@@ -3,6 +3,7 @@ package com.marcow.bible.feature.aichat.domain
 import com.marcow.bible.core.database.BibleRepository
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import javax.inject.Inject
@@ -101,12 +102,12 @@ internal fun answerJsonOrNull(answer: String): JsonObject? {
  */
 internal fun scriptureToolRequest(answer: String): ScriptureToolRequest? {
     val payload = answerJsonOrNull(answer) ?: return null
-    if (payload["tool"]?.contentOrNull != TOOL_NAME) return null
+    if ((payload["tool"] as? JsonPrimitive)?.contentOrNull != TOOL_NAME) return null
     return ScriptureToolRequest(
         bookId = payload.stringOrEmpty("bookId").uppercase(),
         chapter = payload.intOrDefault("chapter", 1),
         verseStart = payload.intOrDefault("verseStart", 1),
-        verseEnd = payload["verseEnd"]?.intOrNull,
+        verseEnd = (payload["verseEnd"] as? JsonPrimitive)?.intOrNull,
     )
 }
 
@@ -153,7 +154,8 @@ private const val TOOL_NAME = "get_scripture"
  * or an array. Dart's `as String?` simply failed the cast and carried on with `''`; a model that sent
  * `{"bookId":{"a":1}}` gets an unknown book here rather than a crash.
  */
-private fun JsonObject.stringOrEmpty(key: String): String = this[key]?.contentOrNull?.toString() ?: ""
+private fun JsonObject.stringOrEmpty(key: String): String =
+    (this[key] as? JsonPrimitive)?.contentOrNull?.toString() ?: ""
 
 /**
  * `(request[key] as num?)?.toInt() ?? fallback`.
@@ -161,4 +163,5 @@ private fun JsonObject.stringOrEmpty(key: String): String = this[key]?.contentOr
  * A JSON string where a number belongs is not a number, so `intOrNull` returning null falls through
  * to the default — the same reading the `as num?` cast produced.
  */
-private fun JsonObject.intOrDefault(key: String, fallback: Int): Int = this[key]?.intOrNull ?: fallback
+private fun JsonObject.intOrDefault(key: String, fallback: Int): Int =
+    (this[key] as? JsonPrimitive)?.intOrNull ?: fallback
