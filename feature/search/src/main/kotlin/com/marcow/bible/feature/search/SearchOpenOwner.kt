@@ -73,11 +73,13 @@ internal class SearchOpenOwner(host: ViewModelStoreOwner) :
      *
      * An owner that publishes none is turned away here rather than left to fail downstream as "Cannot
      * create an instance of class SearchViewModel", which blames the view model for something the
-     * composition around it is missing.
+     * composition around it is missing, and names neither. So the refusal names what is missing:
+     * `ViewModelProvider.Factory`, the one type that can build a `@HiltViewModel`.
      */
     override val defaultViewModelProviderFactory: ViewModelProvider.Factory =
         checkNotNull((host as? HasDefaultViewModelProviderFactory)?.defaultViewModelProviderFactory) {
-            "A @HiltViewModel needs the ViewModelStoreOwner it is drawn over to publish a factory."
+            "A @HiltViewModel needs the ViewModelStoreOwner it is drawn over to publish a " +
+                "ViewModelProvider.Factory, because that is the only thing that can build one."
         }
 
     /** What [rememberSearchViewModelForOpen] runs when the host stops drawing the sheet. */
