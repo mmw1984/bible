@@ -80,10 +80,13 @@ internal val NON_ASCII = Regex("[^\\x00-\\x7F]")
 private fun encodeUriComponent(value: String): String {
     val out = StringBuilder(value.length)
     for (byte in value.toByteArray(Charsets.UTF_8)) {
-        if (byte >= 0 && byte.toChar() in UNRESERVED) {
-            out.append(byte.toChar())
+        // `byte.toInt() and 0xFF` widens to the byte's unsigned value, so the nibbles below are the
+        // byte's own bits whether it came off the wire as a positive number or a negative one.
+        val code = byte.toInt() and 0xFF
+        if (code < 0x80 && code.toChar() in UNRESERVED) {
+            out.append(code.toChar())
         } else {
-            out.append('%').append(HEX_DIGITS[(byte shr 4) and 0xF]).append(HEX_DIGITS[byte and 0xF])
+            out.append('%').append(HEX_DIGITS[code shr 4]).append(HEX_DIGITS[code and 0xF])
         }
     }
     return out.toString()
