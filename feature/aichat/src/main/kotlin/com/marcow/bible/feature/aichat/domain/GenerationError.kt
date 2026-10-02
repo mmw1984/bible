@@ -25,7 +25,7 @@ package com.marcow.bible.feature.aichat.domain
 internal fun generationErrorMessage(error: Throwable): String {
     val raw = error.message?.takeIf { it.isNotBlank() } ?: error::class.simpleName.orEmpty()
     val withoutPrefix = raw.replaceFirst(LEADING_ERROR_TYPE, "")
-    val hidden = withoutPrefix.replaceAll(BEARER_TOKEN, "Bearer [hidden]").trim()
+    val hidden = withoutPrefix.replace(BEARER_TOKEN, "Bearer [hidden]").trim()
     if (hidden.isEmpty() || hidden.length > MAX_DETAIL_LENGTH) return GENERIC
     return "$DETAILED$hidden"
 }
