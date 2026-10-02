@@ -1,6 +1,7 @@
 package com.marcow.bible.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -60,7 +61,7 @@ class AppTokensTest {
     fun `rounded device scales the radii and keeps the screen radius`() {
         // The Flutter build read these off the display corners; a 40 dp corner produced
         // compact 9.6, control 13.6, surface 19.2, screen 40.
-        val radii = AppRadii.fromCornerRadii(topLeft = 40f, topRight = 40f, bottomLeft = 40f, bottomRight = 40f)
+        val radii = AppRadii.fromCornerRadii(topLeftDp = 40f, topRightDp = 40f, bottomLeftDp = 40f, bottomRightDp = 40f)
         assertEquals(9.6f.dp, radii.compact)
         assertEquals(13.6f.dp, radii.control)
         assertEquals(19.2f.dp, radii.surface)
@@ -70,13 +71,13 @@ class AppTokensTest {
     @Test
     fun `radius scale clamps at both ends`() {
         // A very square-ish corner would push compact below its 7 dp floor and control below 10.
-        val tight = AppRadii.fromCornerRadii(topLeft = 12f, topRight = 12f, bottomLeft = 12f, bottomRight = 12f)
+        val tight = AppRadii.fromCornerRadii(topLeftDp = 12f, topRightDp = 12f, bottomLeftDp = 12f, bottomRightDp = 12f)
         assertEquals(7f.dp, tight.compact)
         assertEquals(10f.dp, tight.control)
         assertEquals(14f.dp, tight.surface)
 
         // A very round corner would push surface above its 22 dp ceiling and control above 16.
-        val round = AppRadii.fromCornerRadii(topLeft = 90f, topRight = 90f, bottomLeft = 90f, bottomRight = 90f)
+        val round = AppRadii.fromCornerRadii(topLeftDp = 90f, topRightDp = 90f, bottomLeftDp = 90f, bottomRightDp = 90f)
         assertEquals(11f.dp, round.compact)
         assertEquals(16f.dp, round.control)
         assertEquals(22f.dp, round.surface)
@@ -93,7 +94,7 @@ class AppTokensTest {
     fun `only the largest corner drives the scale`() {
         // A display with only the top corners rounded: the scale follows the largest, but the
         // per-corner values are what a sheet's own shape uses, so they are not smoothed.
-        val radii = AppRadii.fromCornerRadii(topLeft = 50f, topRight = 50f, bottomLeft = 0f, bottomRight = 0f)
+        val radii = AppRadii.fromCornerRadii(topLeftDp = 50f, topRightDp = 50f, bottomLeftDp = 0f, bottomRightDp = 0f)
         assertEquals(50f.dp, radii.screen)
         assertEquals(50f.dp, radii.topLeft)
         assertEquals(0f.dp, radii.bottomLeft)
