@@ -158,7 +158,6 @@ fun AiChatScreen(
             bottomPadding = dockHeight + dockOffset,
             topInset = topInset,
             listState = listState,
-            followLatest = followLatest,
             onRegenerate = onRegenerate,
             onCopy = onCopy,
             onOpenLink = onOpenLink,
@@ -209,7 +208,6 @@ private fun AiChatBody(
     bottomPadding: Dp,
     topInset: Dp,
     listState: LazyListState,
-    followLatest: Boolean,
     onRegenerate: () -> Unit,
     onCopy: (AiMessage) -> Unit,
     onOpenLink: (String) -> Unit,
@@ -391,15 +389,17 @@ private fun AiChatHeaderButton(glyph: AppGlyph, label: String, onClick: () -> Un
 }
 
 /**
- * How far the reader has scrolled past the newest answer, or `null` never.
+ * Whether the reader has scrolled past the newest answer by more than [threshold].
  *
- * The list runs upside down, so the newest turn is item 0 and scrolling away from it is a *larger* index
- * rather than a smaller one — which is the whole reason the reversed layout reads like a chat. Being on
- * any item past the first is therefore already past the threshold, and only the tail of item 0 is
- * measured against [threshold].
+ * Dart's `notification.metrics.pixels - notification.metrics.minScrollExtent < 96` (`ai_chat_page.dart:392`),
+ * read off the reversed list instead: that subtraction is the distance from the newest end, which here is
+ * item 0's scroll offset. The list runs upside down, so the newest turn is item 0 and scrolling away from
+ * it is a *larger* index rather than a smaller one — which is the whole reason the reversed layout reads
+ * like a chat. Being on any item past the first is therefore already past the threshold, and only the
+ * tail of item 0 is measured against it.
  */
-private fun LazyListState.awayFromLatest(threshold: Float): Float =
-    if (firstVisibleItemIndex > 0) Float.MAX_VALUE else firstVisibleItemScrollOffset
+private fun LazyListState.awayFromLatest(threshold: Float): Boolean =
+    firstVisibleItemIndex > 0 || firstVisibleItemScrollOffset > threshold
 
 /**
  * `max(10, max(radius, bottomInset) * .24)` is the composer's own gutter, and this is the 64 the header
