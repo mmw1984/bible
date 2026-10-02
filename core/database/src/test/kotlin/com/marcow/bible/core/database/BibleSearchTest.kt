@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Path
 import java.sql.Connection
+import java.sql.DriverManager
 import java.sql.ResultSet
 
 /**
@@ -118,8 +119,13 @@ class BibleSearchTest {
         assertEquals(Testament.NEW, row.toDomain().book.testament)
     }
 
+    /**
+     * `DriverManager` rather than `org.sqlite.JDBC.createConnection`, whose only overload wants a
+     * `Properties` as its second argument and so has no one-argument form to call. sqlite-jdbc
+     * registers itself as a JDBC driver, so the URL opens the same database either way.
+     */
     private fun <T> withDb(block: (Connection) -> T): T =
-        org.sqlite.JDBC.createConnection("jdbc:sqlite:$asset").use(block)
+        DriverManager.getConnection("jdbc:sqlite:$asset").use(block)
 
     private fun ResultSet.toRow(): ScriptureSearchRow = ScriptureSearchRow(
         bookId = getString("book_id"),
