@@ -48,7 +48,18 @@ javaxInject = "1"
 okhttp = "5.5.0"
 sqliteJdbc = "3.53.4.0"
 retrofit = "3.0.0"
-coil = "3.6.3"
+# Coil is pinned to the last 3.x that agrees with the Kotlin the toolchain already runs (see the
+# toolchain note above), not to the newest release. Coil declares the `kotlin-stdlib` it was built
+# against, and Gradle takes the highest request on the classpath, so a Coil newer than 3.3.0 drags
+# a stdlib past what the 2.2.10 compiler can read: 3.4.0 asks for 2.3.10, 3.5.0 for 2.4.0 and
+# 3.6.x for 2.4.10, while 3.3.0 asks for 2.2.0. The result is not a Coil error but a whole-module
+# one — `:feature:devotion` is the only module that depends on Coil, so it is the only one that
+# compiles against the newer stdlib, and it fails with 433 "compiled with an incompatible version of
+# Kotlin" errors over `kotlin.Unit`, `kotlin.text.Regex` and the rest, plus the unresolved-reference
+# cascade behind them. Downgrading the dependency that asks for too much is preferred over forcing
+# the stdlib down with a resolution strategy, because a library built against a newer stdlib can
+# call APIs the older one does not have.
+coil = "3.3.0"
 jsoup = "1.23.2"
 
 # Test
