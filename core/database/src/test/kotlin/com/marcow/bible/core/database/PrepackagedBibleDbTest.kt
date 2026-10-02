@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Path
 import java.sql.Connection
+import java.sql.DriverManager
 import java.sql.ResultSet
 
 /**
@@ -26,8 +27,14 @@ class PrepackagedBibleDbTest {
             .firstOrNull(Files::exists)
             ?: error("pre-packaged asset not found from ${System.getProperty("user.dir")}")
 
+    /**
+     * `DriverManager` rather than `org.sqlite.JDBC.createConnection`, whose only overload wants a
+     * `Properties` as its second argument and so has no one-argument form to call. sqlite-jdbc
+     * registers itself as a JDBC driver, so the URL opens the same database either way — the same
+     * swap `BibleSearchTest` makes for the same reason.
+     */
     private fun <T> withDb(block: (Connection) -> T): T =
-        org.sqlite.JDBC.createConnection("jdbc:sqlite:$asset").use(block)
+        DriverManager.getConnection("jdbc:sqlite:$asset").use(block)
 
     @Test
     fun `ships 66 books in canon order`() = withDb { db ->
