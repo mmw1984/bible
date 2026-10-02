@@ -9,6 +9,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 
 /*
@@ -104,7 +105,7 @@ fun ScrollAwareEntrance(
     Box(
         modifier = modifier.graphicsLayer {
             alpha = progress.value
-            translationY = (EntranceRiseDp * (1f - progress.value)).toPx()
+            translationY = EntranceRiseDp.dp.toPx() * (1f - progress.value)
         },
     ) {
         content()
