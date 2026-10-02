@@ -36,6 +36,11 @@ import org.junit.jupiter.api.Test
  * The updates are built from the real use cases over a fake transport rather than from stubs, because
  * the wiring between them is the thing worth testing: a fake `AiSearch` would only prove that a flow
  * emits what a flow was told to emit.
+ *
+ * The two tests that hold a gate open step the scheduler with `runCurrent` rather than `advanceUntilIdle`,
+ * because they collect in `backgroundScope` — and `advanceUntilIdle` stops the virtual clock once only
+ * coroutines in that scope are left unprocessed, so the search would never have made either request.
+ * Nothing here waits on the clock either: the gates are `CompletableDeferred`, not delays.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class AiSearchUseCaseTest {
