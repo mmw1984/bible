@@ -1,6 +1,5 @@
 package com.marcow.bible.feature.aichat.ui
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -424,7 +423,7 @@ private fun MarkdownTableRow(
                     .drawBehind {
                         if (column > 0) {
                             drawLine(
-                                colors = colors.line,
+                                color = colors.line,
                                 start = Offset.Zero,
                                 end = Offset(0f, size.height),
                                 strokeWidth = 1.dp.toPx(),
@@ -479,7 +478,7 @@ private fun markdownAnnotatedString(
 ): AnnotatedString {
     val inlineWash = appColors.line.copy(alpha = INLINE_CODE_WASH)
     return buildAnnotatedString {
-        appendStyle(base)
+        appendStyle(SpanStyle(base))
         inlines.forEach { inline ->
             when (inline) {
                 is MarkdownInline.Text -> append(inline.text)
@@ -514,7 +513,7 @@ private fun markdownAnnotatedString(
 
                 is MarkdownInline.Link -> {
                     val tappable = onLink != null && inline.target.isNotBlank()
-                    if (tappable) pushLink(LinkAnnotation.Url(Uri.parse(inline.target)))
+                    if (tappable) pushLink(LinkAnnotation.Url(inline.target))
                     pushStyle(
                         SpanStyle(
                             color = LINK_COLOR,
