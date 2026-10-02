@@ -72,7 +72,10 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix = null
+            // `.debug` keeps a local install (`com.marcow.bible.debug`) beside the release
+            // (`com.marcow.bible`), so a debug build never claims the release ID/signature
+            // (NATIVE_PLAN.md §6 R2).
+            applicationIdSuffix = ".debug"
             versionNameSuffix = null
         }
         release {
