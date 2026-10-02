@@ -75,17 +75,13 @@ data class ScriptureHandoff(
          * pairing the reader never produced: a question with `autoSend = false` would be attached to
          * the turn and never asked, and 「問 AI」 must open a composer rather than send.
          */
-        fun of(
-            reference: String,
-            text: String,
-            chapterContext: String,
-            question: String? = null,
-        ): ScriptureHandoff = ScriptureHandoff(
-            reference = reference,
-            context = chapterContext,
-            attachment = text,
-            question = question,
-            autoSend = question != null,
-        )
+        fun of(reference: String, text: String, chapterContext: String, question: String? = null): ScriptureHandoff =
+            ScriptureHandoff(
+                reference = reference,
+                context = chapterContext,
+                attachment = text,
+                question = question,
+                autoSend = question != null,
+            )
     }
 }
