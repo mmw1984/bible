@@ -153,7 +153,7 @@ private fun UserTurn(message: AiMessage, modifier: Modifier = Modifier) {
                     overflow = if (oneLine) TextOverflow.Ellipsis else TextOverflow.Clip,
                     onTextLayout = { layout ->
                         if (!oneLine && !forcedWrap && layout.lineCount == 1) {
-                            natural = layout.size.width
+                            natural = layout.size.width.toFloat()
                             oneLine = true
                         }
                     },
@@ -210,7 +210,7 @@ private fun AssistantTurn(
                     // Dart's `Semantics(liveRegion: streaming)` around the answer, so a screen reader
                     // hears it arriving — and only while it is arriving, as the flag says.
                     modifier = Modifier.semantics {
-                        liveRegion = if (streaming) LiveRegionMode.Polite else LiveRegionMode.None
+                        if (streaming) liveRegion = LiveRegionMode.Polite
                     },
                     onLink = onLink,
                 )
