@@ -6,7 +6,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -140,9 +139,7 @@ class SearchHostTest {
  * [onBegin] is where a test puts what a manager would do, so one fake covers the happy path and the
  * refused browser.
  */
-private class RecordingSearchSignIn(
-    private val onBegin: suspend () -> Unit = {},
-) : SearchSignIn {
+private class RecordingSearchSignIn(private val onBegin: suspend () -> Unit = {}) : SearchSignIn {
     var beginSignInCalls = 0
         private set
 

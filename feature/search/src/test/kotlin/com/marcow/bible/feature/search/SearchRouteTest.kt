@@ -122,10 +122,7 @@ class SearchRouteTest {
      * The sheet's state machine over the fakes below, with the signed-in watcher already run so
      * `aiReady` reflects [session] the way it does on a real screen.
      */
-    private fun TestScope.searchViewModel(
-        aiSearch: AiSearch,
-        session: OpenRouterSession,
-    ): SearchViewModel {
+    private fun TestScope.searchViewModel(aiSearch: AiSearch, session: OpenRouterSession): SearchViewModel {
         val viewModel = SearchViewModel(
             traditionalSearch = NoTextSearch,
             aiSearch = aiSearch,
