@@ -251,6 +251,27 @@ class AiChatViewModel @Inject constructor(
         viewModelScope.launch { memoryStore.clear() }
     }
 
+    /**
+     * `refreshOpenRouterLogin()`: what `didChangeAppLifecycleState` called on every resume.
+     *
+     * This is the leg that makes the Custom Tab round trip work at all, and it is separate from
+     * [initialize] because [initialize] is guarded by [AiChatState.initialized] — the transcript restore
+     * must happen once, while the sign-in has to be re-read every time the chat comes back to the
+     * foreground, because coming back from the browser is exactly when a code is parked and waiting for
+     * its exchange (`NATIVE_PLAN.md` §4.7).
+     *
+     * `OpenRouterAuthManager.initialize` is safe to run again: it re-reads the key, re-reads the model and
+     * retries the parked exchange, all of which are no-ops once the exchange has been done. A failure is
+     * left in [AiChatState.authError] by the manager rather than thrown, so a network failure on resume
+     * shows in the sign-in panel and does not take the chat down with it.
+     *
+     * Nothing here has to re-ask a held question: the [signIn.signedIn] observer in `init` already does
+     * that, which is `_controllerChanged`'s half of the same behaviour.
+     */
+    fun refreshSignIn() {
+        viewModelScope.launch { signIn.initialize() }
+    }
+
     /** `beginOpenRouterLogin()`: the sign-in panel's button. */
     @Suppress("TooGenericExceptionCaught")
     fun beginSignIn() {

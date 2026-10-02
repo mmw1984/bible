@@ -356,9 +356,12 @@ private fun AnswerAction(glyph: AppGlyph, label: String, onClick: () -> Unit) {
  * rather than pulsing together — Dart's `((animation.value - index * .16) % 1)`. The modulo is written
  * with the add-and-take again because Dart's `%` never comes back negative for a positive divisor and
  * Kotlin's does, and the first half of a cycle is exactly when it would.
+ *
+ * Internal rather than private because the transcript's "Thinking" row draws the same dots, as Dart's
+ * `_ThinkingIndicator` did. [compact] is the reason's own size; the row's is the full one.
  */
 @Composable
-private fun ThinkingDots(compact: Boolean) {
+internal fun ThinkingDots(compact: Boolean) {
     val clock by rememberInfiniteTransition(label = "thinking-dots").animateFloat(
         initialValue = 0f,
         targetValue = 1f,
