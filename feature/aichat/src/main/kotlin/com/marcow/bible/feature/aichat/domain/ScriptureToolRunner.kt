@@ -22,9 +22,13 @@ import javax.inject.Singleton
  * Every error is returned as a `Tool error: …` line rather than thrown. The model asked for a
  * passage and the app could not supply one, so the model is the one that has to hear about it and
  * decide what to say; throwing would fail the whole answer instead.
+ *
+ * Public because [AskQuestionUseCase]'s public injected constructor takes it: a public signature
+ * cannot name an internal type without an `EXPOSED_PARAMETER_TYPE` suppression whose behaviour the
+ * compiler does not preserve.
  */
 @Singleton
-internal class ScriptureToolRunner @Inject constructor(private val bibleRepository: BibleRepository) {
+class ScriptureToolRunner @Inject constructor(private val bibleRepository: BibleRepository) {
     /**
      * The verses of the requested range, or the `Tool error: …` line explaining why there are none.
      *
