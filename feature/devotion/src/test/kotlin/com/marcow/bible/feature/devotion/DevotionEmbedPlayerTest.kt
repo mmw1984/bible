@@ -81,6 +81,24 @@ class DevotionEmbedPlayerTest {
     }
 
     @Test
+    fun `the frame asks youtube for the same two player decisions the dart params made`() {
+        val html = youtubePlayerHtml("dQw4w9WgXcQ")
+
+        // `showVideoAnnotations: false` at `legacy/flutter/lib/devotion_youtube_player.dart:71`, which
+        // is YouTube's `iv_load_policy: 3`. Left at the default the player draws its annotations and an
+        // endscreen over the video — the uncontrollable second UI layer the Dart build's comment on
+        // those params says it was switching them off to avoid.
+        assertTrue(html.contains("iv_load_policy: 3"))
+
+        // `strictRelatedVideos: true`, the same params' other half: `strict: 1` limits the related list
+        // to the video's own channel. `rel: 0` beside it already removes that list outright, so this is
+        // the stricter of two settings rather than the only one — it is named so the Dart params are
+        // not silently dropped.
+        assertTrue(html.contains("strict: 1"))
+        assertTrue(html.contains("rel: 0"))
+    }
+
+    @Test
     fun `the frame is given an origin for the api to check itself against`() {
         // `loadDataWithBaseURL` without a base would present the page as `about:blank`, and the IFrame
         // API refuses to run from there.

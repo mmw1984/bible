@@ -333,6 +333,21 @@ private fun String?.toPlayerClock(): Pair<Double, Double>? {
  *
  * `loadDataWithBaseURL` needs a base even though both URLs are absolute, or the API's own origin
  * checks refuse the script.
+ *
+ * **The `playerVars` carry two decisions that are not ours.** `showVideoAnnotations: false` and
+ * `strictRelatedVideos: true` were what the Dart build passed to `YoutubePlayerParams`
+ * (`legacy/flutter/lib/devotion_youtube_player.dart:71`), and that file carries the reason in a
+ * comment: annotations and endscreens would render an uncontrollable second UI layer on top of the
+ * video, so they were switched off "to leave exactly one controllable UI layer". YouTube's iframe API
+ * takes the same two decisions under other names, and without them this frame is exactly the thing
+ * the Dart build refused to ship — an annotation the reader can tap through the seek zones, and an
+ * endscreen that takes over the block the video sits in. `iv_load_policy: 3` hides both; `strict: 1`
+ * keeps the related list to the video's own channel, which `rel: 0` had already made moot by
+ * removing it outright and which is named here so the Dart params have a line they map to.
+ *
+ * Captions get no parameter for the same reason they got none there: `enableCaption: true` is what
+ * the iframe already does — `cc_load_policy` 0, the default, loads them — so naming it would only be
+ * a second statement of it.
  */
 internal fun youtubePlayerHtml(videoId: String): String =
     """
@@ -353,7 +368,7 @@ internal fun youtubePlayerHtml(videoId: String): String =
     function onYouTubeIframeAPIReady() {
       window.player = new YT.Player('player', {
         videoId: '$videoId',
-        playerVars: {playsinline: 1, rel: 0, modestbranding: 1, enablejsapi: 1}
+        playerVars: {playsinline: 1, rel: 0, modestbranding: 1, enablejsapi: 1, iv_load_policy: 3, strict: 1}
       });
     }
     </script>
