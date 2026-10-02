@@ -63,7 +63,7 @@ interface AiMemoryStore {
  * public module cannot do with an internal type — the same reason `feature/search`'s `BlankAiSearchMemory`
  * is public.
  */
-class BlankAiMemoryStore : AiMemoryStore {
+class BlankAiMemoryStore @javax.inject.Inject constructor() : AiMemoryStore {
     override suspend fun promptMemory(maxCharacters: Int): String = ""
 
     override suspend fun transcript(limit: Int): List<AiMessage> = emptyList()
