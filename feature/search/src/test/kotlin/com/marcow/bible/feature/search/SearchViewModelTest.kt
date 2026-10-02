@@ -143,6 +143,7 @@ class SearchViewModelTest {
         val updates = MutableSharedFlow<AiSearchUpdate>(extraBufferCapacity = 8)
         val viewModel = searchViewModel(aiSearch = FakeAiSearch(updates))
         searchAi(viewModel)
+        advanceUntilIdle()
 
         assertTrue(viewModel.state.value.overviewSearching)
         assertTrue(viewModel.state.value.referencesSearching)
@@ -169,6 +170,7 @@ class SearchViewModelTest {
         val updates = MutableSharedFlow<AiSearchUpdate>(extraBufferCapacity = 8)
         val viewModel = searchViewModel(aiSearch = FakeAiSearch(updates))
         searchAi(viewModel)
+        advanceUntilIdle()
 
         updates.tryEmit(AiSearchUpdate.OverviewFailed)
         updates.tryEmit(AiSearchUpdate.ReferencesReady(listOf(aiHit(johnThreeSixteen(), "God so loved"))))
@@ -186,6 +188,7 @@ class SearchViewModelTest {
         val viewModel = searchViewModel(aiSearch = FakeAiSearch(updates))
 
         searchAi(viewModel)
+        advanceUntilIdle()
         updates.tryEmit(AiSearchUpdate.OverviewReady("An overview."))
         updates.tryEmit(AiSearchUpdate.ReferencesFailed(ReferenceFailure.REQUEST))
         advanceUntilIdle()
