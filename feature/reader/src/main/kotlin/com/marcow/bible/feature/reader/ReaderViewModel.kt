@@ -81,10 +81,13 @@ class ReaderViewModel @Inject constructor(
     /**
      * Opens [bookId] at its first chapter in Chinese, which is what selecting a book in the library
      * did — `chapter: 1, mode: ReadingMode.CHINESE` in `_BibleHomeState`.
+     *
+     * Re-selecting the book being read resets it the same way: Flutter's `_selectBook` ran
+     * unconditionally, so tapping the current book still dropped the chapter back to 1 in Chinese.
      */
     fun selectBook(bookId: String) {
         val index = books.indexOfFirst { it.id == bookId }
-        if (index < 0 || index == position.bookIndex) return
+        if (index < 0) return
         stepTo(position.movedTo(index, FIRST_CHAPTER).copy(mode = ReadingMode.CHINESE))
     }
 
