@@ -88,7 +88,8 @@ data class OpenRouterCallbackUri(
 
     /** The loopback leg of the same sign-in, which a desktop or `flutter run` build receives. */
     val isLoopback: Boolean
-        get() = scheme == "http" && (host == "localhost" || host == "127.0.0.1") &&
+        get() = scheme == "http" &&
+            (host == "localhost" || host == "127.0.0.1") &&
             path.equals("/callback", ignoreCase = true)
 
     /** `uri.queryParameters['error_description'] ?? uri.queryParameters['error']`, empties dropped. */
