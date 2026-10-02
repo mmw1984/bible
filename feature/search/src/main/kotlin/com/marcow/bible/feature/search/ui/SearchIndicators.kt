@@ -201,6 +201,6 @@ private const val MIN_SPINNER_STROKE_DP = 1.6f
 private const val FULL_TURN = 360f
 
 private const val PROGRESS_MILLIS = 1450
-private const val PROGRESS_LINE_HEIGHT = 3.dp
+private val PROGRESS_LINE_HEIGHT = 3.dp
 private const val PROGRESS_LINE_RADIUS = 50
 private const val SEGMENT_BREATH = 0.16f
