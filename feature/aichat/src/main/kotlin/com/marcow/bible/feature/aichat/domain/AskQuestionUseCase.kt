@@ -234,7 +234,7 @@ class AskQuestionUseCase @Inject constructor(private val scriptureToolRunner: Sc
         val segment = StringBuilder()
         var finishReason: FinishReason? = null
         var failure: String? = null
-        var publishedAt: TimeSource.Monotonic.ValueMark? = null
+        var publishedAt: TimeSource.Monotonic.ValueTimeMark? = null
 
         // `_appendWithoutDuplicate(initialAnswer, _cleanModelOutput(rawSegment), additionComplete: …)`,
         // which both the provisional message and the round's return value are built from.
