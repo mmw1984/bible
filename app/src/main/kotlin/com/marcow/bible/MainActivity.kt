@@ -5,15 +5,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.marcow.bible.core.network.openrouter.OpenRouterAuthManager
@@ -23,8 +14,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * Single activity host. Phase 0 only ships the static shell; the reader/library/search/
- * aichat/devotion destinations are wired in later phases (NATIVE_PLAN.md §5).
+ * Single activity host. The content is [BibleApp]: the tab shell (reader / AI chat / devotion),
+ * the reader's top bar, the library destination, the search dialog and settings, mirroring
+ * `BibleHome` in `legacy/flutter/lib/main.dart:199`.
  *
  * **The two legs of the OpenRouter sign-in live here, and this is the only place they can.** Dart ran
  * both from `initialize()` — `AppLinks.getInitialLink()` answered the launch link and
@@ -72,11 +64,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         openRouterSession(intent)
         setContent {
-            MaterialTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    BibleShell()
-                }
-            }
+            BibleApp()
         }
     }
 
@@ -103,17 +91,5 @@ class MainActivity : ComponentActivity() {
             auth.initialize()
             callbacks.forwardFrom(launchIntent)
         }
-    }
-}
-
-@Composable
-private fun BibleShell() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(text = "Bible", style = MaterialTheme.typography.headlineMedium)
-        Text(text = "2.0.0-beta", style = MaterialTheme.typography.bodyMedium)
     }
 }
