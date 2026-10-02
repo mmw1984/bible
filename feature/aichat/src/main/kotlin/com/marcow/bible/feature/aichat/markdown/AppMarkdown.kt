@@ -136,6 +136,7 @@ sealed interface MarkdownInline {
  * trailing empty element — so a document ending in a newline ends on a blank line rather than ending on
  * its last line of text, exactly as it did there.
  */
+@Suppress("NestedBlockDepth")
 fun parseAppMarkdown(data: String): List<MarkdownBlock> {
     val lines = data.replace("\r\n", "\n").split("\n")
     val blocks = mutableListOf<MarkdownBlock>()
