@@ -3,6 +3,8 @@
 package com.marcow.bible.feature.devotion
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -33,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.isDark
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -194,19 +195,24 @@ fun DevotionWebReader(
             Box(modifier = Modifier.fillMaxSize().background(pageBackground)) {
                 AndroidView(
                     key = url,
-                    factory = { context ->
+                    factory = { context: Context ->
                         WebView(context).apply {
                             settings.javaScriptEnabled = true
                             settings.domStorageEnabled = true
                             settings.allowFileAccess = false
                             settings.allowContentAccess = false
                             setBackgroundColor(AndroidColor.TRANSPARENT)
-                            webViewClient = object : WebViewClient() {
+                            webChromeClient = object : WebChromeClient() {
                                 // `onProgress`: `value / 100` in Dart, so the bar is a fraction here.
+                                // It is a `WebChromeClient` callback and not a `WebViewClient` one:
+                                // loading progress is reported by the chrome, and `WebViewClient` has no
+                                // such method to override, so the bar would never have moved.
                                 override fun onProgressChanged(view: WebView?, newProgress: Int) {
                                     progress = newProgress / PERCENT
                                 }
+                            }
 
+                            webViewClient = object : WebViewClient() {
                                 // `onPageFinished` pinned the bar to full rather than trusting the
                                 // last `onProgress`, because a page whose final asset is still
                                 // rendering reports 100 and then draws for another second.
@@ -244,11 +250,11 @@ fun DevotionWebReader(
                             loadUrl(url)
                         }
                     },
-                    onRelease = { webView ->
+                    onRelease = { webView: WebView ->
                         if (frame === webView) frame = null
                         webView.destroy()
                     },
-                    update = { webView -> frame = webView },
+                    update = { webView: WebView -> frame = webView },
                     modifier = Modifier.fillMaxSize(),
                 )
             }
