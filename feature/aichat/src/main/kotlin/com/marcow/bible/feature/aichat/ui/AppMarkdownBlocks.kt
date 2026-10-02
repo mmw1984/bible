@@ -23,8 +23,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -111,11 +111,7 @@ internal fun AppMarkdownBlocks(
  * thought being read is deliberately not.
  */
 @Immutable
-private class MarkdownPalette(
-    val foreground: Color,
-    val secondary: Color,
-    val onLink: ((String) -> Unit)?,
-)
+private class MarkdownPalette(val foreground: Color, val secondary: Color, val onLink: ((String) -> Unit)?) {
 
 /**
  * One block, under the bottom space it carried.
@@ -125,11 +121,7 @@ private class MarkdownPalette(
  * two would be seen side by side.
  */
 @Composable
-private fun MarkdownBlockRow(
-    block: MarkdownBlock,
-    palette: MarkdownPalette,
-    compact: Boolean,
-) {
+private fun MarkdownBlockRow(block: MarkdownBlock, palette: MarkdownPalette, compact: Boolean) {
     val margin = if (block is MarkdownBlock.ListItem) listMargin(compact) else blockMargin(compact)
     Column(modifier = Modifier.padding(bottom = margin)) {
         when (block) {
@@ -231,11 +223,7 @@ private fun MarkdownHeading(level: Int, text: String, compact: Boolean) {
  * painted over the padding box, not carved out of it.
  */
 @Composable
-private fun MarkdownQuote(
-    inlines: List<MarkdownInline>,
-    palette: MarkdownPalette,
-    compact: Boolean,
-) {
+private fun MarkdownQuote(inlines: List<MarkdownInline>, palette: MarkdownPalette, compact: Boolean) {
     val colors = appColors
     MarkdownBody(
         inlines = inlines,
@@ -291,11 +279,7 @@ private fun MarkdownCodeBlock(code: String, compact: Boolean) {
  * ticked and unticked items in one list still line their text up.
  */
 @Composable
-private fun MarkdownListItem(
-    item: MarkdownBlock.ListItem,
-    palette: MarkdownPalette,
-    compact: Boolean,
-) {
+private fun MarkdownListItem(item: MarkdownBlock.ListItem, palette: MarkdownPalette, compact: Boolean) {
     Row(verticalAlignment = Alignment.Top) {
         Box(modifier = Modifier.width(if (item.checked == null) MARKER_COLUMN else CHECK_COLUMN)) {
             if (item.checked == null) {
@@ -365,11 +349,7 @@ private fun MarkdownCheckbox(checked: Boolean) {
  * keeps a five-column one legible, so both are kept.
  */
 @Composable
-private fun MarkdownTable(
-    table: MarkdownBlock.Table,
-    palette: MarkdownPalette,
-    compact: Boolean,
-) {
+private fun MarkdownTable(table: MarkdownBlock.Table, palette: MarkdownPalette, compact: Boolean) {
     val colors = appColors
     val shape = RoundedCornerShape(appRadii.compact)
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -469,12 +449,7 @@ private fun MarkdownTableRow(
 
 /** One table cell, at the table's own `11`/`13` and `1.45`. */
 @Composable
-private fun MarkdownCell(
-    inlines: List<MarkdownInline>,
-    header: Boolean,
-    palette: MarkdownPalette,
-    compact: Boolean,
-) {
+private fun MarkdownCell(inlines: List<MarkdownInline>, header: Boolean, palette: MarkdownPalette, compact: Boolean) {
     MarkdownBody(
         inlines = inlines,
         color = if (header) palette.foreground else palette.secondary,
