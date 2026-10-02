@@ -302,8 +302,8 @@ private fun NavBarTab(
 
 /** The pill's drop shadow, heavier in dark mode because the canvas is nearly black there. */
 private fun pillShadowColor(colors: AppColors): Color = Color.Black.copy(
-        alpha = if (colors.canvas.luminance() < DarkCanvasLuminance) PillShadowDarkAlpha else PillShadowLightAlpha,
-    )
+    alpha = if (colors.canvas.luminance() < DarkCanvasLuminance) PillShadowDarkAlpha else PillShadowLightAlpha,
+)
 
 /**
  * Where the two canvases split: `AppColors.Dark` paints `0xFF090909` and `AppColors.Light` paints
