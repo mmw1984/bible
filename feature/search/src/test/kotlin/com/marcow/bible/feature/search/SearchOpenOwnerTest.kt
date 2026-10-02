@@ -114,7 +114,7 @@ class SearchOpenOwnerTest {
  * The factory `androidx.lifecycle.viewmodel.compose.viewModel` falls back to when the owner it is given
  * publishes none, which is the same shape the activity that hosts the sheet has.
  */
-private val NewFactory = ViewModelProvider.NewInstanceFactory.getInstance()
+private val NewFactory = ViewModelProvider.NewInstanceFactory()
 
 /**
  * Stands in for [SearchViewModel], whose five injected ports would say nothing more here.
