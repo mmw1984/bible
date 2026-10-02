@@ -60,11 +60,13 @@ class AppTokensTest {
     @Test
     fun `rounded device scales the radii and keeps the screen radius`() {
         // The Flutter build read these off the display corners; a 40 dp corner produced
-        // compact 9.6, control 13.6, surface 19.2, screen 40.
+        // compact 9.6, control 13.6, surface 19.2, screen 40. The scales are `Float` constants, so
+        // the products land a hair off those decimals and are compared with the same tolerance
+        // `app_theme_test.dart` used rather than exactly.
         val radii = AppRadii.fromCornerRadii(topLeftDp = 40f, topRightDp = 40f, bottomLeftDp = 40f, bottomRightDp = 40f)
-        assertEquals(9.6f.dp, radii.compact)
-        assertEquals(13.6f.dp, radii.control)
-        assertEquals(19.2f.dp, radii.surface)
+        assertEquals(9.6f, radii.compact.value, TOLERANCE)
+        assertEquals(13.6f, radii.control.value, TOLERANCE)
+        assertEquals(19.2f, radii.surface.value, TOLERANCE)
         assertEquals(40f.dp, radii.screen)
     }
 
@@ -93,12 +95,13 @@ class AppTokensTest {
     @Test
     fun `only the largest corner drives the scale`() {
         // A display with only the top corners rounded: the scale follows the largest, but the
-        // per-corner values are what a sheet's own shape uses, so they are not smoothed.
+        // per-corner values are what a sheet's own shape uses, so they are not smoothed. The
+        // 50 dp corner takes control to its 16 dp ceiling rather than to 17.
         val radii = AppRadii.fromCornerRadii(topLeftDp = 50f, topRightDp = 50f, bottomLeftDp = 0f, bottomRightDp = 0f)
         assertEquals(50f.dp, radii.screen)
         assertEquals(50f.dp, radii.topLeft)
         assertEquals(0f.dp, radii.bottomLeft)
-        assertEquals(17f.dp, radii.control)
+        assertEquals(16f.dp, radii.control)
     }
 
     @Test
@@ -106,5 +109,10 @@ class AppTokensTest {
         assertNotEquals(AppColors.Light.canvas, AppColors.Dark.canvas)
         assertTrue(AppColors.Light.canvas.luminance() > AppColors.Dark.canvas.luminance())
         assertTrue(AppColors.Light.ink.luminance() < AppColors.Dark.ink.luminance())
+    }
+
+    private companion object {
+        /** The scales are `Float`, so the Flutter build's decimals are near rather than equal. */
+        const val TOLERANCE = 0.001f
     }
 }
