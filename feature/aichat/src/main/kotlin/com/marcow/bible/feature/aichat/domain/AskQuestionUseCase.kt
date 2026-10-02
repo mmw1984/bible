@@ -51,8 +51,8 @@ class AskQuestionUseCase @Inject constructor(private val scriptureToolRunner: Sc
     override suspend fun ask(
         provider: AiProvider,
         question: AskQuestion,
-        onProgress: (AnswerProgress) -> Unit = {},
-        isStopped: () -> Boolean = { false },
+        onProgress: (AnswerProgress) -> Unit,
+        isStopped: () -> Boolean,
     ): ChatAnswer {
         val prompt = chatPrompt(
             question.question,
@@ -234,7 +234,7 @@ class AskQuestionUseCase @Inject constructor(private val scriptureToolRunner: Sc
         val segment = StringBuilder()
         var finishReason: FinishReason? = null
         var failure: String? = null
-        var publishedAt: TimeSource.Monotonic.Value? = null
+        var publishedAt: TimeSource.Monotonic.ValueMark? = null
 
         // `_appendWithoutDuplicate(initialAnswer, _cleanModelOutput(rawSegment), additionComplete: …)`,
         // which both the provisional message and the round's return value are built from.
