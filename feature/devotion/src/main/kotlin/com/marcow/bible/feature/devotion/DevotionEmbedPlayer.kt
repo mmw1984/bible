@@ -1,6 +1,7 @@
 package com.marcow.bible.feature.devotion
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -78,7 +79,7 @@ internal fun DevotionEmbedPlayer(url: String, onOpenUrl: (String) -> Unit, modif
             // builds its `WebView` once and keeps it, so a reader who moves to the next article's
             // embed would otherwise still be looking at — and hearing — the previous one.
             key = url,
-            factory = { context ->
+            factory = { context: Context ->
                 WebView(context).apply {
                     // `setJavaScriptMode(JavaScriptMode.unrestricted)` in the Dart build: the widget
                     // is a page, and it does not run without script.
@@ -139,7 +140,7 @@ internal fun DevotionEmbedPlayer(url: String, onOpenUrl: (String) -> Unit, modif
                     loadUrl(url)
                 }
             },
-            onRelease = { webView -> webView.destroy() },
+            onRelease = { webView: WebView -> webView.destroy() },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(DevotionChrome.MEDIA_HEIGHT),
