@@ -2,6 +2,7 @@ package com.marcow.bible.feature.search.domain
 
 import com.marcow.bible.core.network.openrouter.ChatCompletionRequest
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
@@ -131,9 +132,9 @@ internal object OpenRouterSearchRequests {
         put("type", "object")
         put("additionalProperties", false)
         putJsonArray("required") {
-            if (includeOverview) add("overview")
-            add("scriptures")
-            add("suggestedQuestions")
+            if (includeOverview) add(JsonPrimitive("overview"))
+            add(JsonPrimitive("scriptures"))
+            add(JsonPrimitive("suggestedQuestions"))
         }
         putJsonObject("properties") {
             if (includeOverview) putJsonObject("overview") { put("type", "string") }
@@ -144,11 +145,11 @@ internal object OpenRouterSearchRequests {
                     put("type", "object")
                     put("additionalProperties", false)
                     putJsonArray("required") {
-                        add("bookId")
-                        add("chapter")
-                        add("verseStart")
-                        add("verseEnd")
-                        add("reason")
+                        add(JsonPrimitive("bookId"))
+                        add(JsonPrimitive("chapter"))
+                        add(JsonPrimitive("verseStart"))
+                        add(JsonPrimitive("verseEnd"))
+                        add(JsonPrimitive("reason"))
                     }
                     putJsonObject("properties") {
                         putJsonObject("bookId") { put("type", "string") }
