@@ -59,6 +59,9 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    // `SearchRoute` resolves its view model through `hiltViewModel()`; `core:navigation` re-exports
+    // this too, but a module that names the symbol itself says where it came from.
+    implementation(libs.androidx.hilt.navigation.compose)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     api(project(":core:design-system"))
