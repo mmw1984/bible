@@ -154,6 +154,7 @@ internal fun AiChatComposer(
  * and rebuilt from a listener. The screen already holds the question in its state, and a second copy
  * here would be a second thing to keep in step with it.
  */
+@Suppress("LongParameterList")
 @Composable
 private fun AiChatInput(
     value: String,
