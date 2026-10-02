@@ -7,6 +7,7 @@ import com.marcow.bible.core.database.ScriptureSearchRow
 import com.marcow.bible.core.database.VerseEntity
 import com.marcow.bible.core.model.ScriptureHit
 import com.marcow.bible.core.model.Testament
+import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -27,7 +28,7 @@ import org.junit.jupiter.api.assertThrows
  */
 class TraditionalSearchUseCaseTest {
     @Test
-    fun `a query with nothing in it asks the database for nothing`() {
+    fun `a query with nothing in it asks the database for nothing`() = runTest {
         val dao = RecordingBibleDao()
 
         assertEquals(emptyList<ScriptureHit>(), run(dao, "   "))
@@ -38,7 +39,7 @@ class TraditionalSearchUseCaseTest {
     }
 
     @Test
-    fun `the cut-off the label promises is the limit the query is given`() {
+    fun `the cut-off the label promises is the limit the query is given`() = runTest {
         val dao = RecordingBibleDao()
 
         run(dao, "愛")
@@ -47,7 +48,7 @@ class TraditionalSearchUseCaseTest {
     }
 
     @Test
-    fun `the pattern reaches the query with the wildcards escaped`() {
+    fun `the pattern reaches the query with the wildcards escaped`() = runTest {
         val dao = RecordingBibleDao()
 
         run(dao, "  100% Love  ")
@@ -58,7 +59,7 @@ class TraditionalSearchUseCaseTest {
     }
 
     @Test
-    fun `a row becomes a tile carrying the book the projection flattened into it`() {
+    fun `a row becomes a tile carrying the book the projection flattened into it`() = runTest {
         val dao = RecordingBibleDao(rows = listOf(SEARCH_ROW))
 
         val hit = run(dao, "愛").single()
@@ -72,7 +73,7 @@ class TraditionalSearchUseCaseTest {
     }
 
     @Test
-    fun `a verse one translation has and the other does not keeps its row`() {
+    fun `a verse one translation has and the other does not keeps its row`() = runTest {
         // The search SQL projects the two texts as separate nullable columns, so a row the English
         // side does not have must still draw — with an empty side, not as a dropped tile.
         val dao = RecordingBibleDao(rows = listOf(SEARCH_ROW.copy(textWeb = null)))
@@ -84,7 +85,7 @@ class TraditionalSearchUseCaseTest {
     }
 
     @Test
-    fun `a lookup that fails escapes rather than coming back empty`() {
+    fun `a lookup that fails escapes rather than coming back empty`() = runTest {
         // The sheet's `search_status` panel is drawn by catching this. Returning an empty list instead
         // would show `no_results` for a database that could not answer, which is a lie about the app.
         val dao = RecordingBibleDao(failure = IllegalStateException("no such column: text_cuv"))
@@ -95,7 +96,7 @@ class TraditionalSearchUseCaseTest {
     }
 
     @Test
-    fun `nothing that matches is an empty list and not a failure`() {
+    fun `nothing that matches is an empty list and not a failure`() = runTest {
         assertEquals(emptyList<ScriptureHit>(), run(RecordingBibleDao(), "找不到的字"))
     }
 
