@@ -144,7 +144,7 @@ internal fun openRouterCompletionRequest(bearer: String, body: JsonObject): Requ
     .header("Authorization", "Bearer $bearer")
     .header("Content-Type", "application/json")
     .header("X-OpenRouter-Title", TITLE)
-    .post(body.toRequestBody(JSON_MEDIA_TYPE))
+    .post(body.toString().toRequestBody(JSON_MEDIA_TYPE))
     .build()
 
 /** `'OpenRouter request failed (${response.statusCode}): ${_errorMessage(payload)}'`. */
@@ -168,7 +168,8 @@ private fun contentText(raw: String): String {
     } catch (_: SerializationException) {
         return ""
     }
-    val choice = (payload["choices"] as? JsonArray)?.firstOrNull() as? JsonObject ?: return ""
+    val choice = ((payload as? JsonObject)?.get("choices") as? JsonArray)?.firstOrNull() as? JsonObject
+        ?: return ""
     val message = choice["message"] as? JsonObject ?: return ""
     return contentOf(message["content"])
 }
