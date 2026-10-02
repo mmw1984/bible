@@ -27,7 +27,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class BibleShellViewModel @Inject constructor(
-    settingsRepository: SettingsRepository,
+    private val settingsRepository: SettingsRepository,
     val searchSignIn: SearchSignIn,
 ) : ViewModel() {
     val settings: StateFlow<AppSettings> = settingsRepository.settings.stateIn(
