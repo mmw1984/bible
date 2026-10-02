@@ -558,6 +558,9 @@ internal class AiChatViewModelTest {
             signIn = FakeSignIn(signedIn = false),
             aiProvider = AiProviderId.GeminiNano,
         )
+        // `isReady` is `initialized` *and* a provider, so the restore has to be back before it can say
+        // anything: without this the assertion would pass on the provider half alone.
+        viewModel.initialize()
         advanceUntilIdle()
 
         assertFalse(viewModel.state.value.requiresLogin)
