@@ -224,7 +224,6 @@ private fun SearchHeader(
 private fun SearchProgressVisibility(searching: Boolean) {
     AnimatedVisibility(
         visible = searching,
-        alignment = Alignment.TopCenter,
         enter = expandVertically(animationSpec = tween(PROGRESS_MILLIS, easing = EaseOutCubic)) +
             fadeIn(animationSpec = tween(PROGRESS_MILLIS)),
         exit = shrinkVertically(animationSpec = tween(PROGRESS_MILLIS, easing = EaseOutCubic)) +
