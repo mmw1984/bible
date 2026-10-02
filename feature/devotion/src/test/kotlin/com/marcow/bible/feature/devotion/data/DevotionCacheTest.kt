@@ -144,7 +144,11 @@ class DevotionCacheTest {
     @Test
     fun `a real post survives the round-trip with its block tree intact`() = runTest {
         val cache = DevotionCache(dao)
-        val original = post(id = 25436, title = "[觀畫靈修] 亞伯蘭與撒萊在埃及 －2026年8月21日", html = fixture("devotion_guanhua.html"))
+        val original = post(
+            id = 25436,
+            title = "[觀畫靈修] 亞伯蘭與撒萊在埃及 －2026年8月21日",
+            html = fixture("devotion_guanhua.html"),
+        )
 
         cache.write(listOf(original))
         val restored = cache.read().single()

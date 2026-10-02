@@ -47,7 +47,10 @@ class DevotionFeedTest {
 
         assertEquals(listOf(25436L, 25432L), posts.map { it.id })
         assertEquals(
-            listOf("[觀畫靈修] 亞伯蘭與撒萊在埃及 －2026年8月21日", "[詩歌靈修] 頌主奇恩 －2026年8月20日"),
+            listOf(
+                "[觀畫靈修] 亞伯蘭與撒萊在埃及 －2026年8月21日",
+                "[詩歌靈修] 頌主奇恩 －2026年8月20日",
+            ),
             posts.map { it.title },
         )
     }
