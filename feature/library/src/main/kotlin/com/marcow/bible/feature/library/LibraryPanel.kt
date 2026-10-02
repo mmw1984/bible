@@ -183,8 +183,8 @@ private fun TestamentList(
         modifier = modifier,
         transitionSpec = {
             fadeIn(tween(PanelChrome.listEnterMillis, easing = SpringCurve)) +
-                slideIn(tween(PanelChrome.listEnterMillis, easing = SpringCurve)) { height ->
-                    IntOffset(0, (height * PanelChrome.ListSlideFraction).toInt())
+                slideIn(tween(PanelChrome.listEnterMillis, easing = SpringCurve)) { fullSize ->
+                    IntOffset(0, (fullSize.height * PanelChrome.ListSlideFraction).toInt())
                 } togetherWith ExitTransition.None
         },
         label = "libraryTestament",
