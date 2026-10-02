@@ -33,7 +33,7 @@ fun rowEntranceDurationMillis(staggerIndex: Int): Int =
 /** When this book starts moving, `staggerIndex.clamp(0, 10) * .035` of its own duration. */
 fun rowEntranceDelayMillis(staggerIndex: Int): Int {
     val staggered = staggerIndex.coerceIn(0, RowMaxDelayStagger)
-    return (staggered * RowDelayFraction * rowEntranceDurationMillis(staggerIndex)).toInt()
+    return (staggered * RowDelayFraction * rowEntranceDurationMillis(staggered)).toInt()
 }
 
 /** Whether the rows being composed right now belong to the panel's first pass. */
