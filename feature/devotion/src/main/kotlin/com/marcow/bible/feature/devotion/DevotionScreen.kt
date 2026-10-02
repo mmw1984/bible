@@ -270,8 +270,9 @@ private fun DevotionMasthead(
                 // Flutter's `FontWeight.w500`, which is the weight this variable face was drawn at.
                 fontWeight = FontWeight.Medium,
                 maxLines = 1,
-                // Flutter's `TextOverflow.fade`, so a title wider than the window softens.
-                overflow = TextOverflow.Fade,
+                // Flutter's `TextOverflow.fade`, which Compose has no counterpart for, so a title
+                // wider than the window is cut with an ellipsis rather than a soft edge.
+                overflow = TextOverflow.Ellipsis,
             )
         }
         Spacer(Modifier.height(DevotionChrome.BELOW_TITLE))
