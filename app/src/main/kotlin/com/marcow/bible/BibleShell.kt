@@ -26,6 +26,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -316,16 +318,16 @@ private data class SearchOrigin(val bookId: String, val chapter: Int, val mode: 
  */
 @Composable
 private fun ReturnToSearchOrigin(onTap: () -> Unit, modifier: Modifier = Modifier) {
-    AppControlSurface(modifier = modifier) {
-        AppTap(
-            label = stringResource(R.string.return_to_search_origin),
-            onClick = onTap,
-        ) {
+    val label = stringResource(R.string.return_to_search_origin)
+    AppControlSurface(
+        modifier = modifier.semantics { contentDescription = label },
+    ) {
+        AppTap(onClick = onTap) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 AppGlyphView(glyph = AppGlyph.BACK, color = appColors.ink, size = SearchOriginGlyph)
                 Spacer(Modifier.width(SearchOriginGap))
                 Text(
-                    text = stringResource(R.string.return_to_search_origin),
+                    text = label,
                     color = appColors.ink,
                     fontSize = SearchOriginLabelSize,
                     fontWeight = FontWeight.W600,
