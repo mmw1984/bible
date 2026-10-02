@@ -1,6 +1,6 @@
 package com.marcow.bible.feature.navigation
 
-import androidx.compose.animation.core.CubicEasing
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -29,7 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.isDark
+import androidx.compose.ui.graphics.colorspace.isDark
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -325,5 +325,5 @@ private val PillShadowElevation = 4.dp
 private val IndicatorShadowElevation = 2.dp
 private val IndicatorShadowColor = Color.Black.copy(alpha = 0.08f)
 
-/** `Curves.easeOutCubic`, the indicator's curve. */
-private val IndicatorEasing = CubicEasing(0.215f, 0.61f, 0.355f, 1f)
+/** `Curves.easeOutCubic`, the indicator's curve — Compose spells a named cubic out as control points. */
+private val IndicatorEasing = CubicBezierEasing(0.215f, 0.61f, 0.355f, 1f)
