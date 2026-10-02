@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName")
+
 package com.marcow.bible.feature.devotion
 
 import android.annotation.SuppressLint
