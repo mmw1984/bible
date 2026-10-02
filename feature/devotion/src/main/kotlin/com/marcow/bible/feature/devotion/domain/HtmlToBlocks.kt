@@ -102,18 +102,38 @@ internal fun parseHtmlDocument(html: String): HtmlElement {
     while (index < tokens.size) {
         val token = tokens[index]
         index++
-        when (token) {
-            is HtmlCharacter -> stack.last().children.add(HtmlText(token.data))
-
-            is HtmlTag -> if (token.isEndTag) {
-                closeTag(stack, token.data)
-            } else {
-                val element = openTag(stack, token)
-                if (element.tag in RAW_TEXT_ELEMENTS) index = skipRawText(tokens, index, element.tag)
-            }
-        }
+        index = applyToken(stack, tokens, index, token)
     }
     return document
+}
+
+/**
+ * One tree-building step, over a token already stepped past.
+ *
+ * A run of text is appended to the element that is open; a start tag opens one and may swallow the raw
+ * body behind it, which is the only step that moves the index on further; an end tag closes one. Split
+ * out of the loop so the branch is a level shallower than the walk it belongs to, and so the walk reads
+ * as the flat sequence of steps it is. [index] is the token after the one applied, as it was in the
+ * loop this came out of.
+ */
+private fun applyToken(
+    stack: ArrayDeque<HtmlElement>,
+    tokens: List<HtmlToken>,
+    index: Int,
+    token: HtmlToken,
+): Int {
+    var next = index
+    when (token) {
+        is HtmlCharacter -> stack.last().children.add(HtmlText(token.data))
+
+        is HtmlTag -> if (token.isEndTag) {
+            closeTag(stack, token.data)
+        } else {
+            val element = openTag(stack, token)
+            next = if (element.tag in RAW_TEXT_ELEMENTS) skipRawText(tokens, index, element.tag) else index
+        }
+    }
+    return next
 }
 
 /** One step of the scan: a run of text, or a tag. */
