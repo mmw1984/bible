@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.toSpanStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -173,7 +174,7 @@ private fun MarkdownBody(
     compact: Boolean,
     onLink: ((String) -> Unit)?,
     modifier: Modifier = Modifier,
-    lineHeight: TextUnit = bodyLineHeight(compact),
+    lineHeight: TextUnit = bodyFontSize(compact) * bodyLineHeight(compact),
 ) {
     Text(
         text = markdownAnnotatedString(
@@ -478,7 +479,7 @@ private fun markdownAnnotatedString(
 ): AnnotatedString {
     val inlineWash = appColors.line.copy(alpha = INLINE_CODE_WASH)
     return buildAnnotatedString {
-        appendStyle(SpanStyle(base))
+        pushStyle(base.toSpanStyle())
         inlines.forEach { inline ->
             when (inline) {
                 is MarkdownInline.Text -> append(inline.text)
@@ -528,6 +529,7 @@ private fun markdownAnnotatedString(
                 }
             }
         }
+        pop()
     }
 }
 
