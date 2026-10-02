@@ -19,13 +19,13 @@ private val ENGLISH_MONTHS = listOf(
 )
 
 internal fun formatDevotionDate(date: LocalDate, locale: AppLocale): String = when (locale) {
-    AppLocale.EN -> "${ENGLISH_MONTHS[date.monthValue - 1]} ${date.dayValue}, ${date.year}"
-    AppLocale.ZH_HANT -> "${date.year}年${date.monthValue}月${date.dayValue}日"
+    AppLocale.EN -> "${ENGLISH_MONTHS[date.monthValue - 1]} ${date.dayOfMonth}, ${date.year}"
+    AppLocale.ZH_HANT -> "${date.year}年${date.monthValue}月${date.dayOfMonth}日"
 }
 
 internal fun formatDevotionDateShort(date: LocalDate, locale: AppLocale): String = when (locale) {
-    AppLocale.EN -> "${ENGLISH_MONTHS[date.monthValue - 1]} ${date.dayValue}"
-    AppLocale.ZH_HANT -> "${date.monthValue}月${date.dayValue}日"
+    AppLocale.EN -> "${ENGLISH_MONTHS[date.monthValue - 1]} ${date.dayOfMonth}"
+    AppLocale.ZH_HANT -> "${date.monthValue}月${date.dayOfMonth}日"
 }
 
 /**
