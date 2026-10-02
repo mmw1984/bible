@@ -113,7 +113,7 @@ internal class AiChatViewModelTest {
     @Test
     fun `an answer streaming in pieces is one message the whole time`() = runTest(dispatcher) {
         val ask = ScriptedAsk(
-            answers = listOf(chatAnswer("完整答案")),
+            answers = listOf(chatAnswer("完整答案", reasoning = "想了一下")),
             progress = listOf(
                 AnswerProgress("完", "想"),
                 AnswerProgress("完整", "想了一"),

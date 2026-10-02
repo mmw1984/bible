@@ -49,7 +49,7 @@ internal class AiMessageTest {
 
         assertEquals(AiMessageRole.ASSISTANT, json.role, "role defaulted to assistant")
         assertEquals(AiMessageKind.CHAT, json.kind, "kind defaulted to chat")
-        assertEquals("", json.scripture)
+        assertNull(json.scripture)
         assertNull(json.reasoning)
         assertEquals(false, json.webSearch)
         assertEquals(false, json.incomplete)

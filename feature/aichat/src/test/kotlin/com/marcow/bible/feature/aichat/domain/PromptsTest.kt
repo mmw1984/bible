@@ -102,7 +102,7 @@ class PromptsTest {
         // The `'''…'''` at `legacy/flutter/lib/ai_service.dart:517`, which opened on the
         // conversation prompt itself: a reworded instruction here is a different answer to the same
         // question, so the whole text is compared rather than a few phrases of it.
-        assertEquals(CONTINUATION, continuationPrompt(PROMPT, ANSWER))
+        assertEquals("$CONTINUATION\n", continuationPrompt(PROMPT, ANSWER))
         assertTrue(continuationPrompt(PROMPT, ANSWER).startsWith(PROMPT))
     }
 

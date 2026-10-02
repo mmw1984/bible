@@ -50,28 +50,28 @@ class AppMarkdownTest {
         assertEquals(4, table.rows.first().size)
         assertEquals(
             listOf(
-                MarkdownInline.Text("書卷"),
-                MarkdownInline.Text("章節"),
-                MarkdownInline.Text("主題"),
-                MarkdownInline.Text("說明"),
+                listOf(MarkdownInline.Text("書卷")),
+                listOf(MarkdownInline.Text("章節")),
+                listOf(MarkdownInline.Text("主題")),
+                listOf(MarkdownInline.Text("說明")),
             ),
             table.rows[0],
         )
         assertEquals(
             listOf(
-                MarkdownInline.Text("約翰福音"),
-                MarkdownInline.Text("3:16"),
-                MarkdownInline.Strong("愛"),
-                MarkdownInline.Text("神愛世人"),
+                listOf(MarkdownInline.Text("約翰福音")),
+                listOf(MarkdownInline.Text("3:16")),
+                listOf(MarkdownInline.Strong("愛")),
+                listOf(MarkdownInline.Text("神愛世人")),
             ),
             table.rows[1],
         )
         assertEquals(
             listOf(
-                MarkdownInline.Text("詩篇"),
-                MarkdownInline.Text("23:1"),
-                MarkdownInline.Text("牧者"),
-                MarkdownInline.Text("我必不致缺乏"),
+                listOf(MarkdownInline.Text("詩篇")),
+                listOf(MarkdownInline.Text("23:1")),
+                listOf(MarkdownInline.Text("牧者")),
+                listOf(MarkdownInline.Text("我必不致缺乏")),
             ),
             table.rows[2],
         )
