@@ -67,8 +67,13 @@ jobs:
       - name: l10n resources in sync
         run: node tool/arb_to_strings.mjs --check
 
+      # `--continue` so one module's compile error cannot hide every other module's. Without it
+      # Gradle stops at the first failure, and a break in `feature/aichat` left `feature/search`
+      # uncompiled and untested while the run still only named the first module. The gate is
+      # unchanged — the step still fails if any task fails — but the log now carries every module's
+      # result, so a phase's own modules can be read off it.
       - name: Unit tests
-        run: ./gradlew test --stacktrace
+        run: ./gradlew test --stacktrace --continue
 
       - name: Android lint
         run: ./gradlew lintDebug --stacktrace
