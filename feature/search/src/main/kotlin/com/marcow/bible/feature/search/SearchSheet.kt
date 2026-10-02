@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toDp
 import com.marcow.bible.core.database.SEARCH_RESULT_LIMIT
 import com.marcow.bible.core.designsystem.R
 import com.marcow.bible.core.designsystem.components.AppChoice
@@ -114,7 +115,7 @@ fun SearchSheet(
     val surfaceShape = RoundedCornerShape(appRadii.surface)
     // Flutter's `AnimatedPadding(bottom: keyboard)` in 220 ms: the one animation here that is about
     // the window rather than about the search, and the reason the sheet sits where it does.
-    val keyboard = WindowInsets.ime.getBottom(LocalDensity.current)
+    val keyboard = with(LocalDensity.current) { WindowInsets.ime.getBottom(this).toDp() }
     val lifted by animateDpAsState(
         targetValue = keyboard,
         animationSpec = tween(KEYBOARD_MILLIS, easing = EaseOutCubic),
