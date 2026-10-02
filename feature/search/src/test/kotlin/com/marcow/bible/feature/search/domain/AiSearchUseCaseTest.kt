@@ -15,6 +15,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -50,14 +51,14 @@ class AiSearchUseCaseTest {
         val updates = mutableListOf<AiSearchUpdate>()
 
         backgroundScope.launch { aiSearch(client).search(QUERY, "", LANGUAGE).toList(updates) }
-        advanceUntilIdle()
+        runCurrent()
 
         assertEquals(setOf(OVERVIEW_MARKER, REFERENCES_MARKER), client.promptMarkers().toSet())
         assertEquals(1, updates.resolved().size)
         assertEquals(emptyList<String>(), updates.overviews())
 
         overview.complete(OVERVIEW_PROSE)
-        advanceUntilIdle()
+        runCurrent()
 
         assertEquals("An overview.", updates.overviews().single())
     }
@@ -161,9 +162,9 @@ class AiSearchUseCaseTest {
         val updates = mutableListOf<AiSearchUpdate>()
 
         val job = backgroundScope.launch { aiSearch(client).search(QUERY, "", LANGUAGE).toList(updates) }
-        advanceUntilIdle()
+        runCurrent()
         job.cancel()
-        advanceUntilIdle()
+        runCurrent()
 
         assertEquals(emptyList<AiSearchUpdate>(), updates)
     }
