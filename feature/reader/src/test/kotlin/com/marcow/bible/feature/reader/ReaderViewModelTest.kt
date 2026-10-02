@@ -210,7 +210,7 @@ class ReaderViewModelTest {
         // Both translations come from the same rows, so the chapter does not have to be fetched
         // again — which is what Flutter did with a `setState`.
         assertEquals(listOf("起初"), state.verses.map { it.zh })
-        assertEquals(ReadingMode.BILINGUAL, progressDao.rows["GEN"]?.mode)
+        assertEquals(ReadingMode.BILINGUAL.storageValue, progressDao.rows["GEN"]?.mode)
     }
 
     @Test
