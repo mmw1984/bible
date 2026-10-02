@@ -8,6 +8,7 @@ import com.marcow.bible.feature.devotion.domain.DevotionPost
 import com.marcow.bible.feature.devotion.domain.extractPostLinksFromPage
 import com.marcow.bible.feature.devotion.domain.parseArticlePage
 import com.marcow.bible.feature.devotion.domain.toDevotionPosts
+import com.marcow.bible.feature.devotion.domain.toRssDevotionPosts
 import kotlinx.coroutines.CancellationException
 
 /**
@@ -55,7 +56,7 @@ class RestDevotionTier(private val client: DevotionRestClient) : DevotionTier {
 class RssDevotionTier(private val client: DevotionRssClient) : DevotionTier {
     override val name: String = "rss"
 
-    override suspend fun posts(): List<DevotionPost> = client.posts().toDevotionPosts()
+    override suspend fun posts(): List<DevotionPost> = client.posts().toRssDevotionPosts()
 }
 
 /**

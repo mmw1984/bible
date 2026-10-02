@@ -97,8 +97,20 @@ class DevotionFeedTest {
     }
 
     @Test
+    fun `the feed link decodes its entities, while the REST link arrives verbatim`() {
+        val link = "https://devotion.wkphc.org/25436?preview=1&amp;lang=zh"
+
+        val feedPost = rawPost(link = link).toRssDevotionPosts().single()
+        assertEquals("https://devotion.wkphc.org/25436?preview=1&lang=zh", feedPost.link)
+        // JSON gives back the characters the blog wrote, so `&amp;` here is the blog's own text and
+        // stays as it is — `decodeHtmlEntities(tag('link'))` only ever ran on the feed.
+        assertEquals(link, rawPost(link = link).toDevotionPost().link)
+    }
+
+    @Test
     fun `a feed of nothing is an empty day rather than a failure`() {
         assertEquals(emptyList<DevotionPost>(), emptyList<RawDevotionPost>().toDevotionPosts())
+        assertEquals(emptyList<DevotionPost>(), emptyList<RawDevotionPost>().toRssDevotionPosts())
     }
 
     private fun rawPost(

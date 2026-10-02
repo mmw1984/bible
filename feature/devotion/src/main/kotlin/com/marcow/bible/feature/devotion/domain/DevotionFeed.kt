@@ -15,6 +15,19 @@ import com.marcow.bible.core.network.devotion.DevotionPost as RawDevotionPost
 internal fun List<RawDevotionPost>.toDevotionPosts(): List<DevotionPost> =
     map { it.toDevotionPost() }.sortedByDescending { it.devotionDate }
 
+/**
+ * The same mapping for the RSS tier, whose `<link>` is XML text rather than a JSON string.
+ *
+ * `decodeHtmlEntities(tag('link'))` in `_devotionPostFromRssItem`
+ * (`legacy/flutter/lib/devotion_content.dart:806`) — a feed written with `&amp;` in a permalink is
+ * an entity reference the way a browser reads it, so it has to become `&` before the reader opens it.
+ * The REST tier does not decode: JSON hands back exactly the characters the blog wrote, and a link
+ * there that reads `&amp;` is the blog's own text.
+ */
+internal fun List<RawDevotionPost>.toRssDevotionPosts(): List<DevotionPost> =
+    map { it.toDevotionPost().copy(link = decodeHtmlEntities(it.link).trim()) }
+        .sortedByDescending { it.devotionDate }
+
 internal fun RawDevotionPost.toDevotionPost(): DevotionPost {
     val title = decodeHtmlEntities(stripHtmlTags(titleHtml)).trim()
     return DevotionPost(
