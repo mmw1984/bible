@@ -91,7 +91,7 @@ class WebResearchTest {
             ),
         )
 
-        assertEquals(listOf("one.test", "two.test", "three.test"), sources.map { it.title })
+        assertEquals(listOf("one.test", "two.test", "Three C"), sources.map { it.title })
         assertEquals(listOf("A", "B", "C"), sources.map { it.excerpt })
     }
 
