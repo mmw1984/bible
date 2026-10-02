@@ -21,7 +21,7 @@ import com.marcow.bible.core.model.Testament
  */
 
 /** `math.min(size.width * .92, 440)` — the panel covers most of the window, but never all of it. */
-fun libraryPanelWidth(windowWidth: Dp): Dp = minOf(windowWidth * PanelWidthFraction, PanelWidthCap)
+fun libraryPanelWidth(windowWidth: Dp): Dp = minOf((windowWidth * PanelWidthFraction).value.toInt().dp, PanelWidthCap)
 
 /** `SizedBox(width: 270)` in `_BibleHomeState` — the column the reader sits beside on a wide window. */
 val SidebarWidth: Dp = 270.dp
