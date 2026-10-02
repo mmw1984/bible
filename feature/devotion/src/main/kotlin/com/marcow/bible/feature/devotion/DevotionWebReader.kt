@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +52,7 @@ import com.marcow.bible.core.designsystem.components.AppGlyphButton
 import com.marcow.bible.core.designsystem.components.AppGlyphView
 import com.marcow.bible.core.designsystem.components.AppTap
 import com.marcow.bible.core.designsystem.icons.AppGlyph
+import com.marcow.bible.core.designsystem.theme.AppColors
 import com.marcow.bible.core.designsystem.theme.appColors
 import com.marcow.bible.core.network.devotion.DEVOTION_ORIGIN
 import com.marcow.bible.feature.devotion.domain.DevotionPost
@@ -131,9 +133,11 @@ fun DevotionWebReader(
     val colors = appColors
     // `Theme.of(context).brightness == Brightness.dark`, which is the app's own setting rather than
     // the system's: a reader in dark mode with the system in light mode still gets a dark page. The
-    // same value is pushed imperatively below, because a WebView's background is not the one painted
-    // behind it.
-    val pageBackground = if (colors.canvas.isDark()) Color.Black else Color.White
+    // palette *is* that setting — `AppTheme` resolves a `ThemeMode` into these two instances and puts
+    // the one it chose in `LocalAppColors` — so this is the same reading `AppColors.isDark()` makes,
+    // from the outside this module can see it. The colour is pushed imperatively below, because a
+    // WebView's background is not the one painted behind it.
+    val pageBackground = if (colors == AppColors.Dark) Color.Black else Color.White
     var frame by remember(url) { mutableStateOf<WebView?>(null) }
     var progress by remember(url) { mutableFloatStateOf(0f) }
     var failed by remember(url) { mutableStateOf(false) }
@@ -193,70 +197,76 @@ fun DevotionWebReader(
             // page is still painting, which is nearly always, and is most of what a reader sees for
             // the first second or two.
             Box(modifier = Modifier.fillMaxSize().background(pageBackground)) {
-                AndroidView(
-                    key = url,
-                    factory = { context: Context ->
-                        WebView(context).apply {
-                            settings.javaScriptEnabled = true
-                            settings.domStorageEnabled = true
-                            settings.allowFileAccess = false
-                            settings.allowContentAccess = false
-                            setBackgroundColor(AndroidColor.TRANSPARENT)
-                            webChromeClient = object : WebChromeClient() {
-                                // `onProgress`: `value / 100` in Dart, so the bar is a fraction here.
-                                // It is a `WebChromeClient` callback and not a `WebViewClient` one:
-                                // loading progress is reported by the chrome, and `WebViewClient` has no
-                                // such method to override, so the bar would never have moved.
-                                override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                                    progress = newProgress / PERCENT
+                // `key(url)` rather than only `remember`: `AndroidView` builds its `WebView` once and
+                // then keeps it, and a reader who opened the next day's article from the failure
+                // screen would otherwise be reading the last page they failed to load. `AndroidView`
+                // takes no key of its own, so the frame is keyed by the composition around it, which
+                // is also what makes `onRelease` run for the page being left behind.
+                key(url) {
+                    AndroidView(
+                        factory = { context: Context ->
+                            WebView(context).apply {
+                                settings.javaScriptEnabled = true
+                                settings.domStorageEnabled = true
+                                settings.allowFileAccess = false
+                                settings.allowContentAccess = false
+                                setBackgroundColor(AndroidColor.TRANSPARENT)
+                                webChromeClient = object : WebChromeClient() {
+                                    // `onProgress`: `value / 100` in Dart, so the bar is a fraction here.
+                                    // It is a `WebChromeClient` callback and not a `WebViewClient` one:
+                                    // loading progress is reported by the chrome, and `WebViewClient` has no
+                                    // such method to override, so the bar would never have moved.
+                                    override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                                        progress = newProgress / PERCENT
+                                    }
                                 }
+
+                                webViewClient = object : WebViewClient() {
+                                    // `onPageFinished` pinned the bar to full rather than trusting the
+                                    // last `onProgress`, because a page whose final asset is still
+                                    // rendering reports 100 and then draws for another second.
+                                    override fun onPageFinished(view: WebView?, finishedUrl: String?) {
+                                        progress = 1f
+                                    }
+
+                                    override fun onReceivedError(
+                                        view: WebView?,
+                                        request: WebResourceRequest?,
+                                        error: WebResourceError?,
+                                    ) {
+                                        // `error.isForMainFrame`: a failed image or a tracker that
+                                        // timed out is not a failed page, and replacing a readable
+                                        // article over one would be worse than the silence it fixes.
+                                        if (request?.isForMainFrame == true) failed = true
+                                    }
+
+                                    // `onNavigationRequest`, which is the one rule of this delegate
+                                    // worth naming: the reader stays inside itself for the open web
+                                    // and hands everything else to the operating system.
+                                    override fun shouldOverrideUrlLoading(
+                                        view: WebView?,
+                                        request: WebResourceRequest?,
+                                    ): Boolean {
+                                        val target = request?.url?.toString() ?: return false
+                                        if (webReaderMayNavigateInPlace(target)) return false
+                                        if (webReaderLinkIsExternal(target)) uriHandler.openUri(target)
+                                        // Nothing else is followed. Dart launched whatever it could
+                                        // not parse and let the frame decline; see
+                                        // [webReaderLinkIsExternal] for why that is narrowed here.
+                                        return true
+                                    }
+                                }
+                                loadUrl(url)
                             }
-
-                            webViewClient = object : WebViewClient() {
-                                // `onPageFinished` pinned the bar to full rather than trusting the
-                                // last `onProgress`, because a page whose final asset is still
-                                // rendering reports 100 and then draws for another second.
-                                override fun onPageFinished(view: WebView?, finishedUrl: String?) {
-                                    progress = 1f
-                                }
-
-                                override fun onReceivedError(
-                                    view: WebView?,
-                                    request: WebResourceRequest?,
-                                    error: WebResourceError?,
-                                ) {
-                                    // `error.isForMainFrame`: a failed image or a tracker that
-                                    // timed out is not a failed page, and replacing a readable
-                                    // article over one would be worse than the silence it fixes.
-                                    if (request?.isForMainFrame == true) failed = true
-                                }
-
-                                // `onNavigationRequest`, which is the one rule of this delegate
-                                // worth naming: the reader stays inside itself for the open web
-                                // and hands everything else to the operating system.
-                                override fun shouldOverrideUrlLoading(
-                                    view: WebView?,
-                                    request: WebResourceRequest?,
-                                ): Boolean {
-                                    val target = request?.url?.toString() ?: return false
-                                    if (webReaderMayNavigateInPlace(target)) return false
-                                    if (webReaderLinkIsExternal(target)) uriHandler.openUri(target)
-                                    // Nothing else is followed. Dart launched whatever it could
-                                    // not parse and let the frame decline; see
-                                    // [webReaderLinkIsExternal] for why that is narrowed here.
-                                    return true
-                                }
-                            }
-                            loadUrl(url)
-                        }
-                    },
-                    onRelease = { webView: WebView ->
-                        if (frame === webView) frame = null
-                        webView.destroy()
-                    },
-                    update = { webView: WebView -> frame = webView },
-                    modifier = Modifier.fillMaxSize(),
-                )
+                        },
+                        onRelease = { webView: WebView ->
+                            if (frame === webView) frame = null
+                            webView.destroy()
+                        },
+                        update = { webView: WebView -> frame = webView },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
             }
             // Drawn *over* the frame rather than swapped for it, which is the one place this departs
             // from Flutter's `_failed ? _ErrorView : ColoredBox(WebViewWidget)` and is deliberate: the

@@ -142,15 +142,17 @@ private fun DevotionGlyph.imageVector(): ImageVector = ImageVector.Builder(
 /**
  * Adds Lucide's own path data to this vector.
  *
- * `addPathNodes` takes the SVG `d` grammar whole, which matters here: `image-off` and `play` are
- * written with elliptical arcs, and re-typing those as line segments is how an icon quietly changes
- * shape. Lucide strokes on 2 px round caps and joins with no fill, so the fill is transparent and the
- * stroke is a black brush [Icon] re-tints.
+ * [addPathNodes] takes the SVG `d` grammar whole and hands back the nodes [addPath] wants, which
+ * matters here: `image-off` and `play` are written with elliptical arcs, and re-typing those as line
+ * segments is how an icon quietly changes shape. Those two functions are the pair the generated
+ * `Icons.kt` uses, so the arcs are read by the same parser the platform icons are. Lucide strokes on
+ * 2 px round caps and joins with no fill, so the fill is transparent and the stroke is a black brush
+ * [Icon] re-tints.
  */
 private fun ImageVector.Builder.lucidePath(vararg paths: String) {
     paths.forEach { pathData ->
-        addPathNodes(
-            pathData = pathData,
+        addPath(
+            pathData = addPathNodes(pathData),
             fill = SolidColor(Color.Transparent),
             stroke = SolidColor(Color.Black),
             strokeLineWidth = LucideStrokeWidth,
@@ -178,8 +180,8 @@ private fun ImageVector.Builder.lucidePath(vararg paths: String) {
  */
 private fun ImageVector.Builder.materialFilled(vararg paths: String) {
     paths.forEach { pathData ->
-        addPathNodes(
-            pathData = pathData,
+        addPath(
+            pathData = addPathNodes(pathData),
             fill = SolidColor(Color.Black),
             stroke = null,
         )

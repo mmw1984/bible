@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -74,77 +75,83 @@ internal fun DevotionEmbedPlayer(url: String, onOpenUrl: (String) -> Unit, modif
             .clip(shape)
             .background(appColors.surfaceRaised.copy(alpha = DevotionChrome.RAISED_FILL_ALPHA)),
     ) {
-        AndroidView(
-            // Keyed on the URL for the same reason the video's frame is keyed on its id: `AndroidView`
-            // builds its `WebView` once and keeps it, so a reader who moves to the next article's
-            // embed would otherwise still be looking at — and hearing — the previous one.
-            key = url,
-            factory = { context: Context ->
-                WebView(context).apply {
-                    // `setJavaScriptMode(JavaScriptMode.unrestricted)` in the Dart build: the widget
-                    // is a page, and it does not run without script.
-                    settings.javaScriptEnabled = true
-                    settings.domStorageEnabled = true
-                    // The page is SoundCloud's, but a frame is still a frame: local file and content
-                    // access have no place in a widget that only ever loads an `https` URL, and
-                    // leaving them on would widen what a compromised script could reach.
-                    settings.allowFileAccess = false
-                    settings.allowContentAccess = false
-                    // `setBackgroundColor(Colors.transparent)`: the frame sits on the card's own fill.
-                    setBackgroundColor(AndroidColor.TRANSPARENT)
-                    // `onNavigationRequest`'s three branches are in [shouldOverrideUrlLoading] below,
-                    // one for one with the Dart delegate's.
-                    webViewClient = object : WebViewClient() {
-                        override fun onPageFinished(view: WebView?, finishedUrl: String?) {
-                            // `if (mounted) setState(() => _isLoading = false)`. SoundCloud's widget
-                            // finishes this page well before its own artwork is up, so the spinner can
-                            // clear a beat early — the Dart build accepted that, and matching its
-                            // timing is the point.
-                            loading = false
-                        }
-
-                        override fun onReceivedError(
-                            view: WebView?,
-                            request: WebResourceRequest?,
-                            error: WebResourceError?,
-                        ) {
-                            // `error.isForMainFrame`: a failed subresource is not a failed player, and
-                            // replacing a working widget over one would be worse than the silence it
-                            // fixes.
-                            if (request?.isForMainFrame == true) failed = true
-                        }
-
-                        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                            val target = request?.url?.toString() ?: return false
-                            // `false` means the frame follows the URL; `true` means it declines.
-                            //
-                            // 1. SoundCloud's own hosts and CDNs stay — this is the whole point of
-                            //    the widget, and the guard that keeps a track tap from replacing the
-                            //    player with a track page. See [embedMayNavigateInPlace].
-                            if (embedMayNavigateInPlace(target)) return false
-                            // 2. Other `http`/`https` go to the browser, and the frame declines.
-                            //    This is the branch that matters: it is what stops a reader tapping
-                            //    a link inside the widget from replacing the widget they came to
-                            //    play with somebody's article. See [embedLinkIsExternal].
-                            if (embedLinkIsExternal(target)) {
-                                uriHandler.openUri(target)
-                                return true
+        // Keyed on the URL for the same reason the video's frame is keyed on its id: `AndroidView`
+        // builds its `WebView` once and keeps it, so a reader who moves to the next article's embed
+        // would otherwise still be looking at — and hearing — the previous one. `AndroidView` takes no
+        // key of its own, so the frame is keyed by the composition around it, which is what also
+        // makes `onRelease` run for the widget being left behind.
+        key(url) {
+            AndroidView(
+                factory = { context: Context ->
+                    WebView(context).apply {
+                        // `setJavaScriptMode(JavaScriptMode.unrestricted)` in the Dart build: the widget
+                        // is a page, and it does not run without script.
+                        settings.javaScriptEnabled = true
+                        settings.domStorageEnabled = true
+                        // The page is SoundCloud's, but a frame is still a frame: local file and content
+                        // access have no place in a widget that only ever loads an `https` URL, and
+                        // leaving them on would widen what a compromised script could reach.
+                        settings.allowFileAccess = false
+                        settings.allowContentAccess = false
+                        // `setBackgroundColor(Colors.transparent)`: the frame sits on the card's own fill.
+                        setBackgroundColor(AndroidColor.TRANSPARENT)
+                        // `onNavigationRequest`'s three branches are in [shouldOverrideUrlLoading] below,
+                        // one for one with the Dart delegate's.
+                        webViewClient = object : WebViewClient() {
+                            override fun onPageFinished(view: WebView?, finishedUrl: String?) {
+                                // `if (mounted) setState(() => _isLoading = false)`. SoundCloud's widget
+                                // finishes this page well before its own artwork is up, so the spinner can
+                                // clear a beat early — the Dart build accepted that, and matching its
+                                // timing is the point.
+                                loading = false
                             }
-                            // 3. Everything else is followed, which is Dart's
-                            //    `return NavigationDecision.navigate`. `about:blank` and `intent:`
-                            //    have no browser to hand them to, so escalating would drop the tap
-                            //    silently, and following is at least recoverable.
-                            return false
+
+                            override fun onReceivedError(
+                                view: WebView?,
+                                request: WebResourceRequest?,
+                                error: WebResourceError?,
+                            ) {
+                                // `error.isForMainFrame`: a failed subresource is not a failed player, and
+                                // replacing a working widget over one would be worse than the silence it
+                                // fixes.
+                                if (request?.isForMainFrame == true) failed = true
+                            }
+
+                            override fun shouldOverrideUrlLoading(
+                                view: WebView?,
+                                request: WebResourceRequest?,
+                            ): Boolean {
+                                val target = request?.url?.toString() ?: return false
+                                // `false` means the frame follows the URL; `true` means it declines.
+                                //
+                                // 1. SoundCloud's own hosts and CDNs stay — this is the whole point of
+                                //    the widget, and the guard that keeps a track tap from replacing the
+                                //    player with a track page. See [embedMayNavigateInPlace].
+                                if (embedMayNavigateInPlace(target)) return false
+                                // 2. Other `http`/`https` go to the browser, and the frame declines.
+                                //    This is the branch that matters: it is what stops a reader tapping
+                                //    a link inside the widget from replacing the widget they came to
+                                //    play with somebody's article. See [embedLinkIsExternal].
+                                if (embedLinkIsExternal(target)) {
+                                    uriHandler.openUri(target)
+                                    return true
+                                }
+                                // 3. Everything else is followed, which is Dart's
+                                //    `return NavigationDecision.navigate`. `about:blank` and `intent:`
+                                //    have no browser to hand them to, so escalating would drop the tap
+                                //    silently, and following is at least recoverable.
+                                return false
+                            }
                         }
+                        loadUrl(url)
                     }
-                    loadUrl(url)
-                }
-            },
-            onRelease = { webView: WebView -> webView.destroy() },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(DevotionChrome.MEDIA_HEIGHT),
-        )
+                },
+                onRelease = { webView: WebView -> webView.destroy() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(DevotionChrome.MEDIA_HEIGHT),
+            )
+        }
         if (loading) {
             // The spinner Flutter drew over the frame until its first page finished.
             Box(

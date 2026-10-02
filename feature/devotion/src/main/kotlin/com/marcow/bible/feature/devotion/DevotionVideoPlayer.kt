@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -125,78 +126,81 @@ internal fun DevotionVideoPlayer(
                     onOpenUrl = onOpenUrl,
                 )
             } else {
-                AndroidView(
-                    // `key` rather than only `remember`, because `AndroidView` builds its `WebView`
-                    // once and then keeps it: a reader who switches days, or scrolls to the next
-                    // article's video, would otherwise be handed the previous video's player under
-                    // the new page.
-                    key = videoId,
-                    factory = { context: Context ->
-                        WebView(context).apply {
-                            settings.javaScriptEnabled = true
-                            settings.domStorageEnabled = true
-                            // The page is ours, but the player inside it is YouTube's — so the
-                            // WebView is its sandbox, and any error its subframes raise arrives
-                            // here too. Letting them through is what lets the guard below read them
-                            // as the player's own.
-                            settings.allowFileAccess = false
-                            settings.allowContentAccess = false
-                            // `LOAD_NO_CACHE` on the outer document, which is ours and is rebuilt
-                            // per video anyway; the iframe's own cache is YouTube's to manage and
-                            // this does not reach it.
-                            settings.cacheMode = WebSettings.LOAD_NO_CACHE
-                            // The seek gesture is a reader's second tap on a moving video, which
-                            // the player must act on rather than demand a fresh gesture for.
-                            settings.mediaPlaybackRequiresUserGesture = false
-                            // `setBackgroundColor(Colors.transparent)` on the Dart controller: the
-                            // frame sits on the card's own fill, so a white flash must not show
-                            // between them.
-                            setBackgroundColor(AndroidColor.TRANSPARENT)
-                            // No `onPageFinished`: the document being up is not the player being
-                            // up — the API script still has to arrive and run before
-                            // `onYouTubeIframeAPIReady` exists — so readiness is polled by
-                            // `rememberFrameReady`. Flutter hid its spinner on `_ytPlayer`'s
-                            // `onReady` for the same reason.
-                            webViewClient = object : WebViewClient() {
-                                override fun onReceivedError(
-                                    view: WebView?,
-                                    request: WebResourceRequest?,
-                                    error: WebResourceError?,
-                                ) {
-                                    // `error.isForMainFrame`: an ad or a caption track failing is
-                                    // not the player failing, and Flutter guarded the same way.
-                                    if (request?.isForMainFrame == true) failed = true
+                // `key(videoId)` rather than only `remember`, because `AndroidView` builds its `WebView`
+                // once and then keeps it: a reader who switches days, or scrolls to the next
+                // article's video, would otherwise be handed the previous video's player under
+                // the new page. `AndroidView` takes no key of its own, so the frame is keyed by the
+                // composition around it — which is what makes the `AndroidView` on the far side of a
+                // changed key leave the tree, and `onRelease` below run.
+                key(videoId) {
+                    AndroidView(
+                        factory = { context: Context ->
+                            WebView(context).apply {
+                                settings.javaScriptEnabled = true
+                                settings.domStorageEnabled = true
+                                // The page is ours, but the player inside it is YouTube's — so the
+                                // WebView is its sandbox, and any error its subframes raise arrives
+                                // here too. Letting them through is what lets the guard below read them
+                                // as the player's own.
+                                settings.allowFileAccess = false
+                                settings.allowContentAccess = false
+                                // `LOAD_NO_CACHE` on the outer document, which is ours and is rebuilt
+                                // per video anyway; the iframe's own cache is YouTube's to manage and
+                                // this does not reach it.
+                                settings.cacheMode = WebSettings.LOAD_NO_CACHE
+                                // The seek gesture is a reader's second tap on a moving video, which
+                                // the player must act on rather than demand a fresh gesture for.
+                                settings.mediaPlaybackRequiresUserGesture = false
+                                // `setBackgroundColor(Colors.transparent)` on the Dart controller: the
+                                // frame sits on the card's own fill, so a white flash must not show
+                                // between them.
+                                setBackgroundColor(AndroidColor.TRANSPARENT)
+                                // No `onPageFinished`: the document being up is not the player being
+                                // up — the API script still has to arrive and run before
+                                // `onYouTubeIframeAPIReady` exists — so readiness is polled by
+                                // `rememberFrameReady`. Flutter hid its spinner on `_ytPlayer`'s
+                                // `onReady` for the same reason.
+                                webViewClient = object : WebViewClient() {
+                                    override fun onReceivedError(
+                                        view: WebView?,
+                                        request: WebResourceRequest?,
+                                        error: WebResourceError?,
+                                    ) {
+                                        // `error.isForMainFrame`: an ad or a caption track failing is
+                                        // not the player failing, and Flutter guarded the same way.
+                                        if (request?.isForMainFrame == true) failed = true
+                                    }
                                 }
+                                loadDataWithBaseURL(
+                                    YouTubeBaseUrl,
+                                    playerHtml,
+                                    "text/html",
+                                    "utf-8",
+                                    // `historyUrl` is null: the frame loads a page of our own and has no
+                                    // history to seed.
+                                    null,
+                                )
                             }
-                            loadDataWithBaseURL(
-                                YouTubeBaseUrl,
-                                playerHtml,
-                                "text/html",
-                                "utf-8",
-                                // `historyUrl` is null: the frame loads a page of our own and has no
-                                // history to seed.
-                                null,
-                            )
-                        }
-                    },
-                    // `onRelease` is where the `WebView` actually goes. A `DisposableEffect`
-                    // cannot cover it: the call above is keyed, and a key change disposes the
-                    // `AndroidView` without re-running an effect keyed on the old instance — so the
-                    // frame, its audio and its JavaScript would outlive the video the reader had
-                    // scrolled away from.
-                    onRelease = { webView: WebView ->
-                        // Clearing the reference is what makes a tap arriving while the replacement
-                        // is still loading a no-op, rather than a call into a destroyed frame.
-                        if (frame === webView) frame = null
-                        webView.destroy()
-                    },
-                    // Assigned from `update` rather than `factory`, because `update` runs on every
-                    // composition including the first and `factory` only on the first.
-                    update = { webView: WebView -> frame = webView },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(DevotionChrome.VIDEO_ASPECT_RATIO),
-                )
+                        },
+                        // `onRelease` is where the `WebView` actually goes. A `DisposableEffect`
+                        // cannot cover it: the call above is keyed, and a key change disposes the
+                        // `AndroidView` without re-running an effect keyed on the old instance — so the
+                        // frame, its audio and its JavaScript would outlive the video the reader had
+                        // scrolled away from.
+                        onRelease = { webView: WebView ->
+                            // Clearing the reference is what makes a tap arriving while the replacement
+                            // is still loading a no-op, rather than a call into a destroyed frame.
+                            if (frame === webView) frame = null
+                            webView.destroy()
+                        },
+                        // Assigned from `update` rather than `factory`, because `update` runs on every
+                        // composition including the first and `factory` only on the first.
+                        update = { webView: WebView -> frame = webView },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(DevotionChrome.VIDEO_ASPECT_RATIO),
+                    )
+                }
                 // The spinner Flutter drew over the frame until its player was ready.
                 if (!ready) {
                     Box(
@@ -305,7 +309,7 @@ private fun seekPlayer(
         if (!isStillMounted(view)) return@evaluateJavascript
         val clock = answer.toPlayerClock()
         val target = clampSeekTarget(clock?.first ?: 0.0, clock?.second ?: 0.0, delta)
-        view.evaluateJavascript(SeekToJs(target))
+        view.evaluateJavascript(SeekToJs(target), null)
         onDelta(delta)
     }
 }
