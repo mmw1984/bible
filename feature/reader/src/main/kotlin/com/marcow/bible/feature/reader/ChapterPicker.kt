@@ -1,6 +1,7 @@
 package com.marcow.bible.feature.reader
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -238,18 +239,28 @@ internal fun ChapterPickerContent(
     val progress = remember { Animatable(if (inspection) 1f else 0f) }
     LaunchedEffect(progress, inspection) {
         if (inspection) return@LaunchedEffect
-        progress.animateTo(1f, tween(durationMillis = EnterAnimationMillis, easing = SpringCurve))
+        // Linear, because Flutter's two channels were on two curves: the scale ran on `springCurve`
+        // and the fade on an `Interval` over `Curves.easeOut`, so the easing belongs at each use
+        // below rather than on the animation itself. Easing the `Animatable` would have made one of
+        // the two right and the other wrong by a factor of the two curves. `tween`'s own default is
+        // `FastOutSlowInEasing`, so `LinearEasing` is named rather than left to the default.
+        progress.animateTo(1f, tween(durationMillis = EnterAnimationMillis, easing = LinearEasing))
     }
 
     Column(
         modifier = modifier
             .graphicsLayer {
-                // `ScaleTransition(alignment: Alignment.topRight, scale: .82 -> 1)`.
-                val scale = EnterScale + (1f - EnterScale) * progress.value
+                // `ScaleTransition(alignment: Alignment.topRight, scale: .82 -> 1)` on
+                // `CurvedAnimation(curve: springCurve)`, which is the only channel the spring
+                // touched.
+                val scale = EnterScale + (1f - EnterScale) * SpringCurve.transform(progress.value)
                 scaleX = scale
                 scaleY = scale
                 transformOrigin = TransformOrigin(1f, 0f)
-                alpha = progress.value
+                // `FadeTransition(opacity: CurvedAnimation(parent: animation,
+                // curve: Interval(0, .65, curve: Curves.easeOut)))` — the other channel, on the
+                // other curve, over the shorter span.
+                alpha = chapterPickerFade(progress.value)
             }
             .clip(shape)
             .background(colors.surface.copy(alpha = BubbleSurfaceAlpha))
@@ -396,7 +407,7 @@ fun ChapterControl(
 @Composable
 private fun chapterLabel(chapter: Int): String = stringResource(R.string.select_chapter_current, chapter)
 
-/** 320 ms on `springCurve`, the `_showChapterPicker` transition duration. */
+/** 320 ms, the `_showChapterPicker` transition duration. */
 private const val EnterAnimationMillis = 320
 
 /** `.82`, the scale the bubble enters at. */

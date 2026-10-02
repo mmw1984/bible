@@ -1,6 +1,7 @@
 package com.marcow.bible.feature.reader
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -45,7 +46,6 @@ import com.marcow.bible.core.designsystem.R
 import com.marcow.bible.core.designsystem.components.AppGlyphView
 import com.marcow.bible.core.designsystem.components.AppTap
 import com.marcow.bible.core.designsystem.icons.AppGlyph
-import com.marcow.bible.core.designsystem.theme.SpringCurve
 import com.marcow.bible.core.designsystem.theme.appColors
 import com.marcow.bible.core.designsystem.theme.appRadii
 import com.marcow.bible.core.model.VersePair
@@ -87,7 +87,11 @@ fun VerseActionSheet(
     val progress = remember { Animatable(if (inspection) 1f else 0f) }
     LaunchedEffect(progress, inspection) {
         if (inspection) return@LaunchedEffect
-        progress.animateTo(1f, tween(durationMillis = EnterAnimationMillis, easing = SpringCurve))
+        // Linear, because Flutter's two channels were on two curves: the slide ran on
+        // `Curves.easeOutCubic` and the fade on the bare route animation. The easing is applied at
+        // the slide below, where Flutter applied it. `tween`'s own default is
+        // `FastOutSlowInEasing`, so `LinearEasing` is named rather than left to the default.
+        progress.animateTo(1f, tween(durationMillis = EnterAnimationMillis, easing = LinearEasing))
     }
 
     Popup(
@@ -150,7 +154,13 @@ internal fun VerseActionSheetContent(
                     // Flutter slid the sheet up from 12% of the dialog's height, which is the
                     // window's, so the offset is a fraction of the screen rather than of the
                     // sheet — a tall sheet and a short one start from the same place.
-                    translationY = (1f - progress) * EnterOffsetFraction * screenHeight.toPx()
+                    //
+                    // The slide is the only channel `Curves.easeOutCubic` touched
+                    // (`legacy/flutter/lib/main.dart:962`); the fade beside it was the bare route
+                    // animation, so [progress] goes into [alpha] untransformed. Easing one value and
+                    // spending it on both would have given the sheet a spring Flutter never ran.
+                    val slide = EaseOutCubic.transform(progress)
+                    translationY = (1f - slide) * EnterOffsetFraction * screenHeight.toPx()
                     alpha = progress
                 }
                 .padding(
@@ -284,7 +294,7 @@ fun verseActionGlyph(row: VerseActionRow): AppGlyph = when (row) {
     VerseActionRow.EXPLAIN -> AppGlyph.BOOK
 }
 
-/** 200 ms on `springCurve`, the transition of Flutter's `showGeneralDialog`. */
+/** 200 ms, the transition duration of Flutter's `showGeneralDialog` for the sheet. */
 private const val EnterAnimationMillis = 200
 
 /** `.12`, how far down the screen the sheet starts. */
