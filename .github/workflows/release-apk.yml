@@ -87,6 +87,19 @@ jobs:
           REQUIRE_RELEASE_SIGNING: 'true'
         run: ./gradlew :app:assembleRelease :app:bundleRelease --stacktrace
 
+      # Rename before anything inspects or digests the artifacts, so that every step below works
+      # from one path and, more to the point, `apksigner` reads the file under the exact name the
+      # release publishes. `mv` does not touch the bytes, so the certificate below is still the
+      # certificate of the APK that ships — there is just no window in which the check has to guess
+      # at the pre-rename path.
+      - name: Rename artifacts
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          mv app/build/outputs/apk/release/app-release.apk "bible-${VERSION}-release.apk"
+          mv app/build/outputs/bundle/release/app-release.aab "bible-${VERSION}-release.aab"
+
       # NATIVE_PLAN.md §6 R2, checked instead of assumed: `signingReport` shows what the release
       # variant actually resolved to (a fall back to debug prints `Config: debug`), and apksigner
       # shows what certificate the finished APK carries. Only public certificate digests are read
@@ -131,14 +144,6 @@ jobs:
             exit 1
           fi
           echo "release APK signed by the release keystore (alias $alias, cert $apk_digest)"
-
-      - name: Rename artifacts
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          set -euo pipefail
-          mv app/build/outputs/apk/release/app-release.apk "bible-${VERSION}-release.apk"
-          mv app/build/outputs/bundle/release/app-release.aab "bible-${VERSION}-release.aab"
 
       # NATIVE_PLAN.md §5 Phase 6 (R10): the release carries an 8.7 MB Bible database and
       # ~4.6 MB of fonts on top of Compose + Hilt, so the size is a budget, not an
