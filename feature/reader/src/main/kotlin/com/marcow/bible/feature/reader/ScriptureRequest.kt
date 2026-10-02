@@ -76,7 +76,7 @@ fun scriptureRequest(
     reference = reference,
     text = verseSelectionText(reference, verse),
     chapterContext = chapterContext,
-    question = explainQuestion.takeIf { action.carriesQuestion },
+    question = explainQuestion.takeIf { action.carriesQuestion && it.isNotBlank() },
 )
 
 /** The blank line between two verses in the chapter context, `join('\n\n')` in Flutter. */
