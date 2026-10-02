@@ -19,14 +19,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalPlatformContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -38,7 +36,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import coil3.ImageLoader
 import coil3.compose.SubcomposeAsyncImage
 import com.marcow.bible.core.designsystem.R
 import com.marcow.bible.core.designsystem.components.AppTap
@@ -292,20 +289,6 @@ private fun DevotionImagePlaceholder(loading: Boolean) {
             )
         }
     }
-}
-
-/**
- * The loader the article's images go through.
- *
- * Coil's Compose entry points read a process-wide singleton, and nothing in this app installs one —
- * registering it means touching the `app` module, outside this feature's scope — so the loader is
- * built here and handed to each image instead. Its OkHttp fetcher still arrives by `ServiceLoader`,
- * which is how `coil-network-okhttp` announces itself.
- */
-@Composable
-private fun devotionImageLoader(): ImageLoader {
-    val context = LocalPlatformContext.current
-    return remember(context) { ImageLoader.Builder(context).build() }
 }
 
 /**
