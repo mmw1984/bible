@@ -141,7 +141,7 @@ fun DevotionScreen(
                                 DevotionSpinner(color = colors.muted)
                                 Spacer(Modifier.height(DevotionChrome.LOADING_GAP))
                                 Text(
-                                    text = stringResource(R.string.devotion_loading),
+                                    text = stringResource(devotionScreenLabel(DevotionScreenLabel.LOADING)),
                                     color = colors.muted,
                                     fontSize = DevotionChrome.LOADING_SIZE,
                                 )
@@ -262,7 +262,7 @@ private fun DevotionMasthead(
             contentAlignment = Alignment.BottomStart,
         ) {
             Text(
-                text = stringResource(R.string.tab_devotion),
+                text = stringResource(devotionScreenLabel(DevotionScreenLabel.TITLE)),
                 color = appColors.ink,
                 fontFamily = devotionTitleFamily(state.usesEnglishUi),
                 fontSize = layout.titleSize,
@@ -280,14 +280,14 @@ private fun DevotionMasthead(
             Spacer(Modifier.width(DevotionChrome.CONTROL_GAP))
             AppGlyphButton(
                 glyph = AppGlyph.COPY,
-                label = stringResource(R.string.devotion_copy_article),
+                label = stringResource(devotionScreenLabel(DevotionScreenLabel.COPY_ARTICLE)),
                 onClick = onCopyArticle.takeIf { state.post != null },
                 size = DevotionChrome.CONTROL_SIZE,
             )
             Spacer(Modifier.width(DevotionChrome.CONTROL_GAP))
             AppGlyphButton(
                 glyph = AppGlyph.BOOK,
-                label = stringResource(R.string.devotion_open_web_reader),
+                label = stringResource(devotionScreenLabel(DevotionScreenLabel.WEB_READER)),
                 onClick = onOpenWebReader.takeIf { state.post != null },
                 size = DevotionChrome.CONTROL_SIZE,
             )
@@ -333,7 +333,7 @@ private fun DevotionMasthead(
  */
 @Composable
 private fun RefreshControl(loading: Boolean, onRefresh: () -> Unit, modifier: Modifier = Modifier) {
-    val label = stringResource(R.string.devotion_refresh)
+    val label = stringResource(devotionScreenLabel(DevotionScreenLabel.REFRESH))
     AppControlSurface(
         color = appColors.surfaceRaised.copy(alpha = DevotionChrome.CONTROL_FILL_ALPHA),
         borderColor = appColors.line,
@@ -452,7 +452,7 @@ private fun DevotionFailure(
         AppGlyphView(glyph = AppGlyph.CLOUD_OFF, size = DevotionChrome.FAILURE_GLYPH_SIZE, color = colors.muted)
         Spacer(Modifier.height(DevotionChrome.FAILURE_GLYPH_GAP))
         Text(
-            text = stringResource(R.string.devotion_load_failed),
+            text = stringResource(devotionScreenLabel(DevotionScreenLabel.LOAD_FAILED)),
             color = colors.muted,
             fontSize = DevotionChrome.FAILURE_SIZE,
             textAlign = TextAlign.Center,
@@ -473,11 +473,18 @@ private fun DevotionFailure(
         }
         Spacer(Modifier.height(DevotionChrome.FAILURE_BUTTONS_ABOVE))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            FailureButton(label = stringResource(R.string.devotion_retry), onClick = onRetry, emphasized = true)
+            FailureButton(
+                label = stringResource(devotionScreenLabel(DevotionScreenLabel.RETRY)),
+                onClick = onRetry,
+                emphasized = true,
+            )
             Spacer(Modifier.width(DevotionChrome.FAILURE_BUTTON_GAP))
             // There is no post by definition here, so Flutter's `post?.link ?? devotionOrigin` is the
             // site's front page — whatever the host opens this with is its business.
-            FailureButton(label = stringResource(R.string.devotion_open_web_reader), onClick = onWebReader)
+            FailureButton(
+                label = stringResource(devotionScreenLabel(DevotionScreenLabel.WEB_READER)),
+                onClick = onWebReader,
+            )
         }
     }
 }
@@ -513,6 +520,72 @@ internal fun FailureButton(label: String, onClick: () -> Unit, emphasized: Boole
  */
 private fun devotionTitleFamily(usesEnglishUi: Boolean): FontFamily =
     if (usesEnglishUi) AppFonts.Exposure else AppFonts.NotoSerifTC
+
+/**
+ * The seven sentences the page says for itself, in the order it says them.
+ *
+ * Not the sentences it *displays* — the article's own day, title and blocks are the blog's words and
+ * arrive in [DevotionPost], and the exception text under the failure message is deliberately not
+ * localised. What is here is the chrome around them: the masthead's heading and its three controls,
+ * then the words of the two bodies the page can be instead of an article.
+ *
+ * They are gathered into a table so that `DevotionScreenTest` can read them. A string resolved inside a
+ * composable cannot be asserted without a device, and the same is true of the reason these are worth
+ * a table: a page that said 網頁版 beside 複製全文 while the whole of the English UI was in English would
+ * compile, read correctly in a diff, and be wrong on a device only.
+ */
+enum class DevotionScreenLabel {
+    /** The oversized heading, `context.l10n.tabDevotion` at `legacy/flutter/lib/devotion_page.dart:246`. */
+    TITLE,
+
+    /** The masthead's refresh control, `context.l10n.devotionRefresh` at `:509`. */
+    REFRESH,
+
+    /** The control that copies the article, `context.l10n.devotionCopyArticle` at `:276`. */
+    COPY_ARTICLE,
+
+    /**
+     * The control that opens the article's own page in a frame, `context.l10n.devotionOpenWebReader`
+     * at `:284`.
+     *
+     * It is one entry for the two places the page says it, because both say the same thing: the
+     * masthead's third button and the failure screen's second button open the same reader. Flutter
+     * reached for `devotionOpenWebReader` in both, at `:284` and `:402`, and the failure screen is
+     * reached precisely when there is no article to open — so the two buttons a reader can reach at
+     * the worst moment are the ones that must agree about what they are for.
+     */
+    WEB_READER,
+
+    /** The word under the spinner, `context.l10n.devotionLoading` at `:342`. */
+    LOADING,
+
+    /** The failure message, `context.l10n.devotionLoadFailed` at `:359`. */
+    LOAD_FAILED,
+
+    /** The failure screen's first button, `context.l10n.devotionRetry` at `:382`. */
+    RETRY,
+}
+
+/**
+ * The string each of the page's own sentences is written in.
+ *
+ * [DevotionScreenLabel.WEB_READER] is 網頁版 rather than 在瀏覽器開啟 because the two are different
+ * destinations and both exist in the translations: `devotion_open_web_reader` names the embedded frame
+ * this page opens, and `devotion_open_in_browser` names the system browser that the reader's own top
+ * bar hands out to at `DevotionWebReader.kt:246`. Naming this control with the browser's string would
+ * have been the one plausible wrong choice here — it is a book glyph beside a copy glyph, and a reader
+ * who was told it would open a browser would not be wrong so much as sent somewhere they had not asked
+ * to go.
+ */
+fun devotionScreenLabel(label: DevotionScreenLabel): Int = when (label) {
+    DevotionScreenLabel.TITLE -> R.string.tab_devotion
+    DevotionScreenLabel.REFRESH -> R.string.devotion_refresh
+    DevotionScreenLabel.COPY_ARTICLE -> R.string.devotion_copy_article
+    DevotionScreenLabel.WEB_READER -> R.string.devotion_open_web_reader
+    DevotionScreenLabel.LOADING -> R.string.devotion_loading
+    DevotionScreenLabel.LOAD_FAILED -> R.string.devotion_load_failed
+    DevotionScreenLabel.RETRY -> R.string.devotion_retry
+}
 
 /** `colors.ink.withValues(alpha: .55)`, the border of the chip in hand. */
 private const val ACTIVE_CHIP_BORDER_ALPHA = 0.55f
