@@ -241,10 +241,10 @@ class SearchRowsTest {
         // Exhaustiveness is the compiler's job, but a resource that no longer resolves is the one
         // outcome nothing in this module can rule out, and it would draw a bare spinner with nothing
         // in its section to say what is out.
-        listOf(SearchPanel.OverviewLoading, SearchPanel.ScriptureLoading).forEach { panel ->
-            assertNotEquals(0, panel.title, "$panel has no section title")
-            assertNotEquals(0, panel.label, "$panel has no label")
-        }
+        assertNotEquals(0, SearchPanel.OverviewLoading.title, "${SearchPanel.OverviewLoading} has no section title")
+        assertNotEquals(0, SearchPanel.OverviewLoading.label, "${SearchPanel.OverviewLoading} has no label")
+        assertNotEquals(0, SearchPanel.ScriptureLoading.title, "${SearchPanel.ScriptureLoading} has no section title")
+        assertNotEquals(0, SearchPanel.ScriptureLoading.label, "${SearchPanel.ScriptureLoading} has no label")
     }
 }
 
