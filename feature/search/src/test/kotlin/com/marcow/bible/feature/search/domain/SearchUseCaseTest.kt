@@ -191,7 +191,11 @@ class SearchUseCaseTest {
     private fun overview(client: OpenRouterChatClient) = SearchOverviewUseCase(client, modelId)
 
     private fun references(client: OpenRouterChatClient) =
-        SearchReferencesUseCase(client, modelId, BibleRepository(SearchHalfFakeBibleDao(), SearchHalfFakeReadingProgressDao()))
+        SearchReferencesUseCase(
+            client,
+            modelId,
+            BibleRepository(SearchHalfFakeBibleDao(), SearchHalfFakeReadingProgressDao()),
+        )
 
     /** Runs one half and hands back the request it put on the wire. */
     private suspend fun capture(client: ScriptedClient, call: suspend () -> Unit): ChatCompletionRequest {
