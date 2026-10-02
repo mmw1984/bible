@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
@@ -165,6 +166,8 @@ private fun NavBarContent(items: List<AppNavBarItem>, pillWidth: Dp, selectedInd
     var dragging by remember { mutableStateOf(false) }
     var dragPosition by remember { mutableFloatStateOf(effectiveIndex.toFloat()) }
     val indicatorPosition = if (dragging) dragPosition else settled.value
+    // `BorderRadius.circular((kAppNavBarHeight - 8) / 2)` on Flutter's indicator container.
+    val indicatorShape = RoundedCornerShape((AppNavBarHeight - IndicatorInset.dp * 2) / 2)
 
     Box(
         modifier = Modifier
@@ -228,12 +231,15 @@ private fun NavBarContent(items: List<AppNavBarItem>, pillWidth: Dp, selectedInd
                 .height(AppNavBarHeight - IndicatorInset.dp * 2)
                 .shadow(
                     elevation = IndicatorShadowElevation,
-                    shape = RoundedCornerShape((AppNavBarHeight - IndicatorInset.dp * 2) / 2),
+                    shape = indicatorShape,
                     clip = false,
                     ambientColor = IndicatorShadowColor,
                     spotColor = IndicatorShadowColor,
                 )
-                .background(IndicatorFill),
+                // Flutter's indicator is a rounded pill (`BorderRadius.circular((58 - 8) / 2)`):
+                // a bare `background` fill draws a square block instead.
+                .clip(indicatorShape)
+                .background(IndicatorFill, indicatorShape),
         )
 
         Row(
