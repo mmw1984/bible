@@ -29,7 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.colorspace.isDark
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -302,7 +302,16 @@ private fun NavBarTab(
 
 /** The pill's drop shadow, heavier in dark mode because the canvas is nearly black there. */
 private fun pillShadowColor(colors: AppColors): Color =
-    Color.Black.copy(alpha = if (colors.canvas.isDark()) PillShadowDarkAlpha else PillShadowLightAlpha)
+    Color.Black.copy(
+        alpha = if (colors.canvas.luminance() < DarkCanvasLuminance) PillShadowDarkAlpha else PillShadowLightAlpha,
+    )
+
+/**
+ * Where the two canvases split: `AppColors.Dark` paints `0xFF090909` and `AppColors.Light` paints
+ * `0xFFF5F2EA`, so the dark canvas lands near black and the light one near white, and any threshold
+ * between them separates them.
+ */
+private const val DarkCanvasLuminance = 0.5f
 
 /** The indicator is a pure white fill in both themes, as it was in Flutter. */
 private val IndicatorFill = Color.White

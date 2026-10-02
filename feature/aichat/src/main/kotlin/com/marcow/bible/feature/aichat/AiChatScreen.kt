@@ -151,10 +151,9 @@ fun AiChatScreen(
         followLatest = true
         scope.launch {
             listState.animateScrollBy(
+                value = -listState.value,
                 animationSpec = tween(SCROLL_TO_LATEST_MILLIS, easing = EaseOutCubic),
-            ) {
-                scrollBy(-listState.value)
-            }
+            )
         }
     }
 
