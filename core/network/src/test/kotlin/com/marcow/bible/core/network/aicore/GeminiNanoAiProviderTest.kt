@@ -218,6 +218,7 @@ class GeminiNanoAiProviderTest {
         assertEquals(listOf("prepare", "stream", "close"), factory.model.calls)
     }
 
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     @Test
     fun `an answer the reader stops still closes the model`() = runTest {
         // A model that keeps talking: stopping is what the chat's toolbar does, so a half-read answer
