@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.marcow.bible.core.model.AppSettings
 
 /**
  * The settings destination as the navigation host sees it: it owns the [SettingsViewModel] and
@@ -13,7 +14,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
  */
 @Composable
 fun SettingsRoute(onBack: () -> Unit, modifier: Modifier = Modifier, viewModel: SettingsViewModel = hiltViewModel()) {
-    val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val settings by viewModel.settings.collectAsStateWithLifecycle(initialValue = AppSettings())
     Box(modifier = modifier) {
         SettingsScreen(
             settings = settings,
