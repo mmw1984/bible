@@ -100,8 +100,18 @@ class OpenRouterAiProvider @Inject constructor(
                 }
             }
             // Read lazily, one line at a time: a buffered read of the whole body would hold the answer
-            // until the model was done, which is the opposite of what a stream is for.
-            val lines = it.body?.source()?.lineSequence()?.asFlow() ?: emptyFlow()
+            // until the model was done, which is the opposite of what a stream is for. An Okio source
+            // is not a `CharSequence` and carries no `lineSequence()`, so the lines are pulled one
+            // `readUtf8Line()` at a time and each is emitted the moment it is read.
+            val lines = it.body?.source()?.let { source ->
+                sequence {
+                    var line = source.readUtf8Line()
+                    while (line != null) {
+                        yield(line)
+                        line = source.readUtf8Line()
+                    }
+                }.asFlow()
+            } ?: emptyFlow()
             openRouterChatEvents(lines).collect { event -> emit(event) }
         }
     }.flowOn(Dispatchers.IO)
