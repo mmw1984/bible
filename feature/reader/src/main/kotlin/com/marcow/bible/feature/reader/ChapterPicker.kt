@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.roundToIntRect
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
@@ -147,16 +148,20 @@ fun ChapterPickerBubble(
     val density = LocalDensity.current
     val windowWidth = configuration.screenWidthDp.dp
     val windowHeight = configuration.screenHeightDp.dp
-    val bottomInset = density.toDp(WindowInsets.navigationBars.getBottom(density))
+    val bottomInset = with(density) { WindowInsets.navigationBars.getBottom(this).toDp() }
     val width = chapterPickerWidth(windowWidth)
-    val rightMargin = chapterPickerRightMargin(
-        anchorRight = density.toDp(bounds.right),
-        windowWidth = windowWidth,
-    )
-    val top = chapterPickerTop(
-        anchorBottom = density.toDp(bounds.bottom),
-        windowHeight = windowHeight,
-    )
+    val rightMargin = with(density) {
+        chapterPickerRightMargin(
+            anchorRight = bounds.right.toDp(),
+            windowWidth = windowWidth,
+        )
+    }
+    val top = with(density) {
+        chapterPickerTop(
+            anchorBottom = bounds.bottom.toDp(),
+            windowHeight = windowHeight,
+        )
+    }
     val maxHeight = chapterPickerMaxHeight(top = top, windowHeight = windowHeight, bottomInset = bottomInset)
     val offset = with(density) {
         IntOffset(
@@ -363,7 +368,7 @@ fun ChapterControl(
     val colors = appColors
     val label = chapterLabel(chapter)
     AppControlSurface(
-        modifier = modifier.onGloballyPositioned { onAnchorChanged(it.boundsInWindow()) },
+        modifier = modifier.onGloballyPositioned { onAnchorChanged(it.boundsInWindow().roundToIntRect()) },
         color = colors.surfaceRaised.copy(alpha = ChapterControlFillAlpha),
     ) {
         AppTap(
