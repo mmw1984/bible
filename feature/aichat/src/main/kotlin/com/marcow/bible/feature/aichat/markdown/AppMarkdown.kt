@@ -197,12 +197,12 @@ fun parseAppMarkdown(data: String): List<MarkdownBlock> {
 
             header.size > 1 && index + 1 < lines.size && isTableDivider(lines[index + 1]) -> {
                 flushParagraph()
-                val rows = mutableListOf(listOf(inlineCells(header)))
+                val rows = mutableListOf(inlineCells(header))
                 index += 2
                 while (index < lines.size && lines[index].isNotBlank()) {
                     val cells = markdownTableCells(lines[index])
                     if (cells.size <= 1) break
-                    rows += listOf(inlineCells(cells))
+                    rows += inlineCells(cells)
                     index++
                 }
                 blocks += MarkdownBlock.Table(rows)
