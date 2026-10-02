@@ -102,15 +102,15 @@ internal fun parseHtmlDocument(html: String): HtmlElement {
     while (index < tokens.size) {
         val token = tokens[index]
         index++
-        if (token is HtmlCharacter) {
-            stack.last().children.add(HtmlText(token.data))
-            continue
-        }
-        if (token.isEndTag) {
-            closeTag(stack, token.data)
-        } else {
-            val element = openTag(stack, token)
-            if (element.tag in RAW_TEXT_ELEMENTS) index = skipRawText(tokens, index, element.tag)
+        when (token) {
+            is HtmlCharacter -> stack.last().children.add(HtmlText(token.data))
+
+            is HtmlTag -> if (token.isEndTag) {
+                closeTag(stack, token.data)
+            } else {
+                val element = openTag(stack, token)
+                if (element.tag in RAW_TEXT_ELEMENTS) index = skipRawText(tokens, index, element.tag)
+            }
         }
     }
     return document
