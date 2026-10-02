@@ -7,6 +7,9 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import okhttp3.OkHttpClient
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeParseException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -86,6 +89,10 @@ private fun JsonObject.publishDate(): LocalDateTime =
 /**
  * `DateTime.tryParse(raw)?.toLocal() ?? DateTime.now()`: a local date-time with no zone attached.
  *
+ * `DateTime.tryParse` also reads an offset (`+08:00`) or a trailing `Z` and `toLocal()` resolves
+ * it against the device zone; `LocalDateTime.parse` refuses both, so they are resolved the same way
+ * here rather than falling back to now for a date the feed stated plainly.
+ *
  * Public because the devotion cache writes the same WordPress date back out and reads it in again
  * (`DevotionCache` in `feature/devotion`), and a date is a date in both layers: parsing it twice with
  * two implementations is how a cache starts disagreeing with the feed that wrote it.
@@ -93,7 +100,15 @@ private fun JsonObject.publishDate(): LocalDateTime =
 fun parseIsoDateTime(raw: String): LocalDateTime? = try {
     LocalDateTime.parse(raw)
 } catch (_: DateTimeParseException) {
-    null
+    try {
+        OffsetDateTime.parse(raw).atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()
+    } catch (_: DateTimeParseException) {
+        try {
+            ZonedDateTime.parse(raw).withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()
+        } catch (_: DateTimeParseException) {
+            null
+        }
+    }
 }
 
 /** `item['title']['rendered']`, or the empty string `as String? ?? ''` produced. */

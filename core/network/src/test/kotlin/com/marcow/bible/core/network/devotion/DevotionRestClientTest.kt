@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneId
 
 /**
  * The REST tier's decoder and its two routes, checked against `_decodeRestPosts` /
@@ -66,6 +68,26 @@ class DevotionRestClientTest {
 
         assertEquals(LocalDateTime.of(2026, 8, 21, 1, 42, 24), posts[0].publishedAt)
         assertEquals(posts[1].publishedAt.year, LocalDateTime.now().year)
+    }
+
+    @Test
+    fun `an offset date is resolved to device-local time, as toLocal did`() {
+        // `DateTime.tryParse('…+08:00')?.toLocal()`: the offset is read and resolved against the
+        // device zone instead of falling back to now for a date the API stated plainly.
+        assertEquals(
+            OffsetDateTime.parse("2026-08-21T01:42:24+08:00")
+                .atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime(),
+            parseIsoDateTime("2026-08-21T01:42:24+08:00"),
+        )
+    }
+
+    @Test
+    fun `a utc zulu date is resolved to device-local time`() {
+        assertEquals(
+            OffsetDateTime.parse("2026-08-20T17:42:24Z")
+                .atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime(),
+            parseIsoDateTime("2026-08-20T17:42:24Z"),
+        )
     }
 
     @Test
