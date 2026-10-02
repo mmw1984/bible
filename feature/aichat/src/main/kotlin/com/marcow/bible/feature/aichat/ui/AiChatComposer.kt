@@ -200,9 +200,10 @@ private fun AiChatInput(
             // Flutter's `mainAxisAlignment` was centre without a header and start with one, so a bare
             // question sits on the 48 in the middle rather than resting on its top edge. The 48 minus
             // the 5 either side is what makes that box the same height Flutter's constraint gave it.
+            // A `Column`'s axis arrangement is `verticalArrangement`; `verticalAlignment` is a `Row`'s,
+            // and a column of a header and a field has no cross axis to align.
             Column(
                 modifier = Modifier.heightIn(min = BOX_MIN_HEIGHT - BOX_PADDING_VERTICAL * 2),
-                verticalAlignment = if (header != null) Alignment.TopStart else Alignment.CenterStart,
                 verticalArrangement = if (header != null) Arrangement.Top else Arrangement.Center,
             ) {
                 if (header != null) {
