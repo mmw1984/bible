@@ -140,9 +140,9 @@ internal class ClearedViewModel : ViewModel() {
 }
 
 /** A host that publishes a factory, which is what `ComponentActivity` does and the shape accepted. */
-private class FakeHost(
-    override val defaultViewModelProviderFactory: ViewModelProvider.Factory = NewFactory,
-) : ViewModelStoreOwner, HasDefaultViewModelProviderFactory {
+private class FakeHost(override val defaultViewModelProviderFactory: ViewModelProvider.Factory = NewFactory) :
+    ViewModelStoreOwner,
+    HasDefaultViewModelProviderFactory {
     override val viewModelStore: ViewModelStore = ViewModelStore()
 }
 
