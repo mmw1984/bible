@@ -92,6 +92,20 @@ class ReaderViewModel @Inject constructor(
     }
 
     /**
+     * Opens [bookId] at [chapter] keeping the reading mode, which is what jumping to a search hit
+     * did — `_openSearch`'s `onVerse` set `bookIndex` and `chapter` without touching `mode`
+     * (`legacy/flutter/lib/main.dart:853`).
+     *
+     * [selectBook] is deliberately not reused here: selecting a book resets to chapter 1 in Chinese,
+     * while a search hit lands on its own chapter in whatever the reader was reading.
+     */
+    fun openLocation(bookId: String, chapter: Int) {
+        val index = books.indexOfFirst { it.id == bookId }
+        if (index < 0) return
+        stepTo(position.movedTo(index, clampChapter(books[index].chapters, chapter)))
+    }
+
+    /**
      * Opens [chapter], clamped to the book's chapter count.
      *
      * Clamping rather than ignoring keeps the chapter links at the ends of a book — and the chapter
