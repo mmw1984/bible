@@ -39,7 +39,7 @@ interface OpenRouterAuthorizeLauncher {
  * not an activity's — without it Android refuses to start the tab from a non-activity context.
  */
 @Singleton
-class CustomTabsOpenRouterAuthorizeLauncher @Inject constructor(@ApplicationContext private val context: Context) :
+class CustomTabsOpenRouterAuthorizeLauncher @Inject constructor(@param:ApplicationContext private val context: Context) :
     OpenRouterAuthorizeLauncher {
     override fun launch(uri: String): Boolean {
         val intent = CustomTabsIntent.Builder().build().intent.apply {
