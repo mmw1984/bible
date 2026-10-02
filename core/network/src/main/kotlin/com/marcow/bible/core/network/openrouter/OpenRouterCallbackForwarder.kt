@@ -34,9 +34,7 @@ import javax.inject.Singleton
  * this is not inside the branch.
  */
 @Singleton
-class OpenRouterCallbackForwarder @Inject constructor(
-    private val auth: OpenRouterAuthManager,
-) {
+class OpenRouterCallbackForwarder @Inject constructor(private val auth: OpenRouterAuthManager) {
     /**
      * The link the activity was handed, answering whether it was an OpenRouter callback at all.
      *
