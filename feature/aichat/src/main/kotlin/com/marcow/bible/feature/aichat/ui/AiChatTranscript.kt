@@ -1,6 +1,7 @@
 package com.marcow.bible.feature.aichat.ui
 
 import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,14 +24,14 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
+import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import com.marcow.bible.core.designsystem.R
 import com.marcow.bible.core.designsystem.theme.AppFonts
 import com.marcow.bible.core.designsystem.theme.appColors
 import com.marcow.bible.feature.aichat.domain.AiMessage
 import com.marcow.bible.feature.aichat.domain.AiMessageRole
-import kotlin.math.max
-import kotlin.math.min
 
 /**
  * The conversation: `_MessageList` in `legacy/flutter/lib/ai_chat_page.dart:600`, the turns themselves
