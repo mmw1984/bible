@@ -51,7 +51,7 @@ class DevotionArticlePageTest {
     fun `normalizePostHref rejects pages, uploads and the feed`() {
         assertNull(normalizePostHref("https://devotion.wkphc.org/feed"))
         assertNull(normalizePostHref("/wp-content/uploads/a.png"))
-        assertNull(normalizePostHref("/2544"), "two digits is not a post id")
+        assertNull(normalizePostHref("/25"), "two digits is not a post id")
         assertNull(normalizePostHref("/about"))
     }
 

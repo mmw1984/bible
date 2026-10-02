@@ -144,7 +144,7 @@ internal class AiChatViewModelTest {
         viewModel.send("問題")
         advanceUntilIdle()
 
-        assertEquals(1, viewModel.state.value.messages.last().text)
+        assertEquals("", viewModel.state.value.messages.last().text)
         assertEquals("只有思考", viewModel.state.value.messages.last().reasoning)
     }
 

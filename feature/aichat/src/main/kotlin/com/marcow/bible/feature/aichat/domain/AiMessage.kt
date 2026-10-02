@@ -65,7 +65,10 @@ enum class AiMessageRole(val storageValue: String, val promptPrefix: String) {
 
     companion object {
         /** Reads `role`, defaulting to `assistant` exactly as `AiMessage.fromJson` did. */
-        fun fromStorage(value: String?): AiMessageRole = entries.firstOrNull { it.storageValue == value } ?: ASSISTANT
+        fun fromStorage(value: String?): AiMessageRole {
+            if (value == null) return ASSISTANT
+            return entries.firstOrNull { it.storageValue == value } ?: UNKNOWN
+        }
     }
 }
 

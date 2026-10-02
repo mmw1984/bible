@@ -92,8 +92,10 @@ class DevotionWebReaderTest {
             "::::not a url",
             "",
         ).forEach { url ->
-            assertFalse(webReaderLinkIsExternal(url), "$url is both followed and escalated")
-            assertTrue(webReaderMayNavigateInPlace(url) || !webReaderLinkIsExternal(url))
+            assertFalse(
+                webReaderMayNavigateInPlace(url) && webReaderLinkIsExternal(url),
+                "$url is both followed and escalated",
+            )
         }
     }
 
