@@ -174,7 +174,7 @@ class AiSearchUseCaseTest {
 
     /** The real use cases over a fake transport, which is the wiring worth testing. */
     private fun aiSearch(client: FakeChatClient, chapterFailure: Throwable? = null): AiSearchUseCase {
-        val repository = BibleRepository(FakeBibleDao(chapterFailure), FakeReadingProgressDao())
+        val repository = BibleRepository(AiSearchFakeBibleDao(chapterFailure), AiSearchFakeReadingProgressDao())
         val modelId = object : OpenRouterModelId {
             override suspend fun modelId(): String = MODEL
         }
@@ -262,7 +262,7 @@ private val GENESIS = BookEntity("GEN", 1, "創世記", "Genesis", 50, 0)
 private val JOHN = BookEntity("JHN", 43, "約翰福音", "John", 21, 1)
 
 /** The books and verses the references half resolves against; the search SQL is `BibleSearchTest`'s. */
-private class FakeBibleDao(private val chapterFailure: Throwable? = null) : BibleDao {
+private class AiSearchFakeBibleDao(private val chapterFailure: Throwable? = null) : BibleDao {
     private val canon = listOf(GENESIS, JOHN)
 
     private val rows = listOf(
@@ -287,7 +287,7 @@ private class FakeBibleDao(private val chapterFailure: Throwable? = null) : Bibl
     override suspend fun searchContains(pattern: String, limit: Int): List<ScriptureSearchRow> = emptyList()
 }
 
-private class FakeReadingProgressDao : ReadingProgressDao {
+private class AiSearchFakeReadingProgressDao : ReadingProgressDao {
     override suspend fun progress(book: String): ReadingProgressEntity? = null
 
     override suspend fun allProgress(): List<ReadingProgressEntity> = emptyList()
