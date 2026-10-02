@@ -10,6 +10,7 @@ import com.marcow.bible.core.database.VerseEntity
 import com.marcow.bible.core.datastore.InMemorySettingsDataStore
 import com.marcow.bible.core.datastore.SettingsRepository
 import com.marcow.bible.core.model.AppLocale
+import com.marcow.bible.core.model.BibleBook
 import com.marcow.bible.core.model.Testament
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
