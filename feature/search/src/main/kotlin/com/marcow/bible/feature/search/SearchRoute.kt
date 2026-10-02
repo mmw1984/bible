@@ -61,6 +61,7 @@ import com.marcow.bible.core.model.ScriptureHit
  *
  * @see SearchDialog for the parameters, which are the same ones this hands it.
  */
+@Suppress("LongParameterList")
 @Composable
 fun SearchRoute(
     readingMode: ReadingMode,
