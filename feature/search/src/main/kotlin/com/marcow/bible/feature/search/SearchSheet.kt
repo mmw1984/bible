@@ -40,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.toDp
 import com.marcow.bible.core.database.SEARCH_RESULT_LIMIT
 import com.marcow.bible.core.designsystem.R
 import com.marcow.bible.core.designsystem.components.AppChoice
