@@ -84,11 +84,12 @@ data class OpenRouterCallbackUri(
 ) {
     /** `uri.scheme == 'bible' && uri.host == 'openrouter' && uri.path == '/callback'`. */
     val isAppLink: Boolean
-        get() = scheme == "bible" && host == "openrouter" && path == "/callback"
+        get() = scheme == "bible" && host == "openrouter" && path.equals("/callback", ignoreCase = true)
 
     /** The loopback leg of the same sign-in, which a desktop or `flutter run` build receives. */
     val isLoopback: Boolean
-        get() = scheme == "http" && (host == "localhost" || host == "127.0.0.1") && path == "/callback"
+        get() = scheme == "http" && (host == "localhost" || host == "127.0.0.1") &&
+            path.equals("/callback", ignoreCase = true)
 
     /** `uri.queryParameters['error_description'] ?? uri.queryParameters['error']`, empties dropped. */
     val error: String?
@@ -107,7 +108,7 @@ data class OpenRouterCallbackUri(
             val rest = uri.substring(schemeEnd + SCHEME_SEPARATOR.length)
             val pathStart = rest.indexOfFirst { it == '/' || it == '?' || it == '#' }
             if (pathStart < 0) return null
-            val host = rest.substring(0, pathStart).substringBefore('@').lowercase()
+            val host = rest.substring(0, pathStart).substringAfter('@').substringBefore(':').lowercase()
             if (host.isEmpty()) return null
             val remainder = rest.substring(pathStart)
             val path = remainder.substringBefore('?').substringBefore('#')
