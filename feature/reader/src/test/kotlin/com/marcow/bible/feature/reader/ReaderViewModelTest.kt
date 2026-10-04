@@ -14,6 +14,8 @@ import com.marcow.bible.core.model.ReadingMode
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -253,6 +255,52 @@ class ReaderViewModelTest {
     }
 
     @Test
+    fun `a canceled slow load cannot overwrite the newer chapter`() = runTest(dispatcher) {
+        val viewModel = reader()
+        advanceUntilIdle()
+        val slowChapter = CompletableDeferred<Unit>()
+        bibleDao.perChapterGate["GEN:2"] = slowChapter
+        bibleDao.uncancellableChapters += "GEN:2"
+
+        viewModel.selectChapter(2)
+        advanceUntilIdle()
+        viewModel.selectChapter(1)
+        advanceUntilIdle()
+        assertEquals(1, viewModel.state.value.chapter)
+        assertFalse(viewModel.state.value.failed)
+
+        slowChapter.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(1, viewModel.state.value.chapter)
+        assertEquals(listOf("起初"), viewModel.state.value.verses.map { it.zh })
+        assertFalse(viewModel.state.value.failed)
+    }
+
+    @Test
+    fun `a canceled stale failure cannot mark the newer chapter as failed`() = runTest(dispatcher) {
+        val viewModel = reader()
+        advanceUntilIdle()
+        val slowFailure = CompletableDeferred<Unit>()
+        bibleDao.perChapterGate["GEN:2"] = slowFailure
+        bibleDao.uncancellableChapters += "GEN:2"
+        bibleDao.failing += "GEN:2"
+
+        viewModel.selectChapter(2)
+        advanceUntilIdle()
+        viewModel.selectChapter(1)
+        advanceUntilIdle()
+        assertFalse(viewModel.state.value.failed)
+
+        slowFailure.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(1, viewModel.state.value.chapter)
+        assertFalse(viewModel.state.value.failed)
+        assertEquals(listOf("起初"), viewModel.state.value.verses.map { it.zh })
+    }
+
+    @Test
     fun `scrolling writes one row once the reader settles`() = runTest(dispatcher) {
         val viewModel = reader()
         advanceUntilIdle()
@@ -481,6 +529,8 @@ class ReaderViewModelTest {
 
         /** Held by [chapter] while set, so a test can look at the state before a chapter lands. */
         var gate: CompletableDeferred<Unit>? = null
+        val perChapterGate = mutableMapOf<String, CompletableDeferred<Unit>>()
+        val uncancellableChapters = mutableSetOf<String>()
 
         override suspend fun books(): List<BookEntity> = bookRows.sortedBy { it.ordinal }
 
@@ -488,7 +538,15 @@ class ReaderViewModelTest {
 
         override suspend fun chapter(book: String, chapter: Int): List<VerseEntity> {
             gate?.await()
-            check("$book:$chapter" !in failing) { "no such chapter" }
+            val key = "$book:$chapter"
+            perChapterGate[key]?.let { chapterGate ->
+                if (key in uncancellableChapters) {
+                    withContext(NonCancellable) { chapterGate.await() }
+                } else {
+                    chapterGate.await()
+                }
+            }
+            check(key !in failing) { "no such chapter" }
             return verseRows.filter { it.bookId == book && it.chapter == chapter }.sortedBy { it.verse }
         }
 

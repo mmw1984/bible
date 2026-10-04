@@ -51,11 +51,12 @@ class SearchViewModel @Inject constructor(
     /**
      * The in-flight search, cancelled when a newer one starts.
      *
-     * Flutter had nothing to cancel — a stale callback only had to notice `query != value` — and the
-     * guard in [runTraditional] / [runAiSearch] is kept anyway, because it is what stops a slow
-     * answer from writing its panel over the results of the query that replaced it.
+     * Flutter had nothing to cancel — a stale callback only had to notice `query != value` — while
+     * this version cancels the older request and gives each request a token, so a slow or cancelled
+     * stale request cannot write over the one that replaced it, even when the query text matches.
      */
     private var searchJob: Job? = null
+    private var requestToken = 0L
 
     /** Flutter's `bool pendingCloudSearch`: an AI query waiting for a sign-in to land. */
     private var pendingCloudSearch = false
@@ -143,6 +144,7 @@ class SearchViewModel @Inject constructor(
      */
     @Suppress("TooGenericExceptionCaught")
     private fun runTraditional(value: String) {
+        val token = nextRequestToken()
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             val hits = try {
@@ -152,7 +154,7 @@ class SearchViewModel @Inject constructor(
             } catch (_: Exception) {
                 null
             }
-            if (_state.value.query != value) return@launch
+            if (!isCurrentRequest(token)) return@launch
             _state.update {
                 if (hits == null) {
                     it.copy(traditionalFailed = true, traditionalSearching = false)
@@ -182,6 +184,8 @@ class SearchViewModel @Inject constructor(
         // watcher and the submit button reach this: a query the watcher is holding on to can have
         // been emptied from the box in the meantime.
         if (value.isBlank() || _state.value.searching || !_state.value.aiReady) return
+        val token = nextRequestToken()
+        searchJob?.cancel()
         _state.update {
             it.copy(
                 query = value,
@@ -194,13 +198,12 @@ class SearchViewModel @Inject constructor(
                 aiHits = emptyList(),
             )
         }
-        searchJob?.cancel()
         searchJob = viewModelScope.launch {
             try {
                 val memory = aiMemory.promptMemory()
                 val aiLanguage = settingsRepository.settings.first().locale.aiLanguage
                 aiSearch.search(query = value, memory = memory, aiLanguage = aiLanguage).collect { update ->
-                    if (_state.value.query != value) return@collect
+                    if (!isCurrentRequest(token)) return@collect
                     _state.update { it.withUpdate(update) }
                 }
             } catch (cancellation: CancellationException) {
@@ -211,10 +214,14 @@ class SearchViewModel @Inject constructor(
             } finally {
                 // Dart's `finally` in `_searchAi`: a half that is still spinning when the search is
                 // over never answered, and a sheet that cannot stop spinning is worse than a panel.
-                if (_state.value.query == value) _state.update { it.finishedWithoutAnswering() }
+                if (isCurrentRequest(token)) _state.update { it.finishedWithoutAnswering() }
             }
         }
     }
+
+    private fun nextRequestToken(): Long = ++requestToken
+
+    private fun isCurrentRequest(token: Long): Boolean = token == requestToken
 }
 
 /**

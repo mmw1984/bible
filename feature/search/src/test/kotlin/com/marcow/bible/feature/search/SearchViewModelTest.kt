@@ -15,8 +15,10 @@ import com.marcow.bible.feature.search.domain.AiSearchMemory
 import com.marcow.bible.feature.search.domain.AiSearchUpdate
 import com.marcow.bible.feature.search.domain.ReferenceFailure
 import com.marcow.bible.feature.search.domain.TraditionalSearch
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +33,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -95,6 +98,28 @@ class SearchViewModelTest {
 
         assertTrue(viewModel.state.value.traditionalFailed)
         assertFalse(viewModel.state.value.traditionalSearching)
+    }
+
+    @Test
+    fun `a stale same-query traditional response cannot overwrite the newer one`() = runTest(dispatcher) {
+        val traditional = FakeTraditionalSearch()
+        traditional.answersByCall[1] = listOf(johnThreeSixteen())
+        traditional.answersByCall[2] = listOf(mattFourOne())
+        val slowFirst = CompletableDeferred<Unit>()
+        traditional.gateByCall[1] = slowFirst
+        traditional.uncancellableCalls += 1
+        val viewModel = searchViewModel(traditional = traditional)
+
+        runTraditionalForTest(viewModel, "love")
+        advanceUntilIdle()
+        runTraditionalForTest(viewModel, "love")
+        advanceUntilIdle()
+        assertEquals(listOf(mattFourOne()), viewModel.state.value.traditionalHits)
+
+        slowFirst.complete(Unit)
+        advanceUntilIdle()
+
+        assertEquals(listOf(mattFourOne()), viewModel.state.value.traditionalHits)
     }
 
     @Test
@@ -461,17 +486,36 @@ class SearchViewModelTest {
         advanceUntilIdle()
         return viewModel
     }
+
+    private fun runTraditionalForTest(viewModel: SearchViewModel, query: String) {
+        val method = SearchViewModel::class.java.getDeclaredMethod("runTraditional", String::class.java)
+        method.isAccessible = true
+        method.invoke(viewModel, query)
+    }
 }
 
 /** A text search that answers with a fixed list, or fails, and remembers what it was asked. */
 private class FakeTraditionalSearch(var hits: List<ScriptureHit> = emptyList(), var failure: Throwable? = null) :
     TraditionalSearch {
     var lastQuery: String? = null
+    var calls = 0
+    val gateByCall = mutableMapOf<Int, CompletableDeferred<Unit>>()
+    val uncancellableCalls = mutableSetOf<Int>()
+    val answersByCall = mutableMapOf<Int, List<ScriptureHit>>()
 
     override suspend fun invoke(query: String): List<ScriptureHit> {
+        calls += 1
+        val call = calls
         lastQuery = query
+        gateByCall[call]?.let { gate ->
+            if (call in uncancellableCalls) {
+                withContext(NonCancellable) { gate.await() }
+            } else {
+                gate.await()
+            }
+        }
         failure?.let { throw it }
-        return hits
+        return answersByCall[call] ?: hits
     }
 }
 
