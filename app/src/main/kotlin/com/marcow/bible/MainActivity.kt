@@ -9,8 +9,10 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.marcow.bible.core.network.openrouter.OpenRouterAuthManager
 import com.marcow.bible.core.network.openrouter.OpenRouterCallbackForwarder
+import com.marcow.bible.startup.LegacyImportStartup
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 /**
@@ -50,21 +52,30 @@ import javax.inject.Inject
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private var keepSplash = true
+
     /** `OpenRouterAuth.initialize()`: publish what is already stored, then finish a parked exchange. */
     @Inject
     lateinit var auth: OpenRouterAuthManager
+
+    @Inject
+    lateinit var legacyImportStartup: LegacyImportStartup
 
     /** `OpenRouterCallbackForwarder`: the seam between this activity's intents and the sign-in. */
     @Inject
     lateinit var callbacks: OpenRouterCallbackForwarder
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        installSplashScreen().setKeepOnScreenCondition { keepSplash }
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         openRouterSession(intent)
-        setContent {
-            BibleApp()
+        lifecycleScope.launch {
+            withTimeoutOrNull(STARTUP_IMPORT_TIMEOUT_MS) {
+                legacyImportStartup.awaitReady()
+            }
+            setContent { BibleApp() }
+            keepSplash = false
         }
     }
 
@@ -91,5 +102,9 @@ class MainActivity : ComponentActivity() {
             auth.initialize()
             callbacks.forwardFrom(launchIntent)
         }
+    }
+
+    private companion object {
+        const val STARTUP_IMPORT_TIMEOUT_MS = 5_000L
     }
 }

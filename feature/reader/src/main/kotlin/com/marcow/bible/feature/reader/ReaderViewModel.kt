@@ -58,6 +58,8 @@ class ReaderViewModel @Inject constructor(
     /** The live offset, which outruns [position] until it settles. */
     private var scrollRatio = 0f
     private var scrollSave: Job? = null
+    private var openJob: Job? = null
+    private var openRequestId = 0L
 
     /** A write the repository refused, retried by the next flush rather than dropped. */
     private var pendingWrite: ReaderPosition? = null
@@ -206,7 +208,7 @@ class ReaderViewModel @Inject constructor(
         position = target
         scrollRatio = target.scrollRatio
         writes.trySend(target)
-        viewModelScope.launch { open(target) }
+        openLatest(target)
     }
 
     /**
@@ -243,10 +245,18 @@ class ReaderViewModel @Inject constructor(
             return
         }
         val target = mostRecentPosition(books) { bibleRepository.progress(it.id) } ?: position
-        open(target, restoreScroll = true)
+        openLatest(target, restoreScroll = true)
     }
 
-    private suspend fun open(target: ReaderPosition, restoreScroll: Boolean = false) {
+    private fun openLatest(target: ReaderPosition, restoreScroll: Boolean = false) {
+        val requestId = ++openRequestId
+        openJob?.cancel()
+        openJob = viewModelScope.launch {
+            open(requestId = requestId, target = target, restoreScroll = restoreScroll)
+        }
+    }
+
+    private suspend fun open(requestId: Long, target: ReaderPosition, restoreScroll: Boolean = false) {
         val book = books.getOrNull(target.bookIndex) ?: return
         position = target
         scrollRatio = target.scrollRatio
@@ -266,6 +276,7 @@ class ReaderViewModel @Inject constructor(
         }
         try {
             val verses = bibleRepository.chapter(book.id, target.chapter)
+            if (requestId != openRequestId) return
             _state.update {
                 it.copy(
                     verses = verses,
@@ -276,6 +287,7 @@ class ReaderViewModel @Inject constructor(
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (_: Exception) {
+            if (requestId != openRequestId) return
             _state.update { it.copy(loading = false, failed = true) }
         }
     }
